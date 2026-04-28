@@ -1,0 +1,54 @@
+# ============================================
+# .gitignore — Optimal Pension Reforms
+# ============================================
+
+# --- Vídeos e áudio (760MB+) ---
+videos/
+*.mp4
+*.m4a
+*.avi
+*.mov
+*.mkv
+
+# --- Outputs gerados pelo pipeline ---
+# (podem ser regenerados rodando o código no PC remoto)
+trans_retirement/output/
+
+# --- Versões do paper e apresentações (PDFs binários) ---
+versões do artigo/
+
+# --- PDF de cálculos manuscritos ---
+Cálculos Juan*.pdf
+
+# --- Dados binários (Stata .dta) ---
+*.dta
+
+# --- Arquivos temporários do R ---
+.Rhistory
+.Rdata
+.RData
+*.Rproj.user/
+.Rproj.user/
+*.rds
+*.RDS
+
+# --- Arquivos temporários do Stata ---
+*.log
+*.smcl
+
+# --- OS files ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Arquivos temporários genéricos ---
+*.tmp
+*.bak
+*~
+
+# --- CLAUDE.md raiz (é diferente do _docs/CLAUDE.md) ---
+# O CLAUDE.md na raiz parece estar vazio; a versão real está em _docs/
+CLAUDE.md
+
+# --- Arquivo interno do Claude/Cowork ---
+_docs/zi4yABHg
