@@ -617,12 +617,9 @@ dt_origin_lookup<- dt_merged[, .(
 dt_origin_lookup[,P_tp:= N_c-N_a]
 
 # Step 4.3- Integrate into the database the values we need to calculate Beta^(L,P)_(p,t), which are N^c (named claims_c), N^a (named claims) and Beta^L_(-x,t-2*(x+2)) from the lookup table
-dt_origin_of_pstpnmnt_merged_w_lookup_merge<- merge(dt_origin_of_pstpnmnt,dt_origin_lookup,
+dt_origin_of_pstpnmnt_merged_w_lookup<- merge(dt_origin_of_pstpnmnt,dt_origin_lookup,
                                               by=c("origin_p","origin_t"),
                                               all.x = TRUE)
-dt_origin_of_pstpnmnt_merged_w_lookup_left<- left_join(dt_origin_of_pstpnmnt,dt_origin_lookup,
-                                                       by=c("origin_p","origin_t"))
-oi<-dt_origin_of_pstpnmnt_merged_w_lookup[points_norm==1 & dist_reform==6]
 #Step 4.4- Calculate beta^(L,P)_(p,t)
 #turning the database into a data.frame to ease grouped by calculations
 dt_beta<- as.data.frame(dt_origin_of_pstpnmnt_merged_w_lookup)
