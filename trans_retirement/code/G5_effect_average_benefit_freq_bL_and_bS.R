@@ -24,7 +24,10 @@ set.seed(123)
 # DATA ---------------------------------------------------------
 # ******************************************************************************
 
-dt <- fread('working/D1_cross_section.csv.gz') %>% 
+# [TODO:FUTURE] G5 uses D1 cross-section while most canonical files (I4, E4, H3)
+# use D3. Keeping D1 for now since this has been working, but should be updated to
+# D3 in a future revision and results re-verified.
+dt <- fread('working/D1_cross_section.csv.gz') %>%
   .[!is.na(dist_claim_cutoff)]
 gc()
 # New variables: Life Expectancy merged into cross_section so we can calculate discounted estimated lifetime benefits
@@ -312,15 +315,26 @@ plots_old
 dt[male==0,replacement_rate:=0.69+(0.021*(points_norm))]
 dt[male==1,replacement_rate:=0.82+(0.025*(points_norm))]
 
-# Now we'll use the counterfactual reforms' designs to use RR and define both bL(x'it) and bS(xit') => 
+# Now we'll use the counterfactual reforms' designs to use RR and define both bL(x'it) and bS(xit') =>
 # Which are both bL and bS (benefits under the counterfactual level and slope reforms) for the post-reform choices
 # Benefits under the counterfactual reforms
 # Calculating bL
+# NOTE: The division by `replacement_rate` produces benefits_bL = pv_benefits_new * RR_PL / RR_pre,
+# which differs from the absolute formula pv_benefits_new * RR_PL. This ratio-based approach
+# is a POTENTIALLY PROBLEMATIC ASSUMPTION — it adjusts benefits relative to the pre-reform
+# schedule rather than in absolute terms. The extra 1/RR_pre factor varies only by points_norm
+# (not dist_reform), so the points_norm FE in the DD absorbs the level effect, but the DD
+# coefficient captures beta * f(points_norm) where f = 1/RR_pre, which varies across groups.
+# The same assumption applies to benefits_bS below.
+# [ASSUMPTION: ratio-based bL/bS formula — verify derivation against canonical deck appendix]
 dt[male==1, benefits_bL:= fifelse(points_norm<0,pv_benefits_new,pv_benefits_new*(1+(1-0.82)/replacement_rate))]
 dt[male==0, benefits_bL:= fifelse(points_norm<0,pv_benefits_new,pv_benefits_new*(1+(1-0.69)/replacement_rate))]
 # Calculating bS
-dt[male==1, benefits_bS:= fifelse(points_norm<0,pv_benefits_new,pv_benefits_new*(0.082/replacement_rate))]
-dt[male==0, benefits_bS:= fifelse(points_norm<0,pv_benefits_new,pv_benefits_new*(0.069/replacement_rate))]
+# Pure Slope: RR_PS(p) = RR_pbar (constant, slope=0). Slide 25/57.
+# Values 0.82 (men) and 0.69 (women) are the intercepts from slide 10/56.
+# NOTE: previously had 0.082/0.069 (decimal error, off by factor of 10).
+dt[male==1, benefits_bS:= fifelse(points_norm<0,pv_benefits_new,pv_benefits_new*(0.82/replacement_rate))]
+dt[male==0, benefits_bS:= fifelse(points_norm<0,pv_benefits_new,pv_benefits_new*(0.69/replacement_rate))]
 
 
 # Step 1.1- Calcuting Delta_bL and Delta_bS
@@ -393,7 +407,7 @@ for (g in c('[-6,-3]','[-2,-1]','[0,1]','[2,6]','[7,15]')) {
   
   formula <- as.formula(paste0('avg_benefits_bS ~ i(dist_reform, `treat_', g, '`, ref = -2) | dist_reform + points_norm'))
   
-  models_bL[[paste0('treat_bS_',g)]] <- feols(data = dt_agg[!is.na(get(paste0('treat_',g)))& dist_reform<=15],
+  models_bS[[paste0('treat_bS_',g)]] <- feols(data = dt_agg[!is.na(get(paste0('treat_',g)))& dist_reform<=15],
                                               fml = formula,
                                               cluster = 'points_norm')
   
@@ -643,8 +657,19 @@ Beta_SP_table_data_filtered<- dt_beta
 Beta_SP_matrix<- xtabs(Beta_SP~dist_reform+points_norm,data=Beta_SP_table_data_filtered)
 Beta_SP_matrix
 
+# Step 4.5 (previously missing)- Merge Beta_LP and Beta_SP back into dt_merged.
+# dt_beta has multiple rows per (points_norm, dist_reform) due to expansion by x.
+# Beta_LP and Beta_SP are already aggregated per (p,t) pair (via group_by), so we
+# collapse to unique values before merging.
+beta_unique <- dt_beta[, .(Beta_LP = first(Beta_LP),
+                           Beta_SP = first(Beta_SP)),
+                       by = .(points_norm, dist_reform)]
+dt_merged_with_betas <- merge(dt_merged, beta_unique,
+                              by = c("points_norm", "dist_reform"),
+                              all.x = TRUE)
+
 # Step 4.7- We'll calculate Beta^L,A and Beta^S,A clearly also
-dt_merged_with_betas<-as.data.table(dt_merged_with_betas)
+dt_merged_with_betas <- as.data.table(dt_merged_with_betas)
 dt_merged_with_betas[,Beta_LA:=point_estimate_bL-Beta_LP]
 dt_merged_with_betas[,Beta_SA:=point_estimate_bS-Beta_SP]
 
@@ -677,6 +702,11 @@ BEHAV_by_qtr<- dt_merged_with_betas[,.(BEHAV_L= sum(claims_L*avg_post_pure_refor
 # Calculating the counterfactual benefit outlays by quarter
 
 ### Intermediate calculations #####
+# [TODO:REVISE] G5 reads G2_table_results.csv here (density-based estimates from G2),
+# but G5 is a frequency-based upgrade and should not reference earlier G-stage outputs.
+# G5 should use its own selection correction or the F-stage/non-G-stage sources only.
+# This is a POTENTIAL SOURCE OF ERROR: the density-based estimates in G2 may not be
+# consistent with the frequency-based approach used in the rest of G5.
 results_selection <- fread('output/G/G2_table_results.csv')
 
 aux1 <- results_selection[period == 'old' & dist_reform >= 0 & dist_reform <= 12, .(dist_reform, points_norm, delta_ben = (avg_benefits - point_estimate)*3)]

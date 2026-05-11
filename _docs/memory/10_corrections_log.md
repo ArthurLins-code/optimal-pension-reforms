@@ -124,3 +124,60 @@ WMVPF_actual=-0.19 (sample×full-data mismatch) and reversed bL>bS ordering
 `DISCOUNT_Q^(3*t)`, making cost and welfare discounting identical. Should be
 `(1/DISCOUNT_Q)^(3*t)` to match I4 convention where costs accumulate at interest rate.
 **Resolution:** FIXED in commit 2ff4bdb.
+
+### [LEARN:g5-bS-decimal-fix] G5 bS decimal error fixed: 0.082→0.82, 0.069→0.69 (2026-05-11)
+**Stage:** G
+**File:** G5_effect_average_benefit_freq_bL_and_bS.R (lines 322-323), G3 (lines 272-273)
+**Severity:** CRITICAL
+**Description:** Confirmed against canonical slides (slide 10/56, slide 25/57):
+Pure Slope reform uses RR_pbar = 0.82 (men), 0.69 (women). Code had 0.082/0.069
+(off by factor of 10). Fixed in both G5 and G3.
+**Resolution:** FIXED — changed 0.082→0.82 and 0.069→0.69 in G5 and G3.
+
+### [LEARN:g5-merged-betas-fix] G5 Step 4.5: created missing dt_merged_with_betas (2026-05-11)
+**Stage:** G
+**File:** G5_effect_average_benefit_freq_bL_and_bS.R (after line 644)
+**Severity:** CRITICAL
+**Description:** Step 4.7 used `dt_merged_with_betas` but it was never created. The
+object should be `dt_merged` enriched with Beta_LP and Beta_SP from `dt_beta`. Fix:
+collapse dt_beta to unique (points_norm, dist_reform) pairs, then merge into dt_merged.
+This was the missing Step 4.5 that the comments referenced but never implemented.
+**Resolution:** FIXED — added Step 4.5 code to collapse and merge.
+
+### [LEARN:g5-models-bS-fix] G5 bS models stored in correct list (2026-05-11)
+**Stage:** G
+**File:** G5_effect_average_benefit_freq_bL_and_bS.R (line 407)
+**Severity:** MAJOR
+**Description:** bS loop stored models in `models_bL` instead of `models_bS`.
+Worked by accident via c(models_bL, models_bS) concatenation.
+**Resolution:** FIXED — changed `models_bL[[...]]` to `models_bS[[...]]`.
+
+### [LEARN:g5-bL-formula-assumption] bL/bS division by replacement_rate documented (2026-05-11)
+**Stage:** G
+**File:** G5_effect_average_benefit_freq_bL_and_bS.R (lines 319-326)
+**Severity:** MAJOR (documented as assumption)
+**Description:** Both bL and bS formulas divide by `replacement_rate`, producing
+`pv_benefits_new * RR_reform / RR_pre` instead of `pv_benefits_new * RR_reform`.
+This ratio-based approach is a potentially problematic assumption — the extra
+1/RR_pre factor varies by points_norm and could bias DD coefficients across groups.
+**Resolution:** DOCUMENTED as [ASSUMPTION] in code comments. Not changed per user
+instruction — needs professor derivation verification.
+
+### [LEARN:g5-g2-ref-documented] G5 reads G2 output: flagged as potential error source (2026-05-11)
+**Stage:** G
+**File:** G5_effect_average_benefit_freq_bL_and_bS.R (line 705)
+**Severity:** MAJOR (documented)
+**Description:** G5 reads `output/G/G2_table_results.csv` for counterfactual benefit
+outlays. G5 is a frequency-based upgrade from G2 (density-based) and should not
+reference earlier G-stage outputs. This inconsistency could introduce errors.
+**Resolution:** DOCUMENTED as [TODO:REVISE] in code comments. Not changed — needs
+further investigation to determine correct source.
+
+### [LEARN:g5-d1-documented] G5 D1 data source kept, documented for future revision (2026-05-11)
+**Stage:** G
+**File:** G5_effect_average_benefit_freq_bL_and_bS.R (line 27)
+**Severity:** MAJOR (documented)
+**Description:** G5 uses D1 while most canonical files use D3. Keeping D1 for now
+since the pipeline has been working with it.
+**Resolution:** DOCUMENTED as [TODO:FUTURE] in code comments. To be updated to D3
+in a future revision with result verification.
