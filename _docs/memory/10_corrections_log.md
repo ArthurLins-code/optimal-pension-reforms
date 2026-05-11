@@ -92,3 +92,35 @@ updated cross-section that D4 (canonical) builds the panel from.
 (density-based estimates from G2), despite G5 using a frequency-based approach. Should
 use G4 or G5's own selection correction estimates for consistency.
 **Resolution:** OPEN — awaiting professor review.
+
+### [LEARN:g5-merge-fix] G5 Step 4 merge variable naming fixed (2026-05-11)
+**Stage:** G
+**File:** G5_effect_average_benefit_freq_bL_and_bS.R (line 620)
+**Severity:** CRITICAL (partial fix)
+**Description:** Three variable references existed for the merge result:
+`_merge` suffix, `_left` suffix, and unsuffixed. User clarified: `_left` join
+was redundant, `oi` object was debugging artifact. Renamed `_merge` to unsuffixed
+`dt_origin_of_pstpnmnt_merged_w_lookup` matching downstream code.
+**Resolution:** FIXED in commit 2210c2e. NOTE: `dt_merged_with_betas` (line 650)
+remains undefined — G5 still crashes at that point. Awaiting professor input.
+
+### [LEARN:i6-created] I6 created as canonical I-stage with pure reform WMVPF (2026-05-11)
+**Stage:** I
+**File:** I6_wmvpf_with_pure_reforms_freq.R (NEW)
+**Severity:** N/A (new file)
+**Description:** Created to fill the gap left by I5 (LEGACY). Combines I4's actual
+reform WMVPF with pure reform WMVPF_bL/WMVPF_bS consuming G5 outputs. Validated
+on sample data — runs end-to-end. Three bugs caught and fixed during validation:
+(1) directory path resolution, (2) cost discount factor formula, (3) G5 column merge.
+**Resolution:** COMPLETE — committed in 116fef7 + 2ff4bdb. Sample run produces
+WMVPF_actual=-0.19 (sample×full-data mismatch) and reversed bL>bS ordering
+(consistent with G5 bS decimal error).
+
+### [LEARN:i6-discount] I6 cost discount was identical to welfare discount (2026-05-11)
+**Stage:** I
+**File:** I6_wmvpf_with_pure_reforms_freq.R (line 256)
+**Severity:** MAJOR
+**Description:** Original formula `1/(1/DISCOUNT_Q)^(3*t)` simplifies to
+`DISCOUNT_Q^(3*t)`, making cost and welfare discounting identical. Should be
+`(1/DISCOUNT_Q)^(3*t)` to match I4 convention where costs accumulate at interest rate.
+**Resolution:** FIXED in commit 2ff4bdb.
