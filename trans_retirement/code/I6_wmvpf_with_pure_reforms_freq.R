@@ -12,7 +12,8 @@
 #   - working/D3_cross_section.csv.gz   (cross-section from D3)
 #   - working/D2_panel.csv.gz           (panel from D2)
 #   - output/F/new_counterfactual_claim_counts.csv              (actual reform)
-#   - output/F/new_counterfactual_claim_counts_with_pure_schedules_3.csv (pure)
+#   - output/G/G5_table_results_contrafactual_reforms_and_benefits_freq.csv
+#                                   (pure reform benefits + frequencies from G5)
 #   - output/G/G5_table_results_selection.csv   (selection correction from G5)
 #   - output/H/H3_table_results.csv             (tax elasticity from H3)
 #   - extra/Expectativa_Vida_IBGE.xlsx          (life expectancy tables)
@@ -65,11 +66,13 @@ ETA <- 1 - GAMMA_BASELINE * (CONS_INSS - CONS_POP) / CONS_POP  # Welfare weight 
 # On local machine with sample data, set to sample data location.
 
 # Detect environment: server (F:/) vs local sample
+# NOTE: On the server, the root has working/, output/, extra/ as subdirectories.
+# On local sample, transfer_may_retirement/ mirrors this with data/, output/.
 if (dir.exists("F:/Users/tucalins/Documents/transf_11_11/directory_2025")) {
   dir <- "F:/Users/tucalins/Documents/transf_11_11/directory_2025"
   DATA_MODE <- "full"
-} else if (dir.exists("C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement/data")) {
-  dir <- "C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement/data"
+} else if (dir.exists("C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement")) {
+  dir <- "C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement"
   DATA_MODE <- "sample"
 } else {
   stop("No data directory found. Set 'dir' manually.")
@@ -99,8 +102,9 @@ message("=== PART 1: Actual Reform WMVPF ===")
 
 if (DATA_MODE == "sample") {
   # Sample data has pre-computed panel with all needed variables
-  dt_cs <- fread(file.path(dir, 'dt_sampled_anon.csv'))
-  panel  <- fread(file.path(dir, 'panel_sampled_anon.csv'))
+  # Sample CSVs live in data/ subdirectory of the sample root
+  dt_cs <- fread(file.path(dir, 'data', 'dt_sampled_anon.csv'))
+  panel  <- fread(file.path(dir, 'data', 'panel_sampled_anon.csv'))
   message("Loaded sample data: ", nrow(dt_cs), " cross-section obs, ",
           nrow(panel), " panel obs")
 } else {
@@ -250,7 +254,11 @@ dt_flows_actual <- merge(CNTRF_by_qtr, MECH_by_qtr, by = "dist_reform", all = TR
 # --- WMVPF computation (Slide 37-41/56) --------------------------------------
 
 # Discount factors
-dt_flows_actual[, discount_cost    := 1 / (1 / DISCOUNT_Q)^(3 * dist_reform)]
+# Cost: (1/beta)^(3*t) — matches I4 convention (costs grow at interest rate)
+# Welfare: beta^(3*t) — social discount factor
+# NOTE: I4 uses literal 1.005^3 for cost; here we use 1/DISCOUNT_Q = 1/0.995
+# for internal consistency. Difference is ~0.06% (see [LEARN:i4-discount]).
+dt_flows_actual[, discount_cost    := (1 / DISCOUNT_Q)^(3 * dist_reform)]
 dt_flows_actual[, discount_welfare := DISCOUNT_Q^(3 * dist_reform)]
 
 # Net cost = b'(x') - b(x) = BEHAV - CNTRF, discounted
@@ -329,57 +337,40 @@ p_actual <- ggplot(out_actual, aes(x = dist_reform)) +
 
 message("\n=== PART 2: Pure Reform WMVPF (bL/bS decomposition) ===")
 
-# --- Load pure reform counterfactual frequencies -----------------------------
-
-pure_cf_path <- 'output/F/new_counterfactual_claim_counts_with_pure_schedules_3.csv'
-
-if (!file.exists(pure_cf_path)) {
-  message("WARNING: Pure reform frequencies not found at: ", pure_cf_path)
-  message("Pure reform WMVPF will be skipped. Run F-stage (pure.R) first.")
-  PURE_REFORM_AVAILABLE <- FALSE
-} else {
-  PURE_REFORM_AVAILABLE <- TRUE
-  cf_pure <- fread(pure_cf_path)
-  setnames(cf_pure, c("t", "p"), c("dist_reform", "points_norm"), skip_absent = TRUE)
-  message("Loaded pure reform frequencies: ", nrow(cf_pure), " rows")
-  message("Columns: ", paste(names(cf_pure), collapse = ", "))
-}
-
-# --- Load G5 output for pure reform benefits ---------------------------------
-# G5 produces the selection-corrected average benefits under bL and bS schedules.
+# --- Load G5 output (single source for frequencies + benefits) ---------------
+# G5 output already includes F-stage frequency columns (claims_L, claims_S,
+# claims_c) merged with G5's benefit estimates. Loading it as a single source
+# avoids duplicate-column issues from merging two files with overlapping keys.
+#
 # File: output/G/G5_table_results_contrafactual_reforms_and_benefits_freq.csv
 
 g5_pure_path <- 'output/G/G5_table_results_contrafactual_reforms_and_benefits_freq.csv'
 
-if (PURE_REFORM_AVAILABLE && !file.exists(g5_pure_path)) {
+if (!file.exists(g5_pure_path)) {
   message("WARNING: G5 pure reform output not found at: ", g5_pure_path)
-  message("This file is produced by G5's Steps 3-6. If G5 crashes in Step 4,")
-  message("this output won't exist. Run G5 successfully first.")
+  message("This file is produced by G5's Steps 1-3. Run G5 successfully first.")
   PURE_REFORM_AVAILABLE <- FALSE
+} else {
+  PURE_REFORM_AVAILABLE <- TRUE
 }
 
 if (PURE_REFORM_AVAILABLE) {
-  g5_data <- fread(g5_pure_path)
-  message("Loaded G5 pure reform data: ", nrow(g5_data), " rows")
+  dt_pure_cells <- fread(g5_pure_path)
+  message("Loaded G5 pure reform data: ", nrow(dt_pure_cells), " rows")
 
   # --- Compute cell-level pure reform flows ----------------------------------
-  # From G5, we need per-cell: avg_reform_benefits_pre_reform_choices_bL (MECH)
-  # and avg_post_pure_reform_benefits_bL (BEHAV) for each (p, t).
-  # From F-stage: claims_L, claims_S (counterfactual frequencies under pure reforms)
+  # G5 output contains per-cell:
+  #   claims_L, claims_S, claims_c       (from F-stage, merged by G5)
+  #   avg_reform_benefits_pre_reform_choices_bL/bS  (mechanical benefits)
+  #   avg_post_pure_reform_benefits_bL/bS           (behavioral benefits)
 
-  # Check which columns are available from G5
-  g5_cols <- names(g5_data)
+  g5_cols <- names(dt_pure_cells)
   message("G5 columns: ", paste(head(g5_cols, 20), collapse = ", "))
 
-  # Merge G5 pure reform benefits with pure reform frequencies
-  dt_pure_cells <- merge(
-    cf_pure[dist_reform %in% 0:MAX_HORIZON],
-    g5_data[dist_reform %in% 0:MAX_HORIZON],
-    by = c("dist_reform", "points_norm"),
-    all.x = TRUE
-  )
+  # Filter to analysis horizon
+  dt_pure_cells <- dt_pure_cells[dist_reform %in% 0:MAX_HORIZON]
 
-  # Also merge the counterfactual (pre-reform) average benefits from actual cells
+  # Merge the counterfactual (pre-reform) average benefits from actual cells
   dt_pure_cells <- merge(
     dt_pure_cells,
     dt_actual_cells[, .(dist_reform, points_norm, avg_benefits_old_pv)],
@@ -436,7 +427,7 @@ if (PURE_REFORM_AVAILABLE) {
     ][order(dist_reform)]
 
     # Discount and compute WMVPF components
-    flows_L[, discount_cost    := 1 / (1 / DISCOUNT_Q)^(3 * dist_reform)]
+    flows_L[, discount_cost    := (1 / DISCOUNT_Q)^(3 * dist_reform)]
     flows_L[, discount_welfare := DISCOUNT_Q^(3 * dist_reform)]
 
     flows_L[, net_cost_L  := (BEHAV_L_t - CNTRF_t) * discount_cost]
@@ -462,7 +453,7 @@ if (PURE_REFORM_AVAILABLE) {
       by = dist_reform
     ][order(dist_reform)]
 
-    flows_S[, discount_cost    := 1 / (1 / DISCOUNT_Q)^(3 * dist_reform)]
+    flows_S[, discount_cost    := (1 / DISCOUNT_Q)^(3 * dist_reform)]
     flows_S[, discount_welfare := DISCOUNT_Q^(3 * dist_reform)]
 
     flows_S[, net_cost_S  := (BEHAV_S_t - CNTRF_t) * discount_cost]
