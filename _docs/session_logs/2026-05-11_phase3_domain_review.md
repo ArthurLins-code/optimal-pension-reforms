@@ -115,6 +115,18 @@ documented formulas and tracing variable flows.
 - `2210c2e` Phase 3: fix G5 Step 4 merge variable naming
 - `116fef7` Phase 3: create I6 canonical WMVPF with pure reform decomposition
 - `2ff4bdb` Phase 3: fix I6 directory detection, discount factors, and G5 merge
+- `ccdd81b` Phase 3: update session log and corrections log
+- `3f67f7e` Fix G5/G3 remaining blockers: 6 bugs addressed
+
+### G5 remaining blockers (user-directed fixes)
+1. **FIXED:** `dt_merged_with_betas` — created Step 4.5: collapse `dt_beta` to
+   unique (p,t) pairs, merge Beta_LP/Beta_SP back into `dt_merged`
+2. **FIXED:** bS decimal error — 0.082→0.82, 0.069→0.69 in G5 AND G3
+   (confirmed against canonical slides 10/56 and 25/57)
+3. **DOCUMENTED:** bL/bS `/replacement_rate` factor as [ASSUMPTION] in code
+4. **FIXED:** `models_bL[[...bS...]]` → `models_bS[[...bS...]]` on line 407
+5. **DOCUMENTED:** D1 data source kept, added [TODO:FUTURE] for D3 migration
+6. **DOCUMENTED:** G2 reference flagged as [TODO:REVISE] potential error source
 
 ---
 
@@ -122,26 +134,36 @@ documented formulas and tracing variable flows.
 
 - `_docs/quality_reports/phase3_I4_domain_review.md`
 - `_docs/quality_reports/phase3_G5_domain_review.md`
-- `_docs/memory/10_corrections_log.md` — populated with 8+ entries
+- `_docs/memory/10_corrections_log.md` — populated with 17 entries
 - `trans_retirement/code/I6_wmvpf_with_pure_reforms_freq.R` — NEW canonical I-stage
 
 ---
 
-## Open Questions for Professors
+## Open Questions for Professors (updated)
 
 1. I4 → G4/H2 references: intentional or stale?
-2. bL/bS formula derivation (the /replacement_rate factor)
-3. 0.082/0.069 vs 0.82/0.69 in bS formula
-4. Step 4 of G5: `dt_merged_with_betas` is still undefined (line 650)
+2. bL/bS formula derivation (the /replacement_rate factor) — **documented as assumption**
+3. ~~0.082/0.069 vs 0.82/0.69 in bS formula~~ → **FIXED: confirmed 0.82/0.69**
+4. ~~Step 4 of G5: `dt_merged_with_betas` is still undefined~~ → **FIXED: Step 4.5 created**
 5. Consumption parameters source (cons_inss, cons_pop)
 6. Tax externality removed from WMVPF — intentional?
 7. ~~Who will build the I-stage consumer for G5's pure reform outputs?~~ → **I6 created**
+8. G2 reference in G5 — correct source for selection correction? → **flagged for review**
 
 ---
 
 ## Next Steps
 
 - Phase 4: Stage-by-stage reruns on sample data
+  - G5 should now complete Steps 1-6 without crashing (all 3 CRITICALs resolved)
+  - Re-run I6 after G5 produces new outputs (with corrected bS values)
+  - Expect WMVPF_bS > WMVPF_bL after bS decimal fix
+- Remaining open items:
+  - bL/bS `/replacement_rate` factor: documented as assumption
+  - G2 reference: flagged for review
+  - D1→D3 migration: deferred
+  - I4 → G4/H2 references: awaiting professor confirmation
+  - Consumption parameters source: awaiting documentation
   - I6 actual reform section: validated ✓
   - I6 pure reform: needs G5 bS decimal fix first (currently produces reversed ordering)
   - G5: needs professor confirmation on bS formula before fixing
