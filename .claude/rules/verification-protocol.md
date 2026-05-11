@@ -1,53 +1,103 @@
 ---
 paths:
-  - "Slides/**/*.tex"
-  - "Quarto/**/*.qmd"
-  - "docs/**"
+  - "**/*.R"
+  - "**/*.do"
 ---
 
-# Task Completion Verification Protocol
+# Verification Protocol
 
-**At the end of EVERY task, Claude MUST verify the output works correctly.** This is non-negotiable.
+**After any edit to a pipeline script, verify before committing.**
 
-## For Quarto/HTML Slides:
-1. Run `./scripts/sync_to_docs.sh` (or `./scripts/sync_to_docs.sh LectureN`) to render and deploy
-2. Open the HTML in browser: `open docs/slides/LectureX.html` (macOS) or `xdg-open` (Linux)
-3. Verify images display by reading 2-3 image files to confirm valid content
-4. Check HTML source for correct image paths
-5. Check for overflow by scanning dense slides
-6. Verify environment parity: every Beamer box environment has a CSS equivalent in the QMD
-7. Report verification results
+---
 
-## For LaTeX/Beamer Slides:
-1. Compile with xelatex and check for errors
-2. Open the PDF to verify figures render (`open` on macOS, `xdg-open` on Linux)
-3. Check for overfull hbox warnings
+## Verification Steps
 
-## For TikZ Diagrams in HTML/Quarto:
-1. Browsers **cannot** display PDF images inline — ALWAYS convert to SVG
-2. Use SVG (vector format) for crisp rendering: `pdf2svg input.pdf output.svg`
-3. **NEVER use PNG for diagrams** — PNG is raster and looks blurry
-4. Verify SVG files contain valid XML/SVG markup
-5. Copy SVGs to `docs/Figures/LectureX/` via `sync_to_docs.sh`
-6. **Freshness check:** Before using any TikZ SVG, verify extract_tikz.tex matches current Beamer source
+### 1. Static Checks (always)
 
-## For R Scripts:
-1. Run `Rscript scripts/R/filename.R`
-2. Verify output files (PDF, RDS) were created with non-zero size
-3. Spot-check estimates for reasonable magnitude
+Before running, verify:
 
-## Common Pitfalls:
-- **PDF images in HTML**: Browsers don't render PDFs inline → convert to SVG
-- **Relative paths**: `../Figures/` works from `Quarto/` but not from `docs/slides/` → use `sync_to_docs.sh`
-- **Assuming success**: Always verify output files exist AND contain correct content
-- **Stale TikZ SVGs**: extract_tikz.tex diverges from Beamer source → always diff-check
+- [ ] No syntax errors (parse the file: `parse("script.R")` in R, or `do "script.do"` dry-run).
+- [ ] No new hardcoded absolute paths introduced.
+- [ ] No references to LEGACY files (F1-F7, G6, I5) as canonical.
+- [ ] Variable names consistent (`cpf_anon` not `indiv` in new code).
+- [ ] Formula matches canonical deck (cite slide number).
+- [ ] No `NA`/`NaN` producing operations without guards.
 
-## Verification Checklist:
+### 2. Sample Run (when data available)
+
+If the 5% sample data is available in `data_local/` or `transfer_may_retirement/data/`:
+
+```bash
+# R scripts
+Rscript trans_retirement/code/<script>.R
+
+# Stata scripts
+stata-mp -b do trans_retirement/code/<script>.do
 ```
-[ ] Output file created successfully
-[ ] No compilation/render errors
-[ ] Images/figures display correctly
-[ ] Paths resolve in deployment location (docs/)
-[ ] Opened in browser/viewer to confirm visual appearance
-[ ] Reported results to user
+
+After running:
+- [ ] Exit code = 0 (no errors).
+- [ ] No new warnings in stderr (compare to baseline).
+- [ ] No `NaN`/`NA`/`Inf` in key output variables.
+- [ ] Observation counts reasonable (not zero, not duplicated).
+- [ ] Output files created in expected locations.
+- [ ] Compare to gold-standard block (per replication-protocol.md).
+
+### 3. When Data is NOT Available
+
+If sample data is not accessible (e.g., working on laptop without data_local/):
+
+State explicitly in the commit message:
+```
+Static-checked only — sample data not available on this machine.
+Reason: [working on laptop / data_local/ not mounted / etc.]
+```
+
+Still perform all static checks from Step 1.
+
+---
+
+## Verification Checklist by Stage
+
+| Stage | Key Verification |
+|-------|-----------------|
+| A4 | Balance table has no NA cells; N_id + N_unid ~ expected total |
+| B4 | Feature matrix complete (no all-NA columns); N claimants > 0 |
+| C6 | contrib_time_cont has no NA for linked CPFs; R-sq > 0 |
+| D4 | Panel is balanced or documented unbalanced; points_norm centered at 0 |
+| E4 | All plots generated as PDF; no empty plots |
+| F-new | Counterfactual frequencies > 0 for all cells; no NaN in hazard |
+| G5 | ATT coefficients have expected signs; SEs finite |
+| H3 | Elasticity estimate finite; IPW weights bounded |
+| I4 | MVPF in (0, 1); WMVPF in (0, 1); welfare weights sum to ~1 |
+
+---
+
+## Downstream Impact Check
+
+When modifying an upstream script, verify downstream consumers are unaffected:
+
+```
+A4 -> (standalone)
+B4 -> C6, D4
+C6 -> D4
+D4 -> E4, F-new, G5, H3
+F-new -> G5, H3, I4
+G5 -> I4
+H3 -> I4
+```
+
+If your change alters the output schema (column names, types, dimensions),
+check ALL downstream scripts that consume the output.
+
+---
+
+## Reporting
+
+After verification, add a line to the commit message:
+
+```
+Verified: [sample-run / static-only]
+Stage: [letter]
+Downstream: [checked / not-applicable / needs-check]
 ```
