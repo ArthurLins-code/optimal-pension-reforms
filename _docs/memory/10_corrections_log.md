@@ -181,3 +181,41 @@ further investigation to determine correct source.
 since the pipeline has been working with it.
 **Resolution:** DOCUMENTED as [TODO:FUTURE] in code comments. To be updated to D3
 in a future revision with result verification.
+
+### [LEARN:g5-sample-mode] G5 sample-mode environment detection added (2026-05-12)
+**Stage:** G
+**File:** G5_effect_average_benefit_freq_bL_and_bS.R (lines 14-22)
+**Severity:** N/A (enhancement)
+**Description:** Added dual-environment detection matching I6 pattern. Full mode uses
+server F:/ path + D1 + life expectancy merge. Sample mode loads dt_sampled_anon.csv
+(5% D1 sample with pre-merged columns) and skips redundant merge steps.
+**Resolution:** COMPLETE — G5 runs end-to-end on sample data.
+
+### [LEARN:g5-step2-merge] G5 Step 2 merge had mismatched group types (2026-05-12)
+**Stage:** G
+**File:** G5_effect_average_benefit_freq_bL_and_bS.R (line 579)
+**Severity:** CRITICAL
+**Description:** The merge creating `data_counterfactual_reforms_step_2` set
+`group = points_norm` (integer) on left side and `as.numeric(group)` on right
+(converting string '[-6,-3]' to NA). The merge always produced zero rows, making
+all downstream pure reform computations (MECH, BEHAV, CNTRF) empty.
+This bug was hidden because G5 crashed at Step 4 before reaching Step 2's merge.
+**Resolution:** FIXED — use string `group` column from dt_agg on both sides; keep
+points_norm as separate column.
+
+### [LEARN:g5-dt-agg-overwrite] G5 dt_agg overwritten with different column names (2026-05-12)
+**Stage:** G
+**File:** G5_effect_average_benefit_freq_bL_and_bS.R (lines 130, 380, 773)
+**Severity:** MAJOR
+**Description:** `dt_agg` created at line 130 with `avg_benefits_new_pv` is overwritten
+at line 380 with `avg_pv_benefits_new`. The SAVING section (line 773) references the
+old column name, causing a crash. Pre-existing bug, hidden by earlier crashes.
+**Resolution:** FIXED — updated line 773 to use current column names from the second dt_agg.
+
+### [LEARN:g5-knitr-removed] G5 knitr removed from package list (2026-05-12)
+**Stage:** G
+**File:** G5_effect_average_benefit_freq_bL_and_bS.R (line 11)
+**Severity:** MINOR
+**Description:** `knitr` was in the package list but never used in G5. It failed to
+load due to xfun incompatibility on Arthur's laptop R 4.2.2 installation.
+**Resolution:** FIXED — removed knitr from package list.

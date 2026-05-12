@@ -8,15 +8,24 @@
 
 pkgs <- c('scales','zoo','binsreg','ggpubr','readstata13','purrr','readxl','did',
           'stargazer','fixest','MatchIt','tidyr','stringr','data.table','dplyr',
-          'lubridate','stringi','foreign','haven','ggplot2','knitr','grid','broom',
+          'lubridate','stringi','foreign','haven','ggplot2','grid','broom',
           'RColorBrewer')
-.libPaths('F:/docs/R-library')
+
+# --- Environment detection ---------------------------------------------------
+if (dir.exists("F:/Users/tucalins/Documents/transf_11_11/directory_2025")) {
+  dir <- "F:/Users/tucalins/Documents/transf_11_11/directory_2025"
+  DATA_MODE <- "full"
+  .libPaths('F:/docs/R-library')
+} else if (dir.exists("C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement")) {
+  dir <- "C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement"
+  DATA_MODE <- "sample"
+} else {
+  stop("No recognized data directory found. Set 'dir' manually.")
+}
+setwd(dir)
+message("G5 running in ", DATA_MODE, " mode from: ", dir)
+
 for (pkg in pkgs) library(pkg, character.only = TRUE)
-
-# Directory
-
-dir <- "F:/Users/tucalins/Documents/transf_11_11/directory_2025"
-setwd(paste(dir))
 
 set.seed(123)
 
@@ -24,39 +33,57 @@ set.seed(123)
 # DATA ---------------------------------------------------------
 # ******************************************************************************
 
-# [TODO:FUTURE] G5 uses D1 cross-section while most canonical files (I4, E4, H3)
-# use D3. Keeping D1 for now since this has been working, but should be updated to
-# D3 in a future revision and results re-verified.
-dt <- fread('working/D1_cross_section.csv.gz') %>%
-  .[!is.na(dist_claim_cutoff)]
-gc()
-# New variables: Life Expectancy merged into cross_section so we can calculate discounted estimated lifetime benefits
-expectativa <- read_excel(paste0(dir,'/extra/Expectativa_Vida_IBGE.xlsx')) %>% 
-  setDT() %>% 
-  setnames(c('Ano','Idade','Expectativa'), c('table_year', 'age_disc', 'expec_ibge')) 
+if (DATA_MODE == "full") {
+  # [TODO:FUTURE] G5 uses D1 cross-section while most canonical files (I4, E4, H3)
+  # use D3. Keeping D1 for now since this has been working, but should be updated to
+  # D3 in a future revision and results re-verified.
+  dt <- fread('working/D1_cross_section.csv.gz') %>%
+    .[!is.na(dist_claim_cutoff)]
+  gc()
+  # New variables: Life Expectancy merged into cross_section so we can calculate discounted estimated lifetime benefits
+  expectativa <- read_excel(paste0(dir,'/extra/Expectativa_Vida_IBGE.xlsx')) %>%
+    setDT() %>%
+    setnames(c('Ano','Idade','Expectativa'), c('table_year', 'age_disc', 'expec_ibge'))
 
-aux_expectativa <- cross_join(data.table(claim_year = unique(expectativa$table_year)),
-                              data.table(claim_month = seq(1,12,1))) %>%
-  cross_join(data.table(age_disc = unique(expectativa$age_disc))) %>% 
-  setDT()
+  aux_expectativa <- cross_join(data.table(claim_year = unique(expectativa$table_year)),
+                                data.table(claim_month = seq(1,12,1))) %>%
+    cross_join(data.table(age_disc = unique(expectativa$age_disc))) %>%
+    setDT()
 
-# Jan - Nov: table from 1 year before the claiming year
-# Dec: table from the claiming year
+  # Jan - Nov: table from 1 year before the claiming year
+  # Dec: table from the claiming year
 
-aux_expectativa[claim_month < 12, table_year := claim_year - 1]
-aux_expectativa[claim_month == 12, table_year := claim_year - 0]
+  aux_expectativa[claim_month < 12, table_year := claim_year - 1]
+  aux_expectativa[claim_month == 12, table_year := claim_year - 0]
 
-aux_expectativa <- left_join(aux_expectativa, 
-                             expectativa, 
-                             by = c('table_year','age_disc')) %>% 
-  arrange(age_disc, claim_year, claim_month) %>% 
-  na.omit()
-# changing some variables names in dt to simplify the merge
-dt[,claim_month:= month(as.Date(claim_date))]
-dt[, age_disc := floor(age_claim)]
-#adding the life expectancy to the cross_section db
-dt <- left_join(dt, aux_expectativa,
-                by = c('claim_year','claim_month','age_disc'))
+  aux_expectativa <- left_join(aux_expectativa,
+                               expectativa,
+                               by = c('table_year','age_disc')) %>%
+    arrange(age_disc, claim_year, claim_month) %>%
+    na.omit()
+  # changing some variables names in dt to simplify the merge
+  dt[,claim_month:= month(as.Date(claim_date))]
+  dt[, age_disc := floor(age_claim)]
+  #adding the life expectancy to the cross_section db
+  dt <- left_join(dt, aux_expectativa,
+                  by = c('claim_year','claim_month','age_disc'))
+
+  ### New variables: Normalized Points
+  dt[, points_d := floor(points_claim)] %>%
+    .[, points_norm := ifelse(male == 0, points_d - 85, points_d - 95)]
+
+  ### New variable: Claim quarter relative to reform
+  dt[, dist_reform := 4*(claim_quarter - 2015.25)]
+
+} else {
+  # Sample mode: dt_sampled_anon.csv is a 5% sample of D1 with life expectancy
+  # already merged and points_norm/dist_reform already computed.
+  dt <- fread(file.path(dir, 'data', 'dt_sampled_anon.csv')) %>%
+    .[!is.na(dist_claim_cutoff)]
+  gc()
+  message("Sample loaded: ", nrow(dt), " obs after filtering")
+}
+
 # Calculating Present Discounted Value (PDV) at claim date of all benefits (lifetime)
 r_annual<- 0.06
 r_q<- (1+r_annual)^(1/4)-1
@@ -72,15 +99,6 @@ dt[,ann_factor_q:= fifelse(
   (1-(1+r_q)^(-quarters_remaining_of_life))/r_q,
   0
 )]
-
-### New variables: Normalized Points
-
-dt[, points_d := floor(points_claim)] %>% 
-  .[, points_norm := ifelse(male == 0, points_d - 85, points_d - 95)]
-
-### New variable: Claim quarter relative to reform
-
-dt[, dist_reform := 4*(claim_quarter - 2015.25)]
 
 ### Restricting to -30/30
 
@@ -558,9 +576,12 @@ plots_bS
 # Now we'll use the point estimates and the calculated b(xit') to calculate b(xit) for both reforms, which means calculate b^L(xit) and b^S(xit)
 # getting all the data together in one df, which will have estimations of the variables above for both reforms, with the column "reform" indicating the reform we are putting data of in each line.
 # ******************************************************************************
-data_counterfactual_reforms_step_2 <- merge(rbind(dt_agg[dist_reform >= 0,.(points_norm, dist_reform, reform = 'bL', avg_benefits = avg_benefits_bL, group=points_norm)],
-                                                 dt_agg[dist_reform >= 0,.(points_norm, dist_reform, reform= 'bS', avg_benefits = avg_benefits_bS, group=points_norm)]),
-                                           results_counterfactual[,.(group=as.numeric(group), dist_reform = claim_quarter, reform, point_estimate)],
+# FIX: original code set group=points_norm (integer) on left and as.numeric(group)
+# on right (NA from string '[-6,-3]'), so the merge always produced zero rows.
+# Fix: use the string `group` column from dt_agg on both sides; keep points_norm as-is.
+data_counterfactual_reforms_step_2 <- merge(rbind(dt_agg[dist_reform >= 0,.(points_norm, dist_reform, group, reform = 'bL', avg_benefits = avg_benefits_bL)],
+                                                 dt_agg[dist_reform >= 0,.(points_norm, dist_reform, group, reform= 'bS', avg_benefits = avg_benefits_bS)]),
+                                           results_counterfactual[,.(group, dist_reform = claim_quarter, reform, point_estimate)],
                                            by = c('group','dist_reform','reform'))
 #calculating the counterfactual reform benefits with pre-reform choices for each normalized point and quarter
 data_counterfactual_reforms_step_2[,avg_reform_benefits_pre_reform_choices:= avg_benefits-point_estimate]
@@ -749,8 +770,10 @@ dt_results<- dt_welfare_pure_reforms[,
 # ******************************************************************************
 # SAVING ---------------------------------------------------------
 # ******************************************************************************
-out <- merge(rbind(dt_agg[dist_reform >= 0,.(points_norm, dist_reform, period = 'new', avg_benefits_pv = avg_benefits_new_pv, group)],
-                   dt_agg[dist_reform >= 0,.(points_norm, dist_reform, period = 'old', avg_benefits_pv = avg_benefits_old_pv, group)]),
+# FIX: dt_agg was overwritten at line 380 with different column names
+# (avg_pv_benefits_new/old instead of avg_benefits_new/old_pv)
+out <- merge(rbind(dt_agg[dist_reform >= 0,.(points_norm, dist_reform, period = 'new', avg_benefits_pv = avg_pv_benefits_new, group)],
+                   dt_agg[dist_reform >= 0,.(points_norm, dist_reform, period = 'old', avg_benefits_pv = avg_pv_benefits_old, group)]),
              results[,.(group, dist_reform = claim_quarter, period, point_estimate)],
              by = c('group','dist_reform','period'))
 fwrite(out, file = 'output/G/G5_table_results_selection.csv')
