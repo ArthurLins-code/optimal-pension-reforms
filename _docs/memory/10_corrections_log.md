@@ -219,3 +219,22 @@ old column name, causing a crash. Pre-existing bug, hidden by earlier crashes.
 **Description:** `knitr` was in the package list but never used in G5. It failed to
 load due to xfun incompatibility on Arthur's laptop R 4.2.2 installation.
 **Resolution:** FIXED — removed knitr from package list.
+
+### [LEARN:i4-sample-mode] I4 sample-mode environment detection added (2026-05-12)
+**Stage:** I
+**File:** I4_wmvpf_no_pure_reforms_freq.R (lines 17-116)
+**Severity:** N/A (enhancement)
+**Description:** Added dual-environment detection matching G5/I6 pattern. Full mode
+preserves original D3 + life expectancy merge + panel join + benefit/PDV calculations.
+Sample mode loads pre-computed dt_sampled_anon.csv and panel_sampled_anon.csv with
+cpf_anon→indiv rename. Also removed unused knitr and deduplicated lubridate.
+**Resolution:** COMPLETE — I4 runs end-to-end on sample data (54,338 cross-section +
+4,129,688 panel obs). WMVPF_actual on sample = -0.19 (expected sample artifact).
+
+### [LEARN:i4-knitr-removed] I4 knitr removed and lubridate deduplicated (2026-05-12)
+**Stage:** I
+**File:** I4_wmvpf_no_pure_reforms_freq.R (line 11)
+**Severity:** MINOR
+**Description:** `knitr` was in the package list but never used. `lubridate` appeared
+twice. Same xfun incompatibility as G5.
+**Resolution:** FIXED — removed knitr, deduplicated lubridate.
