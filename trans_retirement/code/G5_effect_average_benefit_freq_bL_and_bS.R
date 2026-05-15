@@ -24,6 +24,7 @@ if (dir.exists("F:/Users/tucalins/Documents/transf_11_11/directory_2025")) {
 }
 setwd(dir)
 message("G5 running in ", DATA_MODE, " mode from: ", dir)
+SUFFIX <- if (DATA_MODE == "sample") "_sample" else ""
 
 for (pkg in pkgs) library(pkg, character.only = TRUE)
 
@@ -601,7 +602,7 @@ dt_wide<- dcast(data_counterfactual_reforms_step_2,
 
 
 #then, we'll match with the data that has the info for frequencies N^L (named claims_L in the data) and N^S(named claims_S in the data), calculated in the previous file
-dt_all_pure_reforms<- fread("output/F/new_counterfactual_claim_counts_with_pure_schedules_3.csv")
+dt_all_pure_reforms<- fread(paste0("output/F/new_counterfactual_claim_counts_with_pure_schedules_3", SUFFIX, ".csv"))
 #renaming the variables p and t so they are named points_norm and dist_reform to ease the merge below
 setnames(dt_all_pure_reforms,c("p","t"),c("points_norm","dist_reform"))
 #merging both databases
@@ -776,18 +777,18 @@ out <- merge(rbind(dt_agg[dist_reform >= 0,.(points_norm, dist_reform, period = 
                    dt_agg[dist_reform >= 0,.(points_norm, dist_reform, period = 'old', avg_benefits_pv = avg_pv_benefits_old, group)]),
              results[,.(group, dist_reform = claim_quarter, period, point_estimate)],
              by = c('group','dist_reform','period'))
-fwrite(out, file = 'output/G/G5_table_results_selection.csv')
+fwrite(out, file = paste0('output/G/G5_table_results_selection', SUFFIX, '.csv'))
 
 
 out_cf <- DT_With_avg_benefits
 
-fwrite(out_cf, file = 'output/G/G5_table_results_contrafactual_reforms_and_benefits_freq.csv')
+fwrite(out_cf, file = paste0('output/G/G5_table_results_contrafactual_reforms_and_benefits_freq', SUFFIX, '.csv'))
 
 
-ggsave(plots_new, filename = 'output/G/G4_eventstudy_benefits_new.pdf',
+ggsave(plots_new, filename = paste0('output/G/G4_eventstudy_benefits_new', SUFFIX, '.pdf'),
        height = 6, width = 6)
 
-ggsave(plots_old, filename = 'output/G/G4_eventstudy_benefits_old.pdf',
+ggsave(plots_old, filename = paste0('output/G/G4_eventstudy_benefits_old', SUFFIX, '.pdf'),
        height = 6, width = 6)
 
 ggsave(list_plots_new[['new_[-6,-3]']], filename = 'output/G/G4_eventstudy_benegits_new_1.pdf', 

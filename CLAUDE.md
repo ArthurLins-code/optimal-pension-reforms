@@ -47,7 +47,11 @@ Canonical rerun targets: G5 and I4.
 ### 4. Sample = Validation, Not Replication
 Flag substantive bugs: NaN/NA propagation, wrong signs, reversed
 inequalities, formula-slide mismatches, orders-of-magnitude errors,
-monotonicity violations. Do NOT flag sampling noise.
+monotonicity violations. Do NOT flag sampling noise **unprompted**.
+However, when the user explicitly states an expected interval, number,
+or objective (e.g., "WMVPF should be in (0,1)"), DO flag sample results
+that violate the stated expectation — explain why the deviation is likely
+sampling noise (or not), rather than silently dismissing it.
 
 ### 5. Identifier Convention
 Data uses `cpf_anon` (id_0000001, id_0000002, ...). Old code may use

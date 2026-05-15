@@ -10,24 +10,44 @@
 
 pkgs <- c('scales','zoo','binsreg','ggpubr','readstata13','purrr','readxl','did',
           'stargazer','fixest','MatchIt','tidyr','stringr','data.table','dplyr',
-          'lubridate','stringi','foreign','haven','ggplot2','knitr','grid','broom',
+          'lubridate','stringi','foreign','haven','ggplot2','grid','broom',
           'RColorBrewer')
-.libPaths('F:/docs/R-library')
+
+# --- Environment detection ---------------------------------------------------
+if (dir.exists("F:/Users/tucalins/Documents/transf_11_11/directory_2025")) {
+  dir <- "F:/Users/tucalins/Documents/transf_11_11/directory_2025"
+  DATA_MODE <- "full"
+  .libPaths('F:/docs/R-library')
+} else if (dir.exists("U:/Documents/Paper/directory_2025")) {
+  dir <- "U:/Documents/Paper/directory_2025"
+  DATA_MODE <- "full"
+  .libPaths('F:/docs/R-library')
+} else if (dir.exists("C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement")) {
+  dir <- "C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement"
+  DATA_MODE <- "sample"
+} else {
+  stop("No recognized data directory found. Set 'dir' manually.")
+}
+setwd(dir)
+SUFFIX <- if (DATA_MODE == "sample") "_sample" else ""
+message("Pure: Data mode = ", DATA_MODE, " | dir = ", dir)
+
 for (pkg in pkgs) library(pkg, character.only = TRUE)
-
-# Directory
-
-dir <- "F:/Users/tucalins/Documents/transf_11_11/directory_2025"
-setwd(paste(dir))
 
 set.seed(123)
 
-dt <- fread('working/D3_cross_section.csv.gz') %>% 
-  .[!is.na(dist_claim_cutoff)]
-gc()
-panel <- fread('working/D4_panel_reform.csv.gz')
-gc()
-a <- panel[indiv %in% sample(dt$indiv, 10)]
+# Ensure output directories exist
+dir.create('output/F', recursive = TRUE, showWarnings = FALSE)
+dir.create('output/new_counter_claiming', recursive = TRUE, showWarnings = FALSE)
+
+if (DATA_MODE == "full") {
+  # --- Full data path (original lines 25-29) ---
+  dt <- fread('working/D3_cross_section.csv.gz') %>%
+    .[!is.na(dist_claim_cutoff)]
+  gc()
+  panel <- fread('working/D4_panel_reform.csv.gz')
+  gc()
+  a <- panel[indiv %in% sample(dt$indiv, 10)]
 
 dt_claim <- panel[claim_haz == 1] %>% 
   .[,.(claims = .N), by = .(dist_reform_quarters, points_norm)]
@@ -106,13 +126,22 @@ for (c in unique(results$cohort)) {
 dt_final <- rbindlist(list_cohorts)
 
 # ignore this code above, as the correct version (including t=-1) was created by Gabriel and this one above is outdated (28/03/2026-Arthur)
+} # end if (DATA_MODE == "full") — sample mode skips the duplicated F5+Gabriel block above
 
 #######################################################################################
 # Pure Reforms (w/ frequencies)
 #######################################################################################
 
 #Importing the database that Gabriel generated and sent
-dt_final<- fread("output/new_counter_claiming/actual_reform_gabriel/claims_actual_counterfactual_t_p.csv")
+gabriel_path <- paste0("output/new_counter_claiming/actual_reform_gabriel/claims_actual_counterfactual_t_p", SUFFIX, ".csv")
+if (!file.exists(gabriel_path)) {
+  gabriel_path <- paste0("tmp/claims_actual_counterfactual_t_p", SUFFIX, ".csv")
+}
+if (!file.exists(gabriel_path)) {
+  stop("Gabriel output not found. Run new_counterfactual_claiming3_gabriel.R first.")
+}
+dt_final <- fread(gabriel_path)
+message("Loaded Gabriel output: ", nrow(dt_final), " rows from ", gabriel_path)
 # 1- First,we need to calculate the quarter of arrival for each (p,t) cohort
 # If p>=0, then t_arrival= t-2*p, if p<0 t_arrival= t+2*p
 dt_final[, t_arrival:=t-2*p]
@@ -141,6 +170,7 @@ dt_final<-as.data.table(dt_final)
 
 dt_final[,denominador:=sum(claims[p>=0 & p<Xt],na.rm=TRUE), by=t_arrival]
 dt_final[p>=0 & p<Xt,g_pta:= claims/denominador]
+dt_final[!is.finite(g_pta), g_pta := 0]  # guard against 0/0 in sparse sample cells
 
 # dt_final[!is.finite(g_pta),g_pta:= NA_real_]
 # summary(dt_final$g_pta)
@@ -319,7 +349,8 @@ list_plots_freq_S["4"]
 
 
 # saving the database for this file so we can carry on the pure reform steps in the next files
-fwrite(dt_final,"output/F/new_counterfactual_claim_counts_with_pure_schedules_3.csv")
+fwrite(dt_final, paste0("output/F/new_counterfactual_claim_counts_with_pure_schedules_3", SUFFIX, ".csv"))
+message("Saved pure reform counts with suffix '", SUFFIX, "': ", nrow(dt_final), " rows")
 #Saving all contrafactual level reforms densities plots
 ggsave(list_plots_freq_L[['-1']], filename  = 'output/new_counter_claiming/new_counterfactual_claiming3_pure_level_reform_claiming_frequency_quarterly_2014_Q4.pdf',height = 3, width = 5)
 ggsave(list_plots_freq_L[['0']], filename  = 'output/new_counter_claiming/new_counterfactual_claiming3_pure_level_reform_claiming_frequency_quarterly_2015_Q1.pdf', height = 3, width = 5)

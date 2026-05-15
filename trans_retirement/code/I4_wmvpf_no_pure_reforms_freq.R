@@ -26,6 +26,7 @@ if (dir.exists("F:/Users/tucalins/Documents/transf_11_11/directory_2025")) {
 }
 setwd(dir)
 message("I4: Data mode = ", DATA_MODE, " | dir = ", dir)
+SUFFIX <- if (DATA_MODE == "sample") "_sample" else ""
 
 for (pkg in pkgs) library(pkg, character.only = TRUE)
 
@@ -126,7 +127,7 @@ n_claims <- dt_gab[d_claim_post_reform == 1 & claim_quarter <= 2018.25,.(num_cla
 # Other datasets
 
 #this is the part that changed, I'll substitute results_claiming, the old, density dataset, with the frequencies dataset
-cf_counts <- fread('output/F/new_counterfactual_claim_counts.csv')
+cf_counts <- fread(paste0('output/F/new_counterfactual_claim_counts', SUFFIX, '.csv'))
 setnames(cf_counts, "t", "dist_reform")
 setnames(cf_counts, "p", "points_norm")
 
@@ -277,7 +278,7 @@ sum(out$mech_cost)
 sum(out$fiscal_ext)
 
 
-ggsave(p1, filename = 'output/I/I4_plot_results.pdf', height = 2.8, width = 4.2)
+ggsave(p1, filename = paste0('output/I/I4_plot_results', SUFFIX, '.pdf'), height = 2.8, width = 4.2)
 
 
-fwrite(dt_wmvpf, file = 'output/I/I4_table_wmvpf.csv')
+fwrite(dt_wmvpf, file = paste0('output/I/I4_table_wmvpf', SUFFIX, '.csv'))
