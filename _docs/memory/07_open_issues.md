@@ -30,6 +30,29 @@ Itens que precisam de decisão, input externo, ou investigação. Ordenados por 
 - **Plano:** usar Surrogate Indexes (Athey et al. 2025) para estimar PDV de impostos futuros — ver `08_surrogate_indexes.md`.
 - **Impacto esperado:** pode aumentar MVPF/WMVPF (ou reduzir, dependendo do sinal da resposta de labor supply).
 
+### O5a. G5 bug: MECH usa `claims_L`/`claims_S` em vez de `claims_c` (linha 614)
+- **Arquivo:** `G5_effect_average_benefit_freq_bL_and_bS.R`, linha 614.
+- **Sintoma:** a computação do efeito mecânico (MECH) usa `claims_L` e `claims_S` (claims separados por pure reform) em vez de `claims_c` (claims do contrafactual combinado).
+- **Impacto:** não afeta I6 (que computa WMVPF independentemente), mas pode afetar valores internos do G5 usados nos slides.
+- **Descoberto em:** Phase 6, rewrite de I6 (mai/2026).
+
+### O5b. G5 bug: parenthesização errada na fórmula WMVPF (linha 765)
+- **Arquivo:** `G5_effect_average_benefit_freq_bL_and_bS.R`, linha 765.
+- **Sintoma:** agrupamento incorreto na fórmula de WMVPF.
+- **Impacto:** mesmo que O5a — não afeta I6, mas pode afetar valores nos slides.
+- **Descoberto em:** Phase 6, rewrite de I6 (mai/2026).
+
+### O5c. G5 bug: lê `delta_ben` de G2 (density-based) com fator ×3 (linhas 732–734)
+- **Arquivo:** `G5_effect_average_benefit_freq_bL_and_bS.R`, linhas 732–734.
+- **Sintoma:** G5 lê `delta_ben` do output de G2, que usa estimação density-based com fator de escala ×3. Isso é inconsistente com a abordagem frequency-based do restante do pipeline.
+- **Impacto:** pode afetar valores de WMVPF_bL/bS nos slides.
+- **Descoberto em:** Phase 6, rewrite de I6 (mai/2026).
+
+### ⚠️ Questão aberta sobre origem dos valores canônicos
+- Os valores WMVPF_bL=0.68 e WMVPF_bS=0.71 nos slides canônicos vieram da computação interna do G5 ou de um I-stage (I3/I5)?
+- Se vieram do G5, os bugs O5a–O5c podem afetar esses números.
+- **Ação:** investigar provenance dos valores nos slides antes de corrigir G5.
+
 ### O6. Versões de código redundantes (E1..E4, F1..F5, etc.)
 - Muitas versões antigas ainda em `code/`. Não sabemos se alguma é chamada por script atual.
 - **Ação:** auditoria + movimentação para `code/archive/` se ok. (Sugestão R7 em 06_reorg_notes.)
