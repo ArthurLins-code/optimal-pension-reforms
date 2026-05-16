@@ -611,8 +611,8 @@ dt_merged<- merge(dt_all_pure_reforms,dt_wide,by=c("dist_reform","points_norm"),
 
 #Now we'll calculate the Mechanical expenditures for every quarter following the slides
 MECH_by_qtr<- dt_merged[,
-                        .(MECH_L= sum(claims_L*avg_reform_benefits_pre_reform_choices_bL,na.rm=TRUE),
-                          MECH_S= sum(claims_S*avg_reform_benefits_pre_reform_choices_bS,na.rm=TRUE)),
+                        .(MECH_L= sum(claims_c*avg_reform_benefits_pre_reform_choices_bL,na.rm=TRUE),
+                          MECH_S= sum(claims_c*avg_reform_benefits_pre_reform_choices_bS,na.rm=TRUE)),
                         by=dist_reform]
 
 # Step 4: Average Post Pure-Reform Benefits
