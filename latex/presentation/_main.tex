@@ -1,0 +1,1852 @@
+\input{_preamble.tex}
+\usepackage[dvipsnames]{xcolor}
+\graphicspath{{../figures/}}
+\begin{document}
+\title[Optimal Pension Reforms]{\large{Optimal Pension Reforms:} \\ An Application to the Brazilian Administrative Data}
+\author{Gustavo Gonzaga (PUC-Rio) \\ Gabriel Lemos (MIT Sloan) \\ Juan Rios (PUC-Rio)}
+\date{IPEA Rio de Janeiro}
+\date{\today}
+
+
+
+\maketitle
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\beamerdefaultoverlayspecification{<+->}
+
+\begin{frame}{Brazilian Central Government Expenditures}
+    \centering
+    \includegraphics[width=.9\linewidth]{image37.png}
+\end{frame}
+
+\begin{frame}
+\frametitle{Motivation}
+    \begin{itemize}
+        \item Pension reform has become a central policy issue also in developed countries, but Brazil is an interesting case
+        \begin{itemize}
+            \item Brazil spends heavily on pensions: 10.4\% of GDP in 2019 (OECD average: 7.7\%)
+            \item This high spending occurs despite a relatively low old-age dependency ratio: 15.8\% in 2022 (OECD average: 31.3\%)
+        \end{itemize}
+        \item There have been recent attempts to conduct welfare analysis of these pension reforms using sufficient statistics formulas
+        \item The optimal design has been studied in the structural or theoretical literature
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Setting and Research Question}
+    \begin{columns}
+        \begin{column}{0.55\textwidth}
+            \begin{itemize}
+                \item Explore a reform to the Brazilian length-of-service pension schedule
+                \begin{itemize}
+                     \item Benefits depend on points = age + years of contribution
+                    \item[] 
+                    %\item No minimum claiming age
+                    \uncover<2->{\item Reform changed both the \textbf{benefit level $b_L$} and the \textbf{benefit slope $b_S$} after a point-threshold} 
+                \end{itemize}
+            \end{itemize}
+        \end{column}
+        \begin{column}{0.4\textwidth}
+          \centering
+          %\includegraphics[width=\linewidth]{scheduleReform.png}
+          \begin{tikzpicture}
+  \begin{axis}[
+    width=6cm, height=4.5cm,
+    axis lines=left,
+    axis line style={-{Stealth[length=3mm]}, ultra thick},
+    xmin=0, xmax=4.2, ymin=0, ymax=9,
+    xtick=\empty, ytick=\empty, clip=false,
+    xlabel={},
+    xlabel style={at={(axis description cs:1.02,0)}, anchor=west},
+    ylabel={},
+  ]
+
+    % Axis labels
+    \node[anchor=south, rotate=0] at (axis description cs:0.25,1.02) {Pension size ($b$)};
+    \node[anchor=south, rotate=0] at (axis description cs:0.5,-0.2) {\small Points=Age + Years of Cont.};
+
+    % Black baseline line
+    \addplot[very thick,col_before,domain=0:4] {0.98+1.5*x};
+
+    % Orange shifted line (parallel, upward shift)
+    \only<2->{\addplot[very thick,col_after,domain=0:2] {1.1+1.5*x};
+
+    % Orange horizontal line
+    \addplot[very thick,col_after,domain=2:4] {7};}
+
+    % Pick a reference point along the black line
+    \coordinate (A) at (axis cs:2,{1+1.5*2});
+    \coordinate (B) at (axis cs:2,7); % same x, higher y (on green line)
+    \coordinate (C) at (axis cs:3,{1+1.5*2}); % shift right to hit green line
+
+     % Dashed arrows showing Δb_ℓ (vertical) and Δb_s (horizontal)
+    \only<2->{\draw[col_after, dashed, thick, -{Stealth[length=2mm]}] (A) -- (B) node[midway,left] {$\Delta b_L$};
+    \draw[col_after, dashed, thick, -{Stealth[length=2mm]}] (A) -- (C);
+    \node[col_after] at (axis cs:3,4.6) {$\Delta b_S$};
+
+    % Arc to show angle
+  \draw[thick,col_after] (2.6,4) arc[start angle=0,end angle=22,radius=2];}
+
+  \end{axis}
+\end{tikzpicture}
+          % Optionally, a caption
+          % {\small Caption here}
+        \end{column}
+    \end{columns}
+    \vspace{0.6em}
+    \uncover<3>{\begin{enumerate}
+        \item What was the reform's welfare effect? 
+        \item How should we reform this schedule?
+        \begin{itemize}
+            \item Need to disentangle $\Delta b_L$ and $\Delta b_S$'s welfare effects
+        \end{itemize}
+    \end{enumerate}}
+\end{frame}
+
+\begin{frame}{Findings}
+\begin{itemize}
+    \item What was the reform's welfare effect?
+    \begin{itemize}
+        \item $MVPF=WTP/Cost$ is the beneficiaries' willingness to pay for each \$1 spent on the reform (Hendren and Sprung-Keyser, 2020)
+        \item Let $\eta$ be the average welfare weight on beneficiaries of the reform
+        \item $WMVPF = \eta MVPF$ is the welfare effect for each \$1 spent 
+        \item We find that $MVPF \approx 0.31$ and $WMVPF\approx 0.26$
+    \end{itemize}
+    %\item What is the optimal local reform? How should we change $b_L$ and $b_S$ to maximize welfare increase in a budget neutral reform?
+    \item Bergstrom, Dodds and Rios (2026) show that the optimal (welfare-maximizing) reform should spend on (raise revenue from) policies with highest (lowest) welfare per internal cost (WPIC)
+    \begin{itemize}
+        %\item Policymaker should spend on (raise revenue from) policies with highest (lowest) WMVPFs (Bergstrom, Dodds and Rios, 2026)
+        \item For budget-neutral, WPIC = WMVPF $\Rightarrow$ increase benefit slope and decrease benefit level
+        %\item (Preliminary) Optimal reform consists of increasing benefit slope and decreasing benefit level
+        \item For expenditure financed by payroll tax, WPIC = WNSBD $\Rightarrow$ increase benefit slope and finance it with the payroll tax
+    \end{itemize}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[label=literature]{Related Literature}
+\begin{enumerate}
+    \item \textbf{Effects of pension reforms on claiming and retirement}
+    \vspace{0.3em}
+
+    \begin{itemize}
+        \item Friedberg (2000), Manoli \& Weber (2016), Seibold (2021), Lalive et al (2023),  Giupponi (2025)
+        \vspace{0.3em}
+        \item[\textcolor{violet}{$\rightarrow$}] \textcolor{violet}{The reform allows us to disentangle responses to levels and slope}
+        
+    \end{itemize}
+    
+    \vspace{0.3em}
+    
+    \item \textbf{Pension welfare analysis and optimal design}
+    \vspace{0.3em}
+    
+    \begin{itemize}
+         \item Huggett and Parra (2010), Hosseini and Shourideh (2019), Giesecke and Jager (2021), Haller (2022), Kolsrud et al (2024), Seibold and Reck (2025), McKiernan (2022), Ndiaye and Yu (2025), 
+        \item[\textcolor{violet}{$\rightarrow$}] \textcolor{violet}{Disentangle welfare effect of different policy parameters and inform optimal policy reform based on sufficient statistics}
+    \end{itemize}
+    \item \textbf{Sufficient statistics for welfare analysis and optimal policies}
+    \vspace{0.3em}
+    \begin{itemize}
+        \item Feldstein (1999), Chetty (2009), Kleven (2018), Hendren and Sprung-Keyser (2020), Bergstrom et al (2026)
+        \item[\textcolor{violet}{$\rightarrow$}] \textcolor{violet}{Use sufficient statistics framework to guide optimal local policy reform}
+    \end{itemize}
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Outline}
+  \tableofcontents
+\end{frame}
+
+\section{Institutional Background and Data}
+
+\begin{frame}{Retirement Pensions in Brazil}
+    \begin{itemize}
+        \item Retirement pensions are the largest social security program in Brazil
+        \begin{itemize}
+            \item \alt<2->{\textbf{RGPS}}{RGPS}: private sector workers (90.5\% of expenditures)
+            \item RPPS: public servants (9.5\%)
+        \end{itemize}
+        \item  RGPS is divided into \alt<3->{\textbf{urban}}{urban} (69.2\%) and rural workers (30.8\%)
+        \item Urban workers could claim according to either:
+        \begin{itemize}
+            \item Age: 60 for women and 65 for men
+            \item \alt<4->{\textbf{Length-of-Service}}{Length-of-Service}: women (men) could claim earlier if they had contributed for 30 (35) years
+        \end{itemize}
+        \item 55.2\% of these urban workers retire according to length of service
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Length-of-Service Pension Schedule}
+    \begin{itemize}
+        \item Full pension equivalent to 80\% highest wages since July 1994 adjusted by inflation (contribution wage)
+        \item Benefits capped by a floor (minimum wage) and a ceiling (5.6 minimum wages $\approx$ 90th percentile of the income distribution)
+        \item The replacement rate (benefit/contribution wage) is a function of age, years of contribution, and survival expectancy at claiming
+        % \begin{itemize}
+        %     \item May be above 1
+        % \end{itemize}
+        \item Workers may claim and keep working in the formal sector without benefit withdrawal (no earnings test)
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Data}
+    \begin{itemize}
+        \item Main Analysis: Administrative Social Security data (SUIBE)
+        \begin{itemize}
+            \item Universe of formal private employees' early retirement claims from 2012 to 2019 (2.7 M)
+            \item Includes benefit size, claiming date, replacement rate, years of contribution, DoB etc.
+        \end{itemize}
+        \item Complement with
+        \begin{itemize}
+            \item Universe of formal employees (RAIS):  measures (i) contribution history before and after claiming and (ii) payroll and income tax payments
+            \item Surveys (ELSI and POF): consumption measures for beneficiaries (elderly) and the overall population - needed for welfare analysis
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[label=reform]{The 2015 Reform}
+    \begin{columns}
+        \begin{column}{0.48\textwidth}
+            \begin{itemize}
+                \item Since 1999, benefits increased almost linearly with points (age+years of contribution) 
+                \item In April 2015, Congress started discussion about the reform
+                \item In June 2015, the reform changed two parameters:
+            \end{itemize}
+        \end{column}
+        \begin{column}{0.48\textwidth}
+          \centering
+          \includegraphics[width=\linewidth]{schedule_women_new.pdf}
+        \end{column}
+    \end{columns}
+    % We first calculate the average replacement rate for each cohort in the data according to their mean input (years of contribution, wage, life expectancy etc)
+    % We then take the average across cohorts 
+    % The bump comes from adjustments in life expectancy.
+    \begin{enumerate}
+        \item the benefit level $b_L$ increased at 85 (95) points for women (men)
+        \item the benefit slope $b_S$ was removed after the same threshold  of 85/95 points for women/men
+    \end{enumerate} 
+    \begin{itemize}
+    %\item Eligibility at 30 (35) years of contribution for women (men) unchanged
+    \end{itemize}
+    \bfootnote{\hyperlink{dataReplacement}{\beamerbutton{Data}}
+    \hyperlink{men}{\beamerbutton{Men}}}
+\end{frame}
+
+\begin{frame}[label=rfEvidence]{Claiming Density, Raw Data - Bunching after reform}
+    \centering
+    \includegraphics[width=.9\linewidth]{E3_claiming_density.pdf}
+\bfootnote{\hyperlink{rfEvidenceWomen}{\beamerbutton{Women}} \hyperlink{rfEvidenceMen}{\beamerbutton{Men}}}
+\end{frame}
+
+\section{Model}
+
+\begin{frame}[label=model]
+\frametitle{Agent's problem}
+\begin{itemize}
+    \item Agents maximize their expected utility s.t. a budget constraint
+    \begin{align*}
+        \max_{x_{it}} &\Bigg\{\sum_{s=t}^{T_i}\beta^s E[ u(x_{is})]\quad \text{ s.t. } \\
+         &\quad a_{i,t+1} =(1+r)[a_{it}+y_{it}(x_{it})-\tau(x_{it})+b(x_{it})-c_{it}]\Bigg\}
+    \end{align*}
+    \item Choice vector $x_{it}$ includes assets $a_{it}$, consumption $c_{it}$, whether to claim benefits, formal and informal work, effort, etc.
+    \item They carry to the next period all income $y_{it}$, assets $a_{it}$ and benefits $b$ that are not used to pay taxes $\tau$ or consumption $c_{it}$
+    % b(x_it) should actually be b_t({x_is}s=0^t) but we are saving notation. 
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Welfare and Government's Budget}
+\begin{itemize}
+    \item In the reform period $t=0$, welfare is $\sum_{i} \sum_{t=0}^T\beta^t E[ u(x_{it})]$
+    \item The government budget constraint (GBC) is
+    \begin{align*}
+        \sum_{t=0}^T \sum_i \frac{E[\tau(x_{it})]-E[b(x_{it})]}{(1+r)^t}\geq\bar G_0,
+    \end{align*}
+    % This is weaker than requiring that the budget closes under each state of the world. 
+    \item Two benefit schedule concepts
+    % technically, it also depends on states, but we are saving notation
+    % Note that the actual schedule differs for those who claimed above the threshold depending on whether they claim before or after the reform
+    % The counterfactual schedule is the same
+    \begin{itemize}
+        \item $b^c(\cdot)$: Counterfactual schedule in the absence of the reform
+        \item $b^a(\cdot)$: Actual schedule with the reform
+    \end{itemize}
+    \item They lead to two different choice-vector concepts
+    \begin{itemize}
+        \item $x^c_{it}$: under the counterfactual schedule 
+        \item $x_{it}^a$: under the actual (reformed) schedule
+    \end{itemize}
+    %\item These choices also may affect the state distribution
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Welfare Analysis}
+    \begin{itemize}
+        \item By the envelope theorem, the welfare effect per dollar spent in the reform from $b^c$ to $b^a$ is:
+        \begin{align*}
+            WMVPF(b^c,b^a)=\frac{\sum_t \sum_i E(SMU_{it}[b^a(x^c_{it})-b^c(x^c_{it})])}{C(b^c,b^a)}
+        \end{align*}
+        % b_a'=b^a(x_{it}|a(x_{it})=a)
+        % b_a=b(x_{it}|a(x_{it})=a)
+        \item Where $SMU_{it} \equiv \beta^t \frac{\partial u(x_{it})}{\partial c_{it}}$ is the social marginal utility of consumption for for agent $i$ in period $t$
+        \item $C(b^c,b^a)$ is the cost of the reform, including fiscal externalities: 
+    \end{itemize}
+    \small
+    \begin{align*}
+        \label{eq_nc}
+        \small
+        \sum_{t=0}^T \sum_i \frac{\overbrace{E[b^a(x_{it}^a)]-E[b^c(x_{it}^c)]}^{\text{Benefit Changes}}-
+        \overbrace{\left[E[\tau(x_{it}^a)]-E[\tau(x_{it}^c)]\right]}^{\text{Revenue Changes}}}{(1+r)^t}
+    \end{align*}
+\end{frame}
+
+\section{Empirical Strategy}
+
+\begin{frame}{Empirical Strategy: Overview}
+\begin{itemize}
+    \item What was the reform's welfare effect? Goal is to compute MVPF (Marginal Value of Public Funds) - Hendren, Sprung-Keyser (2020)
+    \item[] $\Rightarrow$  We do this in five steps:
+    \begin{enumerate}
+        \item \alt<2>{\textbf{Estimate how the reform affected the distribution of points}}{Estimate how the reform affected the distribution of points}
+        \item Measure PDV of (net-of-tax) lifetime benefits
+        \item Estimate mechanical effect on DPV of benefits (WTP)
+        \item Estimate total cost of the reform
+        \item Measure the welfare effect of the reform and construct its (W)MVPF
+    \end{enumerate}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[label=identification]{Claiming Hazard}
+    \centering
+    \includegraphics[width=.9\linewidth]{E3_claiming_haz_dist.pdf}
+    % These are simulated points 
+\end{frame}
+
+\begin{frame}{DiD: Effect of the Reform on Claiming Hazard (CH)}
+    \begin{itemize}
+        \item $p$: normalized points, i.e. points -85 (-95) for women (men)
+        \item Control group: Agents with $p<-6$ at $t$
+        \item Treatment groups: Agents with $p \in \tilde p$ at $t$ for  $\tilde p=[-6,-3); [-3,0);[0,2);[2,7), [7,\infty)$
+    \end{itemize}
+    % Note that these are simulated points at each period t rather than points at claiming. 
+    \begin{align*}
+        \label{eq_claiminghaz}
+        CH_{ipt} = \sum_{k \neq -2} \beta_{k,\tilde p} 1(p \in \tilde p) \times 1(t = k) + \delta_t + \gamma_{p} +\zeta X_{ip} + \varepsilon_{ipt}
+    \end{align*}
+    \begin{itemize}
+        \begin{itemize}
+            \item $\beta_{k,\tilde p}$: effect of the reform on CH at $p\in \tilde p$ points
+            \item $\delta_t$, $\gamma_{p}$: time and normalized-points fixed effects
+            \item $X_{ip}$ includes gender, microregion, schooling, race, and birth year fixed effects (at time of claiming). 
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Negative Effect on CH Right Below the threshold $p\in [-2,0)$}
+    \centering
+    \includegraphics[width=0.8\linewidth]{F4_eventstudy_agg_2.pdf}
+\end{frame}
+
+\begin{frame}[label=ChDdRightAbove]{Positive Effect on CH Right Above the Threshold $p \in[0,2)$}
+    \centering
+    \includegraphics[width=0.8\linewidth]{F4_eventstudy_agg_3.pdf}
+    \bfootnote{\hyperlink{chDdOther}{\beamerbutton{Other Point Ranges}} \hyperlink{trend}{\beamerbutton{Raw Trends}}\hyperlink{chToFrequencies}{\beamerbutton{CH to Frequencies}}}
+\end{frame}
+
+\begin{frame}{Actual and Counterfactual Frequencies
+    \only<1>{Q4 2014}\only<2>{Q1 2015}\only<3>{Q2 2015}\only<4>{Q3 2015}\only<5>{Q4 2015}\only<6>{Q1 2016}\only<7>{Q2 2016}\only<8>{Q3 2016}\only<9>{Q4 2016}\only<10>{Q1 2017}\only<11>{Q2 2017}\only<12>{Q3 2017}\only<13>{Q4 2017}\only<14>{Q1 2018}\only<15>{Q2 2018}\only<16>{Q3 2018}}
+     \centering \only<1>{\includegraphics[width=.9\linewidth]{frequenciesQ-3.pdf}}\only<2>{\includegraphics[width=.9\linewidth]{frequenciesQ-2.pdf}}\only<3>{\includegraphics[width=.9\linewidth]{frequenciesQ-1.pdf}}\only<4>{\includegraphics[width=.9\linewidth]{frequenciesQ0.pdf}}\only<5>{\includegraphics[width=.9\linewidth]{frequenciesQ1.pdf}}\only<6>{\includegraphics[width=.9\linewidth]{frequenciesQ2.pdf}}\only<7>{\includegraphics[width=.9\linewidth]{frequenciesQ3.pdf}}\only<8>{\includegraphics[width=.9\linewidth]{frequenciesQ4.pdf}}\only<9>{\includegraphics[width=.9\linewidth]{frequenciesQ5.pdf}}\only<10>{\includegraphics[width=.9\linewidth]{frequenciesQ6.pdf}}\only<11>{\includegraphics[width=.9\linewidth]{frequenciesQ7.pdf}}\only<12>{\includegraphics[width=.9\linewidth]{frequenciesQ8.pdf}}\only<13>{\includegraphics[width=.9\linewidth]{frequenciesQ9.pdf}}\only<14>{\includegraphics[width=.9\linewidth]{frequenciesQ10.pdf}}\only<15>{\includegraphics[width=.9\linewidth]{frequenciesQ11.pdf}}\only<16>{\includegraphics[width=.9\linewidth]{frequenciesQ12.pdf}}
+\end{frame}
+
+\begin{frame}{Empirical Strategy: Overview}
+\begin{itemize}
+    \item What was the reform's welfare effect? Goal is to compute MVPF (Marginal Value of Public Funds) - Hendren, Sprung-Keyser (2020)
+    \item[] $\Rightarrow$  We do this in five steps:
+    \begin{enumerate}
+        \item Estimate how the reform affected the distribution of points
+        \item \textbf{Measure PDV of (net-of-tax) lifetime benefits}
+        \item Estimate mechanical effect on DPV of benefits (WTP)
+        \item Estimate total cost of the reform
+        \item Measure the welfare effect of the reform and construct its (W)MVPF
+    \end{enumerate}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[label=npv]{Discounted Present Value of Net-of-Tax Benefits}
+    \begin{itemize}
+        \item We can measure $\sum_{t=0}^{T} \frac{b^a(x_{it}^a)}{(1+r)^t}$ and $\sum_{t=0}^{T}  \frac{\tau(x_{it}^a)}{(1+r)^t}$
+        \begin{itemize}
+            \item Where $T$ is the last quarter in our data
+        \end{itemize}
+        \item Need to get $b_i^{PDV}\equiv  \sum_{t=0}^{T_i} \frac{b^a(x_{it}^a)}{(1+r)^t}$ and $\tau_i^{PDV}\equiv  \sum_{t=0}^{T_i}  \frac{\tau(x_{it}^a)}{(1+r)^t}$
+        \begin{itemize}
+            \item Where $T_i$ is the number of quarters until $i$'s death, but $T_i>T$
+        \end{itemize}
+        \item Measure $T_i$, assuming that individuals live until life expectancy given their age and sex
+        \item Since monthly benefits are constant, we can estimate $b_i^{PDV}$
+        \item On-going: estimate $\tau_i^{PDV}$ using Surrogate Indexes (Athey et al, 2025)
+    \end{itemize}
+    \bfootnote{\hyperlink{npvTaxes}{\beamerbutton{Surrogate Indexes}}}
+\end{frame}
+
+\begin{frame}{Empirical Strategy: Overview}
+\begin{itemize}
+    \item What was the reform's welfare effect? Goal is to compute MVPF (Marginal Value of Public Funds) - Hendren, Sprung-Keyser (2020)
+    \item[] $\Rightarrow$  We do this in five steps:
+    \begin{enumerate}
+        \item Estimate how the reform affected the distribution of points
+        \item Measure PDV of (net-of-tax) lifetime benefits
+        \item \textbf{Estimate mechanical effect on DPV of benefits (WTP)}
+        \item {Estimate total cost of the reform}
+        \item Measure the welfare effect of the reform and construct its (W)MVPF
+    \end{enumerate}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[label=MEandFE]{Mechanical Effect and Willingness-to-Pay}
+    \begin{itemize}
+        \item WTP is captured by mechanical effect (envelope theorem)
+    \end{itemize}
+    {\small
+    \begin{align*}
+        \label{eq_nc}
+         \sum_i \sum_{t=0}^{T_i} \frac{E[b^a(x^c_{it})]-E[b^c(x_{it}^c)]}{(1+r)^t}
+    \end{align*}
+    }
+    \begin{itemize}
+        \item Mechanical Effect: Counterfactual increase in benefit outlays under the reformed schedule but in the absence of behavioral responses
+        \item Can recover $\sum_t b^a(\mathbf{x_{it}^a})/(1+r)^t$ and $\sum_t b^c(\mathbf{x_{it}^a})/(1+r)^t$ but need:
+        \begin{enumerate}
+            \item counterfactual benefits $\sum_t b^c(\mathbf{x_{it}^c})/(1+r)^t$ 
+            \item mechanical benefits $\sum_t b^a(\mathbf{x^c_{it}})/(1+r)^t$
+        \end{enumerate}
+        \item With the counterfactual claiming frequencies, we just need the avg counterfactual and mechanical benefits at each normalized point
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Average Counterfactual Benefits: $\frac{1}{N_{p,t}^c}\sum_{i:p(x_{it})=p}\sum_t \frac{b^c(x_{it}^c)}{(1+r)^t}$}
+% This should be the sum of the PDV (from the perpective of the refomr) of benefits for those who claim at t with p points from t=0 to T_i.
+% So p(x_it) = p only if i claims at t with p. 
+    \begin{itemize}
+        \item $\bar{b}^{c,a}_{p,t} \equiv \frac{1}{N_{p,t}} \sum_{i:p(x_{it}^a)=p}\sum_t b^c(x_{it}^a)/(1+r)^t$: average PDV of benefits that would have been paid to those claiming with $p$ normalized points in quarter $t$ under the counterfactual schedule and actual choices
+        \item Problem: \textit{Bunchers} could be positively selected (eg, higher wages)
+        \item Identification Assumption: $\bar{b}^{c,a}_{p,t}$ for $p\geq -6$ would remain parallel to the ones in $p<-6$ in the absence of the reform
+        \item The DiD recovers the effect of the reform on these average benefits $\beta^{c,a}_{k,p}$ at each normalized point $p$ and quarter $k$:
+         \begin{align*}
+            \bar{b}^{c,a}_{p,t}=\delta_p^{c,a}+\gamma_t^{c,a} +\sum_{k\neq -2}\beta_{p,k}^{c,a} 1(p\in \tilde p)*1(t=k)+\varepsilon_{p,t}^{c,a}
+        \end{align*}
+        \item $\bar{b}^{c,a}_{p,t}-\hat \beta_{p,t}^{c,a}$ is an estimate for $\frac{1}{N_{p,t}^c}\sum_{i:p(x_{it})=p}\sum_t \frac{b^c(x^c_{it})}{(1+r)^t}$
+    \end{itemize}
+    % The estimate for the average benefit that would have been paid in the absence of the reform at point p and quarter t is estimated as bar b^o_{p,t}-\beta_{t,p}
+\end{frame}
+
+\begin{frame}{Effect on Avg Counterfactual Benefits at $p \in [-2,0)}
+    \centering
+    \includegraphics[width=0.8\linewidth]{old-3.pdf}
+\end{frame}
+
+\begin{frame}[label=selectionRightAbove]{Effect on Avg Counterfactual Benefits at $p \in [0,2)$}
+    \centering
+    \includegraphics[width=0.8\linewidth]{old0.pdf}
+    \bfootnote{\hyperlink{selectionOther}{\beamerbutton{Other Point Ranges}}}
+\end{frame}
+
+
+\begin{frame}{Average Mechanical Benefits: $\frac{1}{N^c_{p,t}}\sum_{i:p(x_{it})=p} \sum_t \frac{b^a(x_{it}^c)}{(1+r)^t}$}
+    \begin{itemize}
+        %\item We correct the observed benefit outlay in each point $p$ and quarter $t$ by the selection of individuals that responded to the reform
+        \item $\bar{b}^{a,a}_{p,t} \equiv \frac{1}{N_{p,t}}\sum_{i:p(x_{it}^a)=p}\sum_t \frac{b^a(x_{it}^a)}{(1+r)^t}$: average PDV of benefits paid to those claiming with $p$ normalized points in quarter $t$ under the actual schedule and choices $\Rightarrow$ Need to correct for behavioral responses
+        \item Identification Assumption: $\bar{b}^{a,a}_{p,t}$ for $p\geq -6$ would remain parallel to the ones in $p<-6$ in the absence of the reform
+        \item The following DiD recovers the effect of the reform on these average benefits $\beta^{a,a}_{k,p}$ at each normalized point $p$ and quarter $k$:
+         \begin{align*}
+            \bar{b}^{a,a}_{p,t}=\delta_p^{a,a}+\gamma_t^{a,a} +\sum_{k\neq -2}\beta_{k,p}^{a,a} 1(p\in \tilde p)*1(t=k)+\varepsilon_{p,t}^{a,a}
+        \end{align*}
+        \item $\bar{b}^{a,a}_{p,t}-\hat \beta_{p,t}^{a,a}$ is an estimate for $\frac{1}{N^c_{p,t}}\sum_{i:p(x_{it})=p}\sum_t \frac{b^a(x^c_{it})}{(1+r)^t}$
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Effect on Avg Actual Benefits at $p \in [-2,0)$}
+    \centering
+    \includegraphics[width=0.8\linewidth]{new-3.pdf}
+\end{frame}
+
+\begin{frame}[label=mechanicalRightAbove]{Effect on Avg Actual Benefits at $p \in [0,2)$}
+    \centering
+    \includegraphics[width=0.8\linewidth]{new0.pdf}
+    \bfootnote{\hyperlink{mechanicalOther}{\beamerbutton{Other Point Ranges}}}
+\end{frame}
+
+\begin{frame}{Empirical Strategy: Overview}
+\begin{itemize}
+    \item What was the reform's welfare effect? Goal is to compute MVPF (Marginal Value of Public Funds) - Hendren, Sprung-Keyser (2020)
+    \item[] $\Rightarrow$  We do this in five steps:
+    \begin{enumerate}
+        \item Estimate how the reform affected the distribution of points
+        \item Measure PDV of (net-of-tax) lifetime benefits
+        \item {Estimate mechanical effect on DPV of benefits (WTP)}
+        \item \textbf{Estimate total cost of the reform}
+        \item Measure the welfare effect of the reform and construct its (W)MVPF
+    \end{enumerate}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[label=costReform]{Cost of the Reform}
+    \begin{itemize}
+        \item The total cost of the reform is
+    \end{itemize}
+    \only<1>{\small
+    \begin{align*}
+        \label{eq_nc}
+        \small
+        \sum_{t=0}^T \sum_i \frac{E[b^a(x_{it}^a)-\tau(x_{it}^a)]-E[b^c(x^c_{it})-\tau(x_{it}^c)]}{(1+r)^t}
+    \end{align*}
+    }
+    \only<2>{\small
+    \begin{align*}
+        \label{eq_nc}
+        \small
+        \sum_{t=0}^T \sum_i \frac{E[b^a(x_{it}^a)]-E[b^c(x^c_{it})]}{(1+r)^t}
+    \end{align*}
+    }
+    \begin{itemize}
+        \item Ongoing: costs after the reform $b^a(x_{it}^a)-\tau(x_{it}^a)$ are directly observed but need counterfactual costs $b^c(x^c_{it})-\tau(x^c_{it})$ 
+        \item Since we have the counterfactual claiming frequencies, we just need the average counterfactual net of tax benefits
+        \item \only<1>{Today, we will present results ignoring the fiscal externalities on tax collection}\only<2>{\textbf{Today, we will present results ignoring the fiscal externalities on tax collection}}
+    \end{itemize}
+    \bfootnote{\hyperlink{netOfTaxBenefits}{\beamerbutton{Cntf Net-of-Tax Benefits}}}
+\end{frame}
+
+\begin{frame}{Empirical Strategy: Overview}
+\begin{itemize}
+    \item What was the reform's welfare effect? Goal is to compute MVPF (Marginal Value of Public Funds) - Hendren, Sprung-Keyser (2020)
+    \item[] $\Rightarrow$  We do this in five steps:
+    \begin{enumerate}
+        \item Estimate how the reform affected the distribution of points
+        \item Measure PDV of (net-of-tax) lifetime benefits
+        \item {Estimate mechanical effect on DPV of benefits (WTP)}
+        \item {Estimate total cost of the reform}
+        \item \textbf{Measure the welfare effect of the reform and construct its (W)MVPF}
+    \end{enumerate}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{WMVPF and MVPF of the Reform}
+    \begin{itemize}
+        \item Under envelope conditions, the welfare effect per dollar spent is:
+        % It is an approximation because we are considering a non-infinitesimal reform
+        \begin{align*}
+            WMVPF(b^c,b^a)\approx \frac{\sum_t \sum_x E(SMU_{it}|x)*[b^a(x)-b^c(x)]}{C(b^c,b^a)}
+        \end{align*}
+        % technically, we are also holding constant the state of the world in b^a(x,pi). I believe we want the same distribution as in the absence of the reform. 
+        % For example, if someone gets fired with a higher probability under the reformed schedule, we want to compute their benefits with the lower probability before the reform was enacted 
+        \item Where $E(SMU_{it}|x) & \equiv E\left(\beta^t \frac{\partial u(x_{it})}{\partial c_{it}}|x_{it}=x\right)$ is the average social marginal utility of consumption for agents with choices $x$
+        \item Assuming that pension benefits have no insurance value, and there are no internalities:
+    \end{itemize}
+    \begin{align*}
+        MVPF & = \frac{\sum_t \sum_x E[b^a(x)-b^c(x)]}{C(b^c,b^a)} \\
+        & = \frac{\text{Mechanical Effect}}{\text{Total Cost}}
+    \end{align*}
+\end{frame}
+
+\begin{frame}[label=consumptionApprox]{Measuring the Welfare Effect of the Reform}
+    \begin{itemize}
+        \item Utilitarian planner + normalizing marginal utility to the avg. in the economy + constant CRRA:
+        % CRRA constant across individuals, allow us to write gamma without i
+        % CRRA constant across consumption levels allow us to use equal instead of approx
+        \begin{align*}
+            E(SMU_{it}|x) = \beta^{t}\left(1-\gamma\frac{c_{x}-c}{c}\right)
+        \end{align*}
+        \begin{itemize}
+            \item $\gamma$ is the CRRA (assumed to be = 4), $c_x$ is the avg. cons. among those choosing $x$, and $c$ is avg consumption in the Brazilian population 
+        \end{itemize}
+        \item Survey evidence that consumption is: 
+        \begin{enumerate}
+            \item constant across points (ELSI)
+            \item 4.2\% higher among beneficiaries than in the overall population (POF)
+        \end{enumerate}
+        % I also think we are using just the average c_x instead of c_x in the end
+        % I think the correct thing to do is to use (c_x-c)*(b_x-b) and then sum..
+        % This has to do with the jensen inequality
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[label=survey]{ELSI: Consumption by Normalized Points}
+    \centering 
+    \includegraphics[width=\textwidth]{ELSI.jpg}
+    % Roughly constant, 
+    % It doesnt seem like redistribution within beneficiaries was that important
+\end{frame}
+
+\begin{frame}{POF Results}
+    \centering 
+    \includegraphics[width=\textwidth]{plot_expenditures_groups.pdf}
+    % Pension beneficiaries consumed 8.2% more
+    % Their marginal utility is therefore lower. 
+    % Welfare effect < Mechanical effect
+\end{frame}
+
+\section{Welfare Effect of the Reform}
+
+\begin{frame}[label=welfareGraph]{Welfare Weighted MVPF}
+    \begin{figure}
+        \centering
+        \label{plot_wmvpf}
+        %\caption{}
+        \includegraphics[width=0.8\linewidth]{plot_wmvpf.pdf}
+    \end{figure}
+    \begin{itemize}
+        \item $WMVPF \approx 0.26$ (>3 for BF) 
+    \end{itemize}
+\end{frame}
+
+\section{Disentangling Responses to $\Delta b_L$ and $\Delta b_S$}
+
+\begin{frame}[label=twoCounterfactualReforms]{Optimal and two Counterfactual Reforms}
+    \begin{itemize}
+        \item Optimal reform of $b()$ depends on the welfare effects of $\Delta b_S()$ and $\Delta b_L()$ (Bergstrom et al, 2026)
+        \begin{itemize}
+            \item Increase expenditure on parameter with highest WPIC
+            \item Decrease expenditure on parameter with lowest WPIC
+        \end{itemize}
+    \end{itemize}
+    \centering
+    \begin{minipage}[b]{0.47\textwidth}
+        \centering
+        %\includegraphics[width=\textwidth]{reformB0.png}
+\begin{tikzpicture}
+  \begin{axis}[
+    width=6cm, height=5cm,
+    axis lines=left,
+    axis line style={-{Stealth[length=3mm]}, ultra thick},
+    xmin=0, xmax=4.2, ymin=0, ymax=9,
+    xtick=\empty, ytick=\empty, clip=false,
+    xlabel={},
+    xlabel style={at={(axis description cs:1.02,0)}, anchor=west},
+    ylabel={},
+  ]
+
+    % Axis labels
+    \node[anchor=south, rotate=0] at (axis description cs:0,1) {$b$};
+    \node[anchor=south, rotate=0] at (axis description cs:1.05,-0.07) {$p$};
+
+    % Black baseline line
+    \addplot[very thick,col_before,domain=0:4] {0.98+1.5*x};
+
+    % Green shifted line (parallel, upward shift)
+    \addplot[very thick,col_after,domain=0:2] {1.1+1.5*x};
+
+    % Green horizontal line
+    \addplot[very thick,col_after,domain=2:4] {4 + 1.5*x};
+
+    \draw[dashed,black!60!black] (axis cs:2,0) -- (axis cs:2,8);
+
+    % Pick a reference point along the black line
+    \coordinate (A) at (axis cs:2,{1+1.5*2});
+    \coordinate (B) at (axis cs:2,7); % same x, higher y (on green line)
+
+    % Dashed arrows showing Δb_ℓ (vertical) and Δb_s (horizontal)
+    \draw[col_after, dashed, thick, -{Stealth[length=2mm]}] (A) -- (B) node[midway,left] {$\Delta b_L$};
+
+    \node at (axis cs:{2},-0.7) {\small $\0$};
+
+  \end{axis}
+\end{tikzpicture}
+    \end{minipage}
+    \begin{minipage}[b]{0.47\textwidth}
+        \centering
+        %\includegraphics[width=\textwidth]{reformB1.png}
+        \begin{tikzpicture}
+  \begin{axis}[
+    width=6cm, height=5cm,
+    axis lines=left,
+    axis line style={-{Stealth[length=3mm]}, ultra thick},
+    xmin=0, xmax=4.2, ymin=0, ymax=9,
+    xtick=\empty, ytick=\empty, clip=false,
+    xlabel={},
+    xlabel style={at={(axis description cs:1.02,0)}, anchor=west},
+    ylabel={},
+  ]
+
+    % Axis labels
+    \node[anchor=south, rotate=0] at (axis description cs:0,1) {$b$};
+    \node[anchor=south, rotate=0] at (axis description cs:1.05,-0.07) {$p$};
+
+    % Black baseline line
+    \addplot[very thick,col_before,domain=0:4] {1.08+1.5*x};
+
+    % Green shifted line (parallel, upward shift)
+    \addplot[very thick,col_after,domain=0:2] {1.1+1.5*x};
+
+    % Green horizontal line
+    \addplot[very thick,col_after,domain=2:4] {4.1};
+
+    \node[col_after] at (axis cs:3,4.6) {$\Delta b_S$};
+
+    \draw[dashed,black!60!black] (axis cs:2,0) -- (axis cs:2,8);
+
+    % Arc to show angle
+  \draw[thick,col_after] (2.6,4) arc[start angle=0,end angle=22,radius=2];
+
+    \node at (axis cs:{2},-0.7) {\small $0$};
+
+  \end{axis}
+\end{tikzpicture}
+    \end{minipage}
+    
+     \begin{itemize}
+         \item Postponement in response to $\Delta b_L$ and anticipation in rspnse to $\Delta b_S$
+     \end{itemize}
+     \bfootnote{\hyperlink{theory}{\beamerbutton{Model}} \hyperlink{intuition}{\beamerbutton{Intuition}}}
+\end{frame}
+
+
+\begin{frame}{Counterfactual claiming distribution}
+    \centering 
+    \includegraphics[width=.9\textwidth]{frequenciesAgg.pdf}
+    % A little deceiving because there are individuals that claim that would not have claimed at all up to the end of 2018 (they are not in the counterfactual frequencies but are also anticipators)
+\end{frame}
+
+\begin{frame}[label=pureLStep]{Disentangling Responses: Overview}
+    \begin{itemize}
+        \item We estimate the welfare effects of these pure reforms in 5 steps
+        \begin{enumerate}
+            \item \alt<2>{\textbf{Estimate frequencies under pure-L reform, redistributing postponement missing mass to future bunching regions}}{Estimate frequencies under pure-L reform, redistributing postponement missing mass to future bunching regions}
+            \item Estimate frequencies under pure-S reform, removing the postponement found in (1) from the actual bunching
+            \item Estimate the mechanical expenditures under both reforms but without responses, correcting for all selection
+            \item Estimate the expenditures under each reform, correcting only for anticipation (postponement) selection
+            \item Compute welfare effects and total costs from 1-4 and compute the WMVPFs
+        \end{enumerate}
+    \end{itemize}
+    \bfootnote{\hyperlink{pureL}{\beamerbutton{Pure-L Frequencies Details}}}
+\end{frame}
+
+\begin{frame}{Frequencies under Pure \textbf{Level} Reform:
+    \only<1>{Q3 2015}\only<2>{Q4 2015}\only<3>{Q1 2016}\only<4>{Q2 2016}\only<5>{Q3 2016}\only<6>{Q4 2016}\only<7>{Q1 2017}\only<8>{Q2 2017}\only<9>{Q3 2017}\only<10>{Q4 2017}\only<11>{Q1 2018}\only<12>{Q2 2018}\only<13>{Q3 2018}}
+     \only<1>{\includegraphics[width=.9\linewidth]{frequenciesLQ0.pdf}}\only<2>{\includegraphics[width=.9\linewidth]{frequenciesLQ1.pdf}}\only<3>{\includegraphics[width=.9\linewidth]{frequenciesLQ2.pdf}}\only<4>{\includegraphics[width=.9\linewidth]{frequenciesLQ3.pdf}}\only<5>{\includegraphics[width=.9\linewidth]{frequenciesLQ4.pdf}}\only<6>{\includegraphics[width=.9\linewidth]{frequenciesLQ5.pdf}}\only<7>{\includegraphics[width=.9\linewidth]{frequenciesLQ6.pdf}}\only<8>{\includegraphics[width=.9\linewidth]{frequenciesLQ7.pdf}}\only<9>{\includegraphics[width=.9\linewidth]{frequenciesLQ8.pdf}}\only<10>{\includegraphics[width=.9\linewidth]{frequenciesLQ9.pdf}}\only<11>{\includegraphics[width=.9\linewidth]{frequenciesLQ10.pdf}}\only<12>{\includegraphics[width=.9\linewidth]{frequenciesLQ11.pdf}}\only<13>{\includegraphics[width=.9\linewidth]{frequenciesLQ12.pdf}}
+\end{frame}
+
+\begin{frame}[label=pureSStep]{Disentangling Responses: Overview}
+    \begin{itemize}
+        \item We estimate the welfare effects of these pure reforms in 5 steps
+        \begin{enumerate}
+            \item Estimate frequencies under pure-L reform, redistributing postponement missing mass to future bunching regions
+            \item \alt<2>{\textbf{Estimate frequencies under pure-S reform, removing the postponement found in (1) from the actual bunching}}{Estimate frequencies under pure-S reform, removing the postponement found in (1) from the actual bunching}
+            \item Estimate the mechanical expenditures under both reforms but without responses, correcting for all selection
+            \item Estimate the expenditures under each reform, correcting only for anticipation (postponement) selection
+            \item Compute welfare effects and total costs from 1-4 and compute the WMVPFs
+        \end{enumerate}
+    \end{itemize}
+    \bfootnote{\hyperlink{pureS}{\beamerbutton{Pure-S Frequencies Details}}}
+\end{frame}
+
+\begin{frame}{Frequencies under Pure \textbf{Slope} Reform:
+    \only<1>{Q3 2015}\only<2>{Q4 2015}\only<3>{Q1 2016}\only<4>{Q2 2016}\only<5>{Q3 2016}\only<6>{Q4 2016}\only<7>{Q1 2017}\only<8>{Q2 2017}\only<9>{Q3 2017}\only<10>{Q4 2017}\only<11>{Q1 2018}\only<12>{Q2 2018}\only<13>{Q3 2018}}
+     \only<1>{\includegraphics[width=.9\linewidth]{frequenciesSQ0.pdf}}\only<2>{\includegraphics[width=.9\linewidth]{frequenciesSQ1.pdf}}\only<3>{\includegraphics[width=.9\linewidth]{frequenciesSQ2.pdf}}\only<4>{\includegraphics[width=.9\linewidth]{frequenciesSQ3.pdf}}\only<5>{\includegraphics[width=.9\linewidth]{frequenciesSQ4.pdf}}\only<6>{\includegraphics[width=.9\linewidth]{frequenciesSQ5.pdf}}\only<7>{\includegraphics[width=.9\linewidth]{frequenciesSQ6.pdf}}\only<8>{\includegraphics[width=.9\linewidth]{frequenciesSQ7.pdf}}\only<9>{\includegraphics[width=.9\linewidth]{frequenciesSQ8.pdf}}\only<10>{\includegraphics[width=.9\linewidth]{frequenciesSQ9.pdf}}\only<11>{\includegraphics[width=.9\linewidth]{frequenciesSQ10.pdf}}\only<12>{\includegraphics[width=.9\linewidth]{frequenciesSQ11.pdf}}\only<13>{\includegraphics[width=.9\linewidth]{frequenciesSQ12.pdf}}
+\end{frame}
+    
+\begin{frame}[label=disentangling]{Disentangling Responses: Overview}
+    \begin{itemize}
+        \item We estimate the welfare effects of these pure reforms in 5 steps
+        \begin{enumerate}
+            \item Estimate frequencies under pure-L reform, redistributing postponement missing mass to future bunching regions
+            \item Estimate frequencies under pure-S reform, removing the postponement found in (1) from the actual bunching
+            \item \alt<2>{\textbf{Estimate the mechanical expenditures under both reforms but without responses, correcting for all selection}}{Estimate the mechanical expenditures under both reforms but without responses, correcting for all selection}
+            \item \alt<2>{\textbf{Estimate the expenditures under each reform, correcting only for anticipation (postponement) selection}}{Estimate the expenditures under each reform, correcting only for anticipation (postponement) selection}
+            \item \alt<2>{\textbf{Compute welfare effects and total costs from 1-4 and compute the WMVPFs}}{Compute welfare effects and total costs from 1-4 and compute the WMVPFs}
+        \end{enumerate}
+    \end{itemize}
+    \bfootnote{\hyperlink{pureDetails}{\beamerbutton{Details}}}
+\end{frame}
+
+\section{Optimal Reform}
+
+\begin{frame}[label=optimal]{Optimal Budget-Balanced Reform}
+    \begin{itemize}
+        \item Which schedule reform increases welfare the most? 
+        \begin{itemize}
+            \item Local in the sense that the government can only increase costs and revenues by a fixed amount set to $C(b^c,b^a)\approx R\$250 B$
+        \end{itemize}
+        \item Implementation advantage:
+        \begin{itemize}
+            \item Optimal pension \textbf{schedule} depends on sufficient statistics under the \textbf{optimal} schedule
+            \item Optimal pension \textbf{reform} depends on sufficient statistics under the \textbf{observed} schedule
+        \end{itemize}
+        \item $WMVPF_{b_L} \approx 0.68<0.71\approx WMVPF_{b_S}$
+        \begin{itemize}
+            \item $\Delta b_S^*=0.081$: 350\% increase (baseline was 0.023)
+            \item $\Delta b_L^*=-791$: 26\% drop (baseline was 3014.76)
+        \end{itemize}
+    \end{itemize}
+    \bfootnote{\hyperlink{optimalDetails}{\beamerbutton{Details}}}
+\end{frame}
+
+\begin{frame}{Optimal Budget-Neutral Reform}
+\centering
+\begin{tikzpicture}
+  \begin{axis}[
+    width=9cm, height=7.5cm,
+    axis lines=left,
+    axis line style={-{Stealth[length=3mm]}, ultra thick},
+    xmin=0, xmax=4.2, ymin=0, ymax=9,
+    xtick=\empty, ytick=\empty, clip=false,
+    xlabel={},
+    xlabel style={at={(axis description cs:1.02,0)}, anchor=west},
+    ylabel={},
+  ]
+
+    % Axis labels
+    \node[anchor=south, rotate=0] at (axis description cs:0,1) {$b$};
+    \node[anchor=south, rotate=0] at (axis description cs:1.05,-0.07) {$p$};
+
+    % Black baseline line
+    \addplot[very thick,col_before,domain=0:4] {1.08+1.5*x};
+
+    % Orange shifted line (parallel, upward shift)
+    \addplot[very thick,col_after,domain=0:2] {1.1+1.5*x};
+
+    % Orange horizontal line
+    \addplot[very thick,col_after,domain=2:3.5] {-6.2+4.5*x};
+
+    %\node[col_after] at (axis cs:3,4.6) {$\Delta b_S$};
+
+    \draw[dashed,black!60!black] (axis cs:2,0) -- (axis cs:2,8);
+
+    % Arc to show angle
+  %\draw[thick,col_after] (2.6,4) arc[start angle=0,end angle=22,radius=2];
+
+    \node at (axis cs:{2},-0.7) {\small $0$};
+
+  \end{axis}
+\end{tikzpicture}
+\end{frame}
+
+\begin{frame}[label=expenditure]{The Optimal Expenditure Problem}
+    \begin{itemize}
+        \item Suppose instead that the government would like to expand Social Security, financing it with payroll taxes
+        \item Bergstrom et al (2026) show that in that case the optimal expenditure would be on the parameter with the largest $WNSBD$, i.e.:
+        {\scriptsize
+        \begin{align*}
+            WNSBD_p= \frac{WE_p-WMVPF_T*TC_p}{ME_p}, \ \text{for} \ p=b_L,b_S
+        \end{align*}}
+        %NSBD net social benefit per dollar 
+        % How much welfare would increase if we spent one dollar with p and then financed that expenditure with a payroll tax increase
+        \item Where $WMVPF_T$ is the payroll tax WMVPF
+        \begin{itemize}
+            \item Combining findings from Lobel (2025) + POF's consumption measures, we calculate $WMVPF_T = 1.53$
+        \end{itemize}
+        \item All other inputs come directly from the above analysis
+        \begin{itemize}
+            \item $WNSBD_{b_S}\approx -0.96>-1.04\approx WNSBD_{b_L}$
+            \item Optimal reform would increase $b_S$ by $\Delta b_S^*=.081$ and finance it with a payroll tax increase 
+        \end{itemize}
+    \end{itemize}
+    \bfootnote{\hyperlink{payroll}{\beamerbutton{Details}} }
+\end{frame}
+
+\begin{frame}{Optimal Expenditure Reform Financed by Payroll}
+\centering
+\begin{tikzpicture}
+  \begin{axis}[
+    width=9cm, height=7.5cm,
+    axis lines=left,
+    axis line style={-{Stealth[length=3mm]}, ultra thick},
+    xmin=0, xmax=4.2, ymin=0, ymax=9,
+    xtick=\empty, ytick=\empty, clip=false,
+    xlabel={},
+    xlabel style={at={(axis description cs:1.02,0)}, anchor=west},
+    ylabel={},
+  ]
+
+    % Axis labels
+    \node[anchor=south, rotate=0] at (axis description cs:0,1) {$b$};
+    \node[anchor=south, rotate=0] at (axis description cs:1.05,-0.07) {$p$};
+
+    % Black baseline line
+    \addplot[very thick,col_before,domain=0:4] {1.08+1.5*x};
+
+    % Orange shifted line (parallel, upward shift)
+    \addplot[very thick,col_after,domain=0:2] {1.1+1.5*x};
+
+    % Orange horizontal line
+    \addplot[very thick,col_after,domain=2:3] {-4.9+4.5*x};
+
+    %\node[col_after] at (axis cs:3,4.6) {$\Delta b_S$};
+
+    \draw[dashed,black!60!black] (axis cs:2,0) -- (axis cs:2,8);
+
+    % Arc to show angle
+  %\draw[thick,col_after] (2.6,4) arc[start angle=0,end angle=22,radius=2];
+
+    \node at (axis cs:{2},-0.7) {\small $0$};
+
+  \end{axis}
+\end{tikzpicture}
+\end{frame}
+
+\begin{frame}{Conclusion}
+    \begin{itemize}
+        \item We document large behavioral responses to the 2015 pension reform
+        \item These responses, alongside the relatively higher consumption of beneficiaries, yield a low welfare effect per dollar spent
+        \begin{itemize}
+            \item WMVPF = 0.26 and MVPF = 0.32
+        \end{itemize}
+        \item The welfare effect per dollar is larger for $b_S$ than for $b_L$ implying that the optimal budget-neutral reform would
+        \begin{itemize}
+            \item Increase the benefit slope
+            \item Decrease the benefit level
+        \end{itemize}
+        \item If the government wants to spend optimally closing the budget with payroll taxes, it should increase the slope
+    \end{itemize}
+\end{frame}
+%-----------------------------------------------------------
+
+\begin{frame}
+    \begin{itemize}
+        \item Thank you!
+        \begin{itemize}
+            \item gtlemos@mit.edu
+            \item juanrios@econ.puc-rio.br
+            \item gonzaga@puc-rio.econ.br
+            
+            
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\appendix
+
+
+\begin{frame}[label=dataReplacement]{Empirical Distribution}
+          \centering
+          \includegraphics[width=.8\linewidth]{E4_pension_schedule_women.pdf}
+    \bfootnote{\hyperlink{reform}{\beamerbutton{Back}}}
+\end{frame}
+
+\begin{frame}[label=men]{Men's Replacement Rate}
+    \begin{columns}
+        \begin{column}{0.45\textwidth}
+            \centering
+            \includegraphics[width=\linewidth]{schedule_men_new.pdf}
+        \end{column}
+        \begin{column}{0.45\textwidth}
+          \centering
+          \includegraphics[width=\linewidth]{E4_pension_schedule_men.pdf}
+        \end{column}
+    \end{columns}
+    \bfootnote{\hyperlink{reform}{\beamerbutton{Back}}}
+\end{frame}
+
+\begin{frame}[label=rfEvidenceWomen]{Reduced Form Evidence (Women)}
+    \centering
+    \includegraphics[width=.9\linewidth]{E3_claiming_density_women.pdf}
+    \bfootnote{\hyperlink{rfEvidence}{\beamerbutton{Back}}}
+\end{frame}
+
+\begin{frame}[label=rfEvidenceMen]{Reduced Form Evidence (Men)}
+    \centering
+    \includegraphics[width=.9\linewidth]{E3_claiming_density_men.pdf}
+    \bfootnote{\hyperlink{rfEvidence}{\beamerbutton{Back}}}
+\end{frame}
+
+
+
+\begin{frame}[label=chDdOther]{Negative Effect on CH at $p\in [-6,-2)$}
+    \centering
+    \includegraphics[width=0.7\linewidth]{F4_eventstudy_agg_1.pdf}
+\end{frame}
+
+\begin{frame}{Positive (Short-Term) Effect on CHs at $p\in [2,6]$}
+    \centering
+    \includegraphics[width=0.7\linewidth]{F4_eventstudy_agg_4.pdf}
+\end{frame}
+
+\begin{frame}{Positive (Short-Term) Effect on CHs at $p\in [7,\bar 15]$}
+    \centering
+    \includegraphics[width=0.7\linewidth]{F4_eventstudy_agg_5.pdf}
+    \bfootnote{\hyperlink{ChDdRightAbove}{\beamerbutton{Back}}}
+\end{frame}
+
+\begin{frame}[label=trend]{CH for all point ranges}
+    \centering
+    \includegraphics[width=.9\linewidth]{E3_claiming_haz_quarters_group.pdf}
+    \bfootnote{\hyperlink{ChDdRightAbove}{\beamerbutton{Back}}}
+\end{frame}
+
+\begin{frame}[label=selectionOther]{Effect on Avg Pre-Reform Benefits at $p \in [\bar p-6,\bar p-2)$}
+    \centering
+    \includegraphics[width=0.8\linewidth]{old-12.pdf}
+\end{frame}
+
+\begin{frame}{Effect on Avg Pre-Reform Benefits at $p \in [\bar p+2,\bar p+6)$}
+    \centering
+    \includegraphics[width=0.8\linewidth]{old4.pdf}
+\end{frame}
+
+\begin{frame}{Effect on Avg Pre-Reform Benefits at $p \in [\bar p+6,\bar p+15]$}
+    \centering
+    \includegraphics[width=0.8\linewidth]{old13.pdf}
+    \bfootnote{\hyperlink{selectionRightAbove}{\beamerbutton{Back}}}
+\end{frame}
+
+\begin{frame}[label=chToFrequencies]{Recovering Cntf Frequencies from Claiming Hazards}
+    \begin{itemize}
+        \item Let $C_{pt}$ and $R_{pt}$ denote the number of claims and the number of potential claimants at $(p,t)$, such that $CH_{pt}=C_{pt}/R_{pt}$
+        \item Before the announcement: $C^c_{p,-2}=C_{p,-2}$ and $R^c_{p,-2}=R_{p,-2}$
+        \begin{block}{Assumption 1: Deterministic Point Accumulation}
+            Normalized points increase deterministically by $\Delta p= 0.5$, corresponding to continuous contributions in formal employment until claiming. 
+        \end{block}
+        \item Potential claimants in $t+1$ = survivors from $t$ + inflows in $t+1$
+        \[
+        R_{p+\Delta p,\,t+1}^c = R_{pt}^c - C_{pt}^c + I_{p+\Delta p,\,t+1}
+        = R_{pt}^c \left(1 - CH_{pt}^c\right) + I_{p+\Delta p,\,t+1},
+        \]
+        \item $I_{pt}$: the number of workers who become eligible with $p$ points in $t$
+        \item The counterfactual frequency is recovered using $C_{pt}^c = R^c_{pt} CH^c_{pt}$
+    \end{itemize}
+    \bfootnote{\hyperlink{ChDdRightAbove}{\beamerbutton{Back}}}
+\end{frame}
+
+\begin{frame}[label=npvTaxes]{Estimating the PDV of Tax Collection}
+    \begin{itemize}
+        \item We estimate $\tau_i^{PDV}$ this using Surrogate Indexes (Athey et al, 2025)
+        \begin{enumerate}
+            \item Using 1995-2000 sample of workers one can compute $\tau^{PDV}_{i}$ assuming they stop working within 20 years
+            \item Predict $\tau^{PDV}_{i}$ with observables (income, sector, age, etc.)
+            \item Use (2) to predict $\tau_i^{PDV}$ for those in our sample (2012-2018)
+        \end{enumerate}
+    \end{itemize}
+    \bfootnote{\hyperlink{npv}{\beamerbutton{Back}}}
+\end{frame}
+
+\begin{frame}[label=tax]{Effect on Tax Collection}
+    \begin{itemize}
+        \item Leverage the fact that workers with earnings $<$ 1.25*minimum wage, were not affected by the reform since benefits are capped at the MW
+         \begin{align*}
+            \label{eq_dd_taxes}
+            \Delta \tau_{i,t} = \delta_i^{tax}+\gamma_t^{tax} + \sum_{k\neq -2}\beta_k^{tax}1(w_{it}>1.25MW) \times 1(t = k) +\varepsilon^{tax}_{it}
+        \end{align*}
+        \begin{assumption}[Parallel growth]
+            \label{ass_parallelTaxes}
+             If the reform had not occurred, the change in tax collected from workers with contribution wages below 1.25 minimum wages would have remained parallel to the change in taxes collected from the ones above. 
+        \end{assumption}
+        \item Restricted to workers with up to 5 MWs ($\approx 80$\%) 
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Tax Collection Results (DD)}
+    \centering
+    \includegraphics[width=0.7\linewidth]{H2_dd_tax_collection_1.pdf}
+    \bfootnote{\hyperlink{MEandFE}{\beamerbutton{Back}}}
+\end{frame}
+
+\begin{frame}[label=mechanicalOther]{Effect on Avg Post-Reform Benefits at $p \in [\bar p-6,\bar p-2)$}
+    \centering
+    \includegraphics[width=0.8\linewidth]{new-12.pdf}
+\end{frame}
+
+\begin{frame}{Effect on Avg Post-Reform Benefits at $p \in [\bar p+2,\bar p+6)$}
+    \centering
+    \includegraphics[width=0.8\linewidth]{new4.pdf}
+\end{frame}
+
+\begin{frame}{Effect on Avg Post-Reform Benefits at $p \in [\bar p+6,\bar p+15]$}
+    \centering
+    \includegraphics[width=0.8\linewidth]{new13.pdf}
+    \bfootnote{\hyperlink{mechanicalRightAbove}{\beamerbutton{Back}}}
+\end{frame}
+
+\begin{frame}[label=netOfTaxBenefits]{Avg Cntf Net-of-Tax Benefits $\frac{1}{N_{p,t}^c}\sum_{i:p(x_{it}^c)=p}[b^c(x_{it}^c)-\tau(x^c_{it})]$}
+    \begin{itemize}
+        \item $\bar{b}^{NoT}_{p,t} \equiv \frac{1}{N_{p,t}} \sum_{i:p(x_{it}^a)=p}b^c(x_{it}^a)-\tau(x_{it}^a)$: average of net-of-tax benefits that would have been paid to those claiming with $p$ normalized points in quarter $t$ under the pre-reform schedule and post-reform choices
+        \item Problem: \textit{Bunchers} could be positively selected (eg, higher benefits and taxes)
+        \item Identification Assumption: $\bar{b}^{NoT}_{p,t}$ for $p\geq -6$ would remain parallel to the ones in $p<-6$ in the absence of the reform
+        \item The DiD recovers the effect of the reform on these average benefits $\beta^{NoT}_{k,p}$ at each normalized point $p$ and quarter $k$:
+         \begin{align*}
+            \bar{b}^{NoT}_{p,t}=\delta_p^{NoT}+\gamma_t^{NoT} +\sum_{k\neq -2}\beta_{p,k}^{NoT} 1(p\in \tilde p)*1(t=k)+\varepsilon_{p,t}^{NoT}
+        \end{align*}
+        \item $\bar{b}^{NoT}_{p,t}-\hat \beta_{p,t}^{NoT}$ is an estimate for $\frac{1}{N_{p,t}^c}\sum_{i:p(x^c_{it})=p}[b^c(x^c_{it})-\tau(x^c_{it})]$
+    \end{itemize}
+    \bfootnote{\hyperlink{costReform}{\beamerbutton{Back}}}
+    % The estimate for the average benefit that would have been paid in the absence of the reform at point p and quarter t is estimated as bar b^o_{p,t}-\beta_{t,p}
+\end{frame}
+
+\begin{frame}[label=theory]{Two-Step Agent Problem}
+    \begin{align*}
+        \tilde{U}_{i0}(p,b) =\max_{x_{i0}} \Big\{\sum_{t=0}^T\beta^t E[u(x_{it})]\ \text{s.t. the Budget Constraint}, \\
+         p(x^{iT})=p,\ \text{ and }\ b(x_{it})=b\Big\}
+    \end{align*}
+    \begin{itemize}
+        \item $\tilde{U}_{i0}(p,b)$ reduced-form expected utility in terms of points and benefits given rational choices. 
+        \item Imply indifference curves decreasing in $\beta$ ($-\frac{d}{d\beta}\frac{d\tilde U/dp}{d\tilde U/db}<0$)
+        \item Two sets of agents: 
+        \begin{enumerate}
+            \item Unconstrained agents: Get to reform with $p(x_{i0})<\bar p$ (can bunch at $\bar p$)
+            \item Constrained agents: Get to reform with more than $p(x_{i0})>\bar p$ points (cannot bunch and can only choose between $[p(x_{i0}),\infty)$)
+        \end{enumerate}
+    \end{itemize}
+    \bfootnote{\hyperlink{twoCounterfactualReforms}{\beamerbutton{Back}}}
+\end{frame}
+
+\begin{frame}[label=intuition]{Theoretical Density Before and After $\Delta b_L>0$}
+\centering
+\setlength{\columnsep}{6pt}
+\begin{columns}[T,onlytextwidth]
+
+% ============= ESQUERDA =============
+\begin{column}{0.49\textwidth}
+\centering
+\begin{tikzpicture}
+  \begin{axis}[
+    width=6.5cm, height=6cm,
+    axis lines=left,
+    axis line style={-{Stealth[length=3mm]}, ultra thick},
+    xmin=0, xmax=4.2, ymin=0, ymax=9,
+    xtick=\empty, ytick=\empty, clip=false,
+    %--- labels near arrow tips
+    xlabel={$p$},
+    xlabel style={at={(axis description cs:1.02,0)}, anchor=west},
+    ylabel={}, % esvazia o ylabel do pgfplots (ele rotaciona por padrão)
+  ]
+
+    %--- Criamos manualmente o rótulo horizontal do eixo y no bico da seta:
+    \node[anchor=south, rotate=0] at (axis description cs:0,1.02) {$b$};
+
+    %---- Parâmetros
+    \def\slope{1.3}
+    \def\notch{1.3}
+    \def\pH{1.2}
+    \def\pbar{2.7}
+    \def\aIC{0.08}
+
+    %---- Linhas de orçamento (sempre visíveis)
+    \addplot[very thick,col_before,domain=0:4.2] {\slope*x};
+    \only<2->{\addplot[very thick,col_after,domain=0:\pbar] {\slope*x};
+    \addplot[very thick,col_after,domain=\pbar:4.2] {\slope*x+\notch};
+    \draw[dashed,black!60!black] (axis cs:\pbar,0) -- (axis cs:\pbar,\slope*\pbar+\notch);}
+
+    %---- IC azul (sempre visível)
+    \addplot[black, very thick, domain=0:4.1, samples=220, restrict y to domain=0:7]
+      {1.5 + 0.5*(x-2) + 0.2*(x)^2 + 0.08*(x)^3};
+    \filldraw[black] (axis cs:1.2,1.56) circle (1.5pt);
+    \draw[dashed] (axis cs:1.2,0) -- (axis cs:1.2,1.56);
+    \node[black] at (axis cs:3.5,8) {\footnotesize $\beta_L$};
+
+    %---- IC vermelha baixa: aparece no overlay 2 (e já mostra \beta_H)
+      \addplot[black, dashed, very thick, domain=1.5:4.1, samples=220, restrict y to domain=0:7.5]
+        {3.5 + 1.3*(x-\pbar) + 0.6*(x-\pbar)^2 + 0.1*(x-\pbar)^3};
+      \filldraw[black] (axis cs:2.7,3.51) circle (1.5pt);
+      \draw[dashed] (axis cs:2.7,0) -- (axis cs:2.7,3.51);
+      \node[black] at (axis cs:4.3,8) {\footnotesize $\beta_H$}; % já no overlay 2
+
+    %---- IC vermelha alta: aparece no overlay 3
+      \only<2->{\addplot[black, dashed, very thick, domain=1.5:4.1, samples=220, restrict y to domain=0:7]
+        {4.8 + 1.3*(x-\pbar) + 0.6*(x-\pbar)^2 + 0.1*(x-\pbar)^3};
+      \filldraw[black] (axis cs:2.7,4.81) circle (1.5pt);
+      \draw[dashed] (axis cs:2.7,0) -- (axis cs:2.7,4.81);}
+
+    %---- Rótulos no eixo x
+    \node at (axis cs:{1.2},-0.4) {\small $p_L$};
+    \node at (axis cs:{2.7},-0.4) {\small $\bar{p}$};
+
+  \end{axis}
+\end{tikzpicture}
+\end{column}
+
+% ============= DIREITA =============
+\begin{column}{0.49\textwidth}
+\centering
+
+\begin{tikzpicture}
+  \begin{axis}[
+    width=6.5cm, height=6cm,
+    axis lines=left,
+    axis line style={-{Stealth[length=3mm]}, ultra thick},
+    xmin=0, xmax=4.2, ymin=0, ymax=9,
+    xtick=\empty, ytick=\empty, clip=false,
+    %--- labels near arrow tips
+    xlabel={$p$},
+    xlabel style={at={(axis description cs:1.02,0)}, anchor=west},
+    ylabel={}, % esvazia o ylabel do pgfplots (ele rotaciona por padrão)
+  ]
+
+    %--- Criamos manualmente o rótulo horizontal do eixo y no bico da seta:
+    \node[anchor=south, rotate=0] at (axis description cs:0,1.02) {$f(p)$};
+
+    \addplot[very thick, col_before, domain=0:4.18, samples=220, smooth]
+      {5 * exp(-0.5*((x-2.22)/0.68)^2)};
+
+    \only<2->{\addplot[very thick, col_after, domain=0:1.2, samples=220, smooth]
+      {5 * exp(-0.5*((x-2.22)/0.68)^2)};
+
+      \addplot[very thick, col_after, domain=2.7:4.18, samples=220, smooth]
+      {5 * exp(-0.5*((x-2.22)/0.68)^2)};
+
+    \draw[very thick, col_after] (axis cs:1.2,0) -- (axis cs:1.2,1.7);
+    \draw[very thick, col_after] (axis cs:1.2,0.1) -- (axis cs:2.7,0.1);
+    \draw[ultra thick, col_after] (axis cs:2.7,0) -- (axis cs:2.7,7);}
+
+    %---- Rótulos no eixo x
+    \node at (axis cs:{1.2},-0.4) {\small $p_L$};
+    \node at (axis cs:{2.7},-0.4) {\small $\bar{p}$};
+
+  \end{axis}
+\end{tikzpicture}
+
+
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}[label=intuition]{Theoretical Density Before and After $\Delta b_S<0$}
+\centering
+\setlength{\columnsep}{6pt}
+\begin{columns}[T,onlytextwidth]
+
+% ============= ESQUERDA =============
+\begin{column}{0.49\textwidth}
+\centering
+
+\begin{tikzpicture}
+  \begin{axis}[
+    width=6.5cm, height=6cm,
+    axis lines=left,
+    axis line style={-{Stealth[length=3mm]}, ultra thick},
+    xmin=0, xmax=4.2, ymin=0, ymax=9,
+    xtick=\empty, ytick=\empty, clip=false,
+    %--- labels near arrow tips
+    xlabel={$p$},
+    xlabel style={at={(axis description cs:1.02,0)}, anchor=west},
+    ylabel={}, % esvazia o ylabel do pgfplots (ele rotaciona por padrão)
+  ]
+
+    %--- Criamos manualmente o rótulo horizontal do eixo y no bico da seta:
+    \node[anchor=south, rotate=0] at (axis description cs:0,1.02) {$b$};
+
+    %---- Parâmetros
+    \def\slope{1.3}
+    \def\notch{1.3}
+    \def\pH{1.2}
+    \def\pbar{2.7}
+    \def\aIC{0.08}
+
+    %---- Linhas de orçamento (sempre visíveis)
+    \addplot[very thick,col_before,domain=0:4.2] {1.2+\slope*x};
+    \only<2>{\addplot[very thick,col_after,domain=0:2] {1.2+\slope*x};}
+    \only<2>{\addplot[very thick,col_after,domain=2:4.2] {1.2+\slope*2};}
+    \draw[dashed,black!60!black] (axis cs:2,0) -- (axis cs:2,1.2+\slope*2);
+
+    %---- IC solida (sempre visível)
+    \addplot[black, very thick, domain=0.7:4.1, samples=220, restrict y to domain=0:7]
+      {2.65 + 0.08*x + 0.15*x^(2) + 0.05*x^(3)};
+    \filldraw[black] (axis cs:2,1.2+\slope*2) circle (1.5pt);
+    \node[black] at (axis cs:3.3,7.5) {\footnotesize $\beta_H$};
+
+    %---- IC dashed - before
+    \addplot[black, dashed, very thick, domain=1.2:4.1, samples=220, restrict y to domain=0:7]
+      {3.75+0.09*x+0.07*x^(2)+0.02*x^(3)};
+    \filldraw[black] (axis cs:3.4,5.65) circle (1.5pt);
+    \node[black] at (axis cs:4.1,7.3) {\footnotesize $\beta > \beta_H$};
+    \draw[dashed,black!60!black] (axis cs:3.4,0) -- (axis cs:3.4,5.65);
+
+    %---- IC dashed - after
+    \only<2>{\addplot[black, dashed, very thick, domain=1:4, samples=220, restrict y to domain=0:7]
+      {3.2+0.09*x+0.07*x^(2)+0.02*x^(3)};}
+
+    %---- Rótulos no eixo x
+    \node at (axis cs:{2},-0.4) {\small $\bar p$};
+    \node at (axis cs:{3.4},-0.4) {\small $p$};
+
+  \end{axis}
+\end{tikzpicture}
+
+\end{column}
+
+% ============= DIREITA =============
+\begin{column}{0.49\textwidth}
+\centering
+
+\begin{tikzpicture}
+  \begin{axis}[
+    width=6.5cm, height=6cm,
+    axis lines=left,
+    axis line style={-{Stealth[length=3mm]}, ultra thick},
+    xmin=0, xmax=4.2, ymin=0, ymax=9,
+    xtick=\empty, ytick=\empty, clip=false,
+    %--- labels near arrow tips
+    xlabel={$p$},
+    xlabel style={at={(axis description cs:1.02,0)}, anchor=west},
+    ylabel={}, % esvazia o ylabel do pgfplots (ele rotaciona por padrão)
+  ]
+
+    %--- Criamos manualmente o rótulo horizontal do eixo y no bico da seta:
+    \node[anchor=south, rotate=0] at (axis description cs:0,1.02) {$f(p)$};
+
+    \addplot[very thick, col_before, domain=0:4.18, samples=220, smooth]
+      {5 * exp(-0.5*((x-2.22)/0.68)^2)};
+
+    \only<2>{\addplot[very thick, col_after, domain=0:2.5, samples=220, smooth]
+      {5 * exp(-0.5*((x-2.22)/0.68)^2)};}
+
+    \only<2>{\addplot[very thick, col_after, domain=2.5:4.18, samples=220, smooth]
+      {5.65 * exp(-0.5*((x-2.22)/0.45)^2)};}
+
+    \only<2>{\draw[ultra thick, col_after] (axis cs:2.5,4.6) -- (axis cs:2.5,9);}
+
+    \draw[dashed,black!60!black] (axis cs:2.5,0) -- (axis cs:2.5,4.6);
+
+    %---- Rótulos no eixo x
+    \node at (axis cs:{2.5},-0.4) {\small $\bar{p}$};
+
+  \end{axis}
+\end{tikzpicture}
+
+
+\end{column}
+\end{columns}
+% This movement happens over time because unconstrained individuals with ideal points at p>pbar may have to wait quarters after the reform to reach pbar and bunch. 
+    % Ex: Woman with p^sim=80 at t=0 and works needs to wait 2.5 years (til december 2017) to claim. 
+    % She would have claimed with 86 points in june 2018 but claims now with 85 in december 2017. 
+    % Her movement increases claiming at 2017Q4 at pbar, so that the counterfactual claiming in 2017Q4 at pbar is lower than the actual 
+    % But it also decreases claiming at 2018Q2 at p=85, so that the counterfactual claiming in 2018Q2 is higher than the actual claiming.  
+    % Note this effect on pbar+x takes x/2 years to happen or 2x quarter to happen. So for example, a movement from pbar + 6 to pbar would take 12 quarters to appear (there are 12 quarters between the reform and 2018Q2)
+    \bfootnote{\hyperlink{constrained}{\beamerbutton{Constrained Agents}} \hyperlink{twoCounterfactualReforms}{\beamerbutton{Back}}}
+\end{frame}
+
+\begin{frame}[label=constrained]{Constrained Agents Responding to $\Delta b_S$}
+    \centering 
+    \includegraphics[width=.8\textwidth]{morRef2The.png}
+    % This response should increase the claiming density at p_underline immediately after the reform. (Only people are inattentive; this effect could be delayed.)
+    % It should also decrease the claiming density at  p*=p_underline+x, x/2 years or 2x quarters after the reform. Ex: If punderline=87 and p*=89 (x=2), it should decrease density in 89 four quarters after the reform (.
+    % There should be no one claiming at p>pbar after the first quarter after the reform unless it is because of frictions.
+    % Note that if there are partial frictions (people claim at pbar+epsilon<p*), then the increase will happen at pbar+epsilon, 2*epsilon quarters after the reform. The decrease in p* should happen in the same period. 
+    % Empiricamente, não conseguimos estimar o efeito sobre a CHs so para constrained agents (those that have age+contribution>pbar in June 2015), because the CH is not defined for those that have already claimed. So after the reform, there will be no one claiming with p<pbar-6.5 because everyone will be claiming with p>age+contribution in June 2015. 
+    % Idea: plot the distribution of constrained agents at each month before and after the reform. I think the logic above has predictions for where (points) and when (quarters) the effect should arise. 
+    \bfootnote{\hyperlink{twoCounterfactualReforms}{\beamerbutton{Back}}}
+\end{frame}
+
+\begin{frame}{\textcolor{red}{Pure Reforms Frequencies: Announcement ($t=-1$)}}
+\begin{itemize}
+    \item For $p<0$, there is only postponement that would  occur under pure-L, but not under the pure-S reform. Hence:
+    \[
+    N^L_{p,-1}=N^a_{p,-1}
+    \qquad\text{and}\qquad
+    N^S_{p,-1}=N^c_{p,-1}
+    \]
+    \item For $p\geq 0$, actual reform induces postponement at $t=-1$ due to larger post-reform benefits (as in the pure-L reform)
+    \item Hence, for already-eligible claimants:
+    \[
+    N^L_{p,-1}=N^a_{p,-1}, \qquad p\geq 0
+    \]
+\end{itemize}
+\end{frame}
+
+\begin{frame}{\textcolor{red}{Pure-S Anticipation at $t=-1$: Logic}}
+\begin{itemize}
+    \item Under the pure-S reform, the level increase is absent and waiting becomes less attractive for $p>0$
+    \item Thus, already-eligible claimants who delay under the actual reform would instead anticipate under the pure-S reform
+    \item A1 (Attention Mapping): if an individual reacts with delay $x$ quarters after implementation under the actual reform, she would react with delay $x$ quarters after announcement under the pure-S reform
+    \begin{itemize}
+        \item This implies that early excess mass under the actual reform in $t$ is shifted to $t-1$ under the pure-S reform
+    \end{itemize}
+    \item Because points rise by $0.5$ per quarter while $p$ is binned at integers, mass from $(p,0)$ is splitted back to $(p,-1)$ and $(p-1,-1)$ for $p\geq 0$
+\end{itemize}
+\end{frame}
+
+\begin{frame}{\textcolor{red}{Pure-S Frequencies at $t=-1$ and $p\geq 0$}}
+    \begin{itemize}
+        \item Define early excess mass in cell $(p,t)$ as $EM_{p,t}\equiv N^a_{p,t}-N^c_{p,t}$
+        \item A1 implies that incoming anticipation mass at $p\geq 0$ and $t=-1$:
+        \[
+        A_{p,-1}\equiv \frac12 EM_{p,0}+\frac12 EM_{p+1,0}.
+        \]
+        \item For $p\geq 0$ and $t=-1$, the frequency under the pure-S reform equals the counterfactual distribution (as nobody would postpone) + this anticipation mass (as anticipators would claim before the reform): 
+        \begin{align*}
+            N^S_{p,-1}=N^c_{p,-1}+A_{p,-1}
+        \end{align*}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Assumptions: Point Accumulation and Bunching Window}
+\begin{itemize}
+    \item A3: Bunching only happens in $p\in[0,\textcolor{red}{3})$, corresponding to responses within \textcolor{red}{3} quarters after first facing the incentive
+    \item In the first post-reform quarters, excess mass can appear beyond $p=2$ because anticipation by already-eligible claimants is diffuse
+    \item The key empirical restriction is that this higher-$p$ excess largely disappears after $t=\textcolor{red}{3}$
+    \item This motivates using early excess mass only for $t\in\{0,1,2,3\}$ when constructing pure-S anticipation
+\end{itemize}
+\end{frame}
+
+\begin{frame}[label=pureL]{Pure-L Frequencies for $t\geq 0$: Arrivals at Cutoff}
+\begin{itemize}
+    \item Goal: Get \emph{pure level} frequencies $N^{L}_{p,t}$
+    \item Number of postponers from $(p,s)$: $P_{p,s}\equiv N^{c}_{p,s}-N^{a}_{p,s}\quad\text{for }p<0$
+    \item A2: Points accumulate deterministically at $0.5$ per quarter
+    \item For $p<0$, postponer from $(p,s)$ reaches cutoff $p=0$ at $s-2p\equiv t$, so that \emph{postponement arrivals at the cutoff} in quarter $t$ are:
+    \[
+        PA_{t} \equiv \sum_{p\in\{-6,-5.5,\dots,-0.5\}} P_{p,\;t+2p},
+    \]
+    \item Interpretation: $PA_{t}$ is the number of postponers that first become able to claim with $p=0$ (arrive at the threshold) in quarter $t$
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Pure-L Frequency}
+    \begin{itemize}
+        \item A2 implies that a claim in $(p,t)$ must come from arrivals at $t-2p$
+        \begin{itemize}
+            \item Ex: the only postponers who can be at $(p,t)=(1,4)$ are those that arrived in $t=2$ and then claimed 2 quarters later
+        \end{itemize}
+        \item Postponement bunching at $(p,t)$ is arrivals in $t-2p$ ($PA_{t-2p}$) times the probability of claiming with $p$ given arrival in $t-2p$ ($g_{p,t-2p}$):
+    \[
+        PB_{p,t}\equiv g_{p,t-2p}\cdot PA_{t-2p}
+    \]
+    \item Post pure-L reform frequency:
+    \[
+        N^{L}_{p,t}=
+        \begin{cases}
+            N^{a}_{p,t}, & p<0,\\[3pt]
+            N^{c}_{p,t}+PB_{p,t}, & p\ge 0.
+        \end{cases}
+    \]
+\end{itemize}
+\end{frame}
+
+\begin{frame}[label=gp_est]{Estimating $g_{p,t}$ from Arrival Cohorts (Counts)}
+\begin{itemize}
+    \item A3: Bunching only happens for \textcolor{red}{$p=0,1$}, which corresponds to delays in claiming up to \textcolor{red}{2} quarters after reaching the threshold, justified by:
+        \begin{itemize}
+            \item In the first periods, excess mass could occur for non-bunching anticipation (which also only appears up to \textcolor{red}{$t=3$})
+            % Suggesting that the less attentive ppl were inattentive for 3 quarters
+            % If someone reaches p=0 and only responds 3 quarters later it will claim with 1.5 points
+            \item In later periods $(t\geq \textcolor{red}{4})$, excess mass is only observed for \textcolor{red}{$p=0,1$}
+            % When there is only actual bunching incentives, it is diffuse up to 4
+        \end{itemize}
+    \item A4 (Proportional Mixing): Conditional on arriving on $t$, anticipators and postponers claim proportionally across \textcolor{red}{$p=0,1$}. Note that 
+    \begin{itemize}
+        \item Even those who arrive at $t=0$ may claim  at $(p,t)=(1,2)$. 
+        \item We consider who arrives at $t\geq 0$, but not anticipators already above the cutoff at the reform
+    \end{itemize}
+    \item Empirical claiming distribution conditional on arrivals in $t>0$:
+    \[
+        \widehat{ g}_{p,t}\equiv
+        \frac{\#\{i:\text{ arrived in } t\text{, and claimed with }p\}}
+             {\#\{i:\text{ arrived in } t\text{, and claimed with }\textcolor{red}{p\in [0,1]}\}},
+        \quad \textcolor{red}{p=0,1}
+    \]
+\end{itemize}
+\bfootnote{\hyperlink{pureLStep}{\beamerbutton{Back}} }
+\end{frame}
+
+\begin{frame}[label=pureS]{Post Pure-S Reform Frequencies}
+    \begin{itemize}
+        \item Remember that $EM_{p,t}\equiv N^a_{p,t}-N^c_{p,t},
+        \quad p\geq 0,\; t\in\{0,1,2,3\}$, and let $EM_{p,t}=0$ for $t>3$. 
+        % This is because the excess mass we are talking about is only for early quarters anticipation
+        % The later quarters anticipation consist of individuals that had not arrived by t=0, would have claim at p>0 but anticpate to p=0. They would do the exact same thing under the pure-S reform.
+        
+        \item Define incoming anticipation mass:
+        \[
+        A_{p,t}\equiv \frac12 EM_{p,t+1}+\frac12 EM_{p+1,t+1}.
+        \]
+        \item Then, for $p\geq 0$,
+        \[
+        N^S_{p,t}=N^c_{p,t}+A_{p,t}-PB_{p,t}.
+        \]
+         \item Since $EM_{p,t}=0$ for $t>3$, this automatically shuts down the anticipation adjustment for later periods, so no extra third line is needed.
+    \end{itemize}
+    \bfootnote{\hyperlink{pureSStep}{\beamerbutton{Back}} }
+\end{frame}
+
+\begin{frame}{Post Pure-S Reform Frequencies}
+    \begin{itemize}
+        \item Pure-S reform would create all the movements in the actual reform above the cutoff except for the postponement:
+    \end{itemize}
+    \begin{align*}
+            N^S_{p,t}&=\begin{cases} 
+                N_{p,t}^c, & if\quad p<0 \\
+                N_{p,t}^a - PB_{p,t}, & if\quad p\geq 0
+            \end{cases}
+        \end{align*}
+    \begin{itemize}
+        \item Since $PB_{p,t}=0$ outside $p\in[0,4)$, this subtraction only affects cells where postponement bunching can arise
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[label=pureDetails]{Overview of Pure Reform Computation}
+\begin{itemize}
+    \item Choices (e.g., claiming, years of contribution, wage, etc.) for individual $i$ in quarter $t$ are denoted by $x_{it}$
+    \begin{itemize}
+        \item $x^a_{it}$: Actual choices observed after the reform
+        \item $x^c_{it}$: Counterfactual choices in the absence of the reform
+        \item $x^L_{it}$: Choices that would have been made under the pure-L reform
+    \end{itemize}
+    \item Goal: construct 3 analogous benefit objects under each pure reform
+    \begin{itemize}
+        \item $b^{L}(x^a_{it})$: benefits applying $b^{L}$ to observed post-reform choices $x^a_{it}$
+        \item $b^{L}(x^c_{it})$: mechanical benefits paid without behavioral responses
+        \item $b^{L}(x^{L}_{it})$: benefits under the pure-L schedule using only pure-L behavioral responses
+    \end{itemize}
+    \item Same logic applies for the pure slope reform ($b^{S}$)
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Step 1: Compute Actual Expenditures $E^{a,L}_{p,t}$}
+\begin{itemize}
+    \item Apply the pure level schedule $b^{L}$ to observed post-reform choices $x^a_{it}$
+    \item We approximate this using replacement rates (RR): see next slide 
+    
+    \item {Compute total expenditure in each cell $(p,t)$ as:}
+    \begin{align*}
+        {E^{a,L}_{p,t} \equiv \sum_{i \in \{p|t\}} \sum_t^{T_i} \frac{b^L(x^a_{it})}{(1+r)^t}}
+    \end{align*}
+    
+    \item {Note this corresponds to $N^a_{p,t}\,\bar b^L(x^a_{p,t})$ in the previous notation :}
+    
+    \item {$E^{a,L}_{p,t}$ is the PV of total expenditures with those who claim with $p$ points in quarter $t$ under the pure-L schedule and observed choices}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[label=men]{Approximations for $b^L(x_{it}^a)$ and $b^S(x_{it}^a)$}
+    \begin{columns}
+        \begin{column}{0.45\textwidth}
+            \centering
+            \includegraphics[width=\linewidth]{schedule_women_new.pdf}
+        \end{column}
+        \begin{column}{0.45\textwidth}
+          \centering
+          \includegraphics[width=\linewidth]{schedule_men_new.pdf}
+        \end{column}
+    \end{columns}
+    {\small \begin{align*}
+        RR(x_{it}^a) & = RR_{0} (x_{it}^a) + b_S(x_{it}^a)p(x_{it}^a) =\begin{cases}
+            0.69+0.021p \text{ if $i$ woman} \\
+            0.82+0.025p \text{ if $i$ man}
+        \end{cases}
+    \end{align*}}
+    \begin{itemize}
+        \item $b^L(x_{it}^a) = \begin{cases}
+            b(x_{it}^a) & if \quad p(x_{it}^a)<0 \\
+            b(x_{it}^a)\{1+[1-RR_{0}(x_{it}^a)]/RR(x_{it}^a)\} & if \quad p(x_{it}^a)\geq 0
+        \end{cases}$
+        \item $b^S(x_{it}^a) = \begin{cases}
+            b(x_{it}^a) & if \quad p(x_{it}^a)<0 \\
+            b(x_{it}^a)RR_{0}(x_{it}^a)/RR(x_{it}^a) & if \quad p(x_{it}^a)\geq 0
+        \end{cases}$
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Step 2: Mechanical Expenditure $E^{c,L}_{p,t}=\sum_{i \in \{p|t\}} \sum_t^{T_i} \frac{b^L(x^c_{it})}{(1+r)^t}$}
+\begin{itemize}
+    \item {Mechanical expenditures are computed under (i) $b^L$ and (ii) counterfactual choices in the absence of the reform $x_{it}$}
+    
+    \item {We use a DD to recover the counterfactual expenditure in each cell}
+\end{itemize}    
+    \begin{align*}
+        {E^{a,L}_{p,t}=\delta_{p}^{L}+\gamma_t^{L} +\sum_{k\neq -2}\beta_{\tilde{p},k}^{L} 1(p\in \tilde p)*1(t=k)+\varepsilon_{p,t}^{L}}
+    \end{align*}
+\begin{itemize}    
+    \item {Same DD as before but using $E^{a,L}_{p,t}$ (expenditures) instead of $\bar b^{L}(x^a_{p,t})$}
+    
+    \item {$\beta^{L}_{p,t}$ captures selection coming from postponement and anticipation}
+    
+    \item {For each normalized point $p$ and $t\geq 0$, we get $E^{c,L}_{p,t}
+        \;=\;
+        E^{a,L}_{p,t}
+        \;-\;
+        \hat \beta^{L}_{p,t}$:}
+    \item {Alternatively, we can work with the original DD where $\beta^{L}_{p,t}$ is an effect on average benefits and then set $E^{c,L}_{p,t}=N^{c}_{p,t}[\bar b^L(x^a_{p,t})-\hat \beta^{L}_{p,t}]$}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Step 2.1: Cntrf. Expenditure $E^{c}_{p,t}=\sum_{i \in \{p|t\}} \sum_t^{T_i} \frac{b^c(x^c_{it})}{(1+r)^t}$}
+\begin{itemize}
+    \item {Counterfactual expenditures are computed under (i) $b^c$ and (ii) counterfactual choices in the absence of the reform $x_{it}^c$}
+    
+    \item {We use a DD to recover the counterfactual expenditure in each cell}
+\end{itemize}    
+    \begin{align*}
+        {E^{a,c}_{p,t}=\delta_{p}^{a,c}+\gamma_t^{a,c} +\sum_{k\neq -2}\beta_{\tilde{p},k}^{a,c} 1(p\in \tilde p)*1(t=k)+\varepsilon_{p,t}^{a,c}}
+    \end{align*}
+\begin{itemize}    
+    \item {Same DD as before but using $E^{a,c}_{p,t}=\sum_i \sum_t^{T_i} \frac{b^c(x^a_{it})}{(1+r)^t}}
+    
+    \item {$\beta^{L}_{p,t}$ captures selection coming from postponement and anticipation}
+    
+    \item {For each normalized point $p$ and $t\geq 0$, we get $E^{c}_{p,t}
+        \;=\;
+        E^{a,c}_{p,t}
+        \;-\;
+        \hat \beta^{a,c}_{p,t}$:}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Step 3: Mechanical Expenditures under Pure Level Reform}
+\begin{itemize}
+    \item These are the mechanical expenditures with higher benefits but no behavioral responses
+    
+    
+    \item We aggregate {counterfactual expenditures} across normalized points:
+    \[
+        \text{MECH}^{L}_t
+        \;=\;
+        \sum_{p} {E^{c,L}_{p,t}}
+    \]
+    
+    \item This is the PV of total benefit outlays under the $b^L$ reform absent any behavioral response for those claiming in $(p,t)$
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Step 4: Pure-L Expenditures $E^{L}_{p,t}=\sum_{i \in \{p|t\}}\sum_i^{T_i} b^L(x^L_{it})$}
+\begin{itemize}
+    \item Since pure level reform generates {postponement} but no {anticipation}, we only need to remove selection from the latter 
+    
+    \item Since only postponement affects $p<0$: 
+    \[
+        {
+        E^{L}_{p,t} \;=\; E^{a,L}_{p,t}
+        }\quad \text{ for }\quad p<0,\ t\geq -1
+    \]
+    \item \textcolor{red}{For $p\geq 0$ and $t=-1$,  $E^{L}_{p,t}=E^{a,L}_{p,t}$ because there is postponement both in the actual and the pure-L reforms:}
+    \item For $p\geq 0$ and $t\geq 0$, we construct expenditures by combining counterfactual expenditures with postponement inflows $E^{P,L}_{p,t}$:
+    \[
+        {
+        E^{L}_{p,t}
+        \;=\;
+        E^{c,L}_{p,t}
+        \;+\;
+        E^{P,L}_{p,t}
+        }
+    \]
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Postponement Effects: Examples}
+    \begin{itemize}
+        \item Ex1: Postponers to $(p,t)=(1,6)$ come from $(-1,2)$ and $ (-2,0)$, but cannot come from $(-3,-2)$, $(-4,-4)$, $(-5,-6)$ nor $(-6,-8)$
+        \begin{itemize}
+            \item They come from $(-x,t-2(x+1))$ for $x=1,2$
+            \item {All these groups arrive at the threshold in quarter $t-2p=4$, but remember they claim with $1$ with probability $g_{1,4}$}
+        \end{itemize}
+        
+        \item Ex2: Postponers to $(p,t)=(2,6)$ come from $(-1,0)$, but cannot come from $(-2,-2)$, $(-3,-4)$, $(-4,-6)$, $(-5,-8)$ nor $(-6,-10)$
+        \begin{itemize}
+            \item They come from $(-x,t-2(x+2))$ for $x=1$ 
+            \item {They arrive at the threshold in quarter $t-2p=2$, but remember they claim with $2$ with probability $g_{2,2}$}
+        \end{itemize}
+        
+        \item {Construct postponement expenditures in $(p,t)$ from expenditure losses in origin cells}
+        \begin{align*}
+        \text{Ex1:}\quad 
+        {E^{P,L}_{1,6}}
+        &{= g_{1,4}\Bigl[-E^{P,L}_{-1,2}-E^{P,L}_{-2,0}\Bigr]}
+        \\
+        \text{Ex2:}\quad 
+        {E^{P,L}_{2,6}}
+        &{= g_{2,2}\Bigl[-E^{P,L}_{-1,0}\Bigr]}
+        \end{align*}
+        \item {Where $E^{P,L}_{p,t}=E^{a,L}_{p,t}-E^{c,L}_{p,t}$ for all $p\in (-6,0)$ and $t\geq -1$}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Postponement Effects: General Case}
+    \begin{itemize}
+        \item To get from $-x$ to $p$, individuals need $2x$ periods to get to zero and then $2p$ periods to get to $p$ 
+        
+        \item So if they got from $-x$ to $p$ in $t$, they need to have left in $t-2(x+p)$
+        
+        \item Postponers to $(p,t)$ come from $(-x,t-2(x+p))$ for $x=1,..,\bar{x}_{p,t}$
+        
+        \item  Where $-\bar x_{p,t}$ is the most negative point where postponers to $(p,t)$ came from associated with the quarter of the announcement $t-2(\bar x_{p,t}+p)=-1$ if such point is at least $-6$, i.e.
+        \begin{align*}
+            \bar x_{t,p}=\begin{cases}
+                (t+1)/2-p & \text{ if } (t+1)/2-p\leq 6 \\
+                6 & \text{ otherwise.}
+            \end{cases}
+        \end{align*}
+        \item {Remember that all these groups arrive at the threshold in $t-2p$ and claim with $p$ with probability $g_{p,t-2p}$}
+        \item {Construct total postponement expenditures in $(p,t)$ as the reallocation of expenditure losses from origin cells}        
+        \begin{align*}
+            {
+            E^{P,L}_{p,t}
+            &=
+            {g_{p,t-2p}}
+            \sum_{x=1}^{\bar x_{t,p}}
+            \Bigl(
+            -{E^{P,L}_{-x,t-2(x+p)}}
+            \Bigr) \quad for\ p \in [0,4)
+            }
+        \end{align*}    
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Pure Level Behavioral and Counterfactual Expenditures}
+    \begin{itemize}
+        \item {This ensures we recover $E^{L}_{p,t}$ for all $p$}
+        
+        \item Behavioral expenditures in quarter $t$:
+        \[
+            {
+            \text{BEHAV}^{L}_t
+            \;=\;
+            \sum_{p}
+            E^{L}_{p,t}
+            }
+        \]
+        
+        \item {Combines pure-L behavioral shifting with reallocated expenditures}
+        
+        \item We can also recover the counterfactual benefit outlays as before 
+        \begin{align*}
+            {
+            \text{CNTRF}_t
+            =
+            \sum_{p}
+            E^{c}_{p,t}
+            }\equiv \sum_{p}
+            N^{c}_{p,t}\,
+            \bar b(x_{p,t})
+        \end{align*}
+    \end{itemize}
+\end{frame}
+
+
+
+\begin{frame}{Final Outputs}
+    \begin{itemize}
+        \item We can then compute Total Costs, Mechanical and Welfare Effects for $b^L$ (as in slide 38) and computing WMVPFs
+        \begin{align*}
+             TC^L_t &= \text{BEHAV}_t^{L} - \text{CNTRF}_t, \quad 
+             ME^L_t = \text{MECH}_t^{L} - \text{CNTRF}_t \text{ and }\\ 
+            WE^L_t &= ME^L_t \, \left(1-\gamma \frac{c_b - c_{pop}}{c_{pop}}-\right) \Rightarrow WMVPF_t^L = \frac{WE^L_t}{TC^L_t}
+        \end{align*}
+        
+        \item Get avg $\Delta b_L$ in $t=T$ (Q3 2018):
+        \begin{align*}
+            \Delta b_L = \frac{1}{N_T}\sum_{i}b(x^a_{iT})\frac{1-RR_{0}(x^a_{iT})}{RR(x^a_{iT})}
+        \end{align*}
+        
+        \item Outputs: (i) densities, (ii) WE/FE/ME graph, (iii) $\Delta b_S$ and $\Delta b_L$, (iv) $TC_T$ and $TC_T^L$, and (v) WMVPFs for the last quarter (Q3-2018)
+    \end{itemize}
+    \bfootnote{\hyperlink{disentangling}{\beamerbutton{Back}} }
+\end{frame}
+
+\begin{frame}{Equivalent Steps for the Pure Slope Reform $b^{S}$ (1/2)}
+\begin{enumerate}
+    \item Compute ${b}^S(x^a_{it})$ and {the expenditures in $E^{a,S}_{p,t} = \sum_{i \in \{p|t\}} b^S(x^a_{it})$}
+    \item Estimate the selection effects with the following DD
+    \begin{align*}
+        {E^{a,S}_{p,t}}=\delta_{p}^{S}+\gamma_t^{S} +\sum_{k\neq -2}\beta_{\tilde p,k}^{S} 1(p\in \tilde p)*1(t=k)+\varepsilon_{p,t}^{S}
+    \end{align*}
+    
+    \item Correct expenditure in (1) using selection and get total mec. expend. 
+    \[
+    {
+    E^{c,S}_{p,t}
+    \;=\;
+    E^{a,S}_{p,t}
+    \;-\;
+    \hat \beta^{S}_{p,t}
+    \quad
+    \text{or using old DD }
+    \quad
+    E^{c,S}_{p,t}
+    =
+    N^{c}_{p,t}[\bar b^{S}(x_{p,t}^a)-\hat \beta^S_{p,t}]
+    }
+    \]
+    
+    \item Pure-S expenditures correct (1) only for postponement selection:
+\end{enumerate}
+{\tiny
+    \[
+    E^{P,S}_{p,t}
+    =
+    \begin{cases}
+        E^{a,S}_{p,t}-E^{c,S}_{p,t} & \text{ for } p<0 \\
+        -g_{p,t-2p}
+            \sum_{x=1}^{\bar x_{t,p}}
+            {E^{P,S}_{-x,t-2(x+p)}} & \text{ for } p\in [0,4) \\
+        0 & \text{ for } p\geq 4
+    \end{cases} \Rightarrow
+    E^{S}_{p,t}
+    =
+    \begin{cases}
+        E^{c,S}_{p,t} & \text{ for } p<0 \\
+        E^{a,S}_{p,t}-E^{P,S}_{p,t} & \text{ for } p\geq 0
+    \end{cases}
+    \]}
+\end{frame}
+
+\begin{frame}{Equivalent Steps for the Pure Slope Reform $b^{S}$ (2/2)}
+\begin{enumerate}
+    \setcounter{enumi}{4}
+    
+    \item Aggregate {expenditures} using the density under the pure slope reform
+    \[
+        \text{BEHAV}^{S}_t
+        \;=\;
+        \sum_{p}
+        {E^{S}_{p,t}
+        }
+    \]
+    
+    \item Compute total costs, mechanical and welfare effects, and WMVPFs: 
+    \begin{align*}
+        {
+        TC^S_t &= \text{BEHAV}_t^{S} - \text{CNTRF}_t, \quad 
+        ME^S_t = \text{MECH}_t^{S} - \text{CNTRF}_t \text{ and }}\\ 
+        {
+        WE^S_t &= ME^S_t \, \left(1-\gamma \frac{c_b - c_{pop}}{c_{pop}}-\right) 
+        \Rightarrow WMVPF_t^S = \frac{WE^S_t}{TC^S_t}}
+    \end{align*}
+    
+    \item Get avg $\Delta b_S$ using share of men/women ($s_m/s_w$) as weights
+    \begin{align*}
+        \Delta b_S = -(s_w*0.021+s_m*0.025)
+    \end{align*}
+    
+    \item Generate WMVPF inputs graph, $\Delta b_S$, $TC_T^S$, and $WMVPF_T^S$
+\end{enumerate}
+\bfootnote{\hyperlink{disentangling}{\beamerbutton{Back}} }
+\end{frame}
+
+\begin{frame}[label=optimalDetails]{Optimal Budget-Balanced Reform Details}
+    \begin{itemize}
+        \item Which schedule reform increases welfare the most? 
+        \begin{itemize}
+            \item Local in the sense that the government can only increase costs and revenues by a fixed amount set to $C(b^c,b^a)$
+        \end{itemize}
+        \item If the policymaker needs to balance its budget with $b_S$ and $b_L$:
+        \begin{itemize}
+            \item Increase $b_S$ so that $dC/db_S * \Delta b_S^* = C(b^c,b^a)$
+            \item Decrease $b_L$ so that $dC/db_L * \Delta b_L^* = -C(b^c,b^a)$
+        \end{itemize}
+        \item Estimate $dC/db_S$ ($dC/db_L$) with $C(b,b_S)/\Delta b_S$ ($C(b,b_L)/\Delta b_L$)
+        \item Implementation advantage:
+        \begin{itemize}
+            \item Optimal pension \textbf{schedule} depends on sufficient statistics under the \textbf{optimal} schedule
+            \item Optimal pension \textbf{reform} depends on sufficient statistics under the \textbf{observed} schedule
+        \end{itemize}
+    \end{itemize}
+    \bfootnote{\hyperlink{optimal}{\beamerbutton{Back}}}
+\end{frame}
+
+\begin{frame}[label=payroll]{Estimating WNSBD}
+    \begin{itemize}
+        \item Get the inputs for WNSBD from the analysis above:
+        {\footnotesize
+        \begin{align*}
+            WNSBD_p & = \frac{\sum_t\sum_xE(SMU_{it}|x)[b^p(x)-b(x)]-{WMVPF_T}(ME_p+BE_p)}{ME_p} \\
+            & = \left(1-\gamma \frac{c_b - c_{pop}}{c_{pop}}-\right) - {WMVPF_T}\left(1+\frac{BE_p}{ME_p}\right),\quad \ \text{for} \ p=L,S
+        \end{align*}}
+        
+        %\item Assumption: $SMU_{it}$ is constant ($\gamma \frac{c_b - c_{pop}}{c_{pop}}$) among beneficiaries
+        
+        \item Lobel (2025) finds that the ${MVPF_T}\approx 1.64$ with incidence of 23\% on firms (zero weight), 12\% on workers (consumption $c_w$) and 65\% on consumers (consumption $c_p$) so that:
+        \begin{align*}
+            {WMVPF_T} = \left[.12\gamma \left(1-\gamma \frac{c_w - c_{pop}}{c_{pop}}-\right)+.65\right]1.64
+        \end{align*}
+    \end{itemize}
+    \bfootnote{\hyperlink{expenditure}{\beamerbutton{Back}} }
+\end{frame}
+
+\end{document}
