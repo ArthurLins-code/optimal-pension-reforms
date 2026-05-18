@@ -1525,48 +1525,88 @@
     \end{itemize}
 \end{frame}
 
-\begin{frame}{Step 2: Mechanical Expenditure $E^{c,L}_{p,t}=\sum_{i \in \{p|t\}} \sum_t^{T_i} \frac{b^L(x^c_{it})}{(1+r)^t}$}
+\begin{frame}{Step 2: Mechanical Expenditure under Pure Reforms}
 \begin{itemize}
-    \item {Mechanical expenditures are computed under (i) $b^L$ and (ii) counterfactual choices in the absence of the reform $x_{it}$}
-    
-    \item {We use a DD to recover the counterfactual expenditure in each cell}
-\end{itemize}    
-    \begin{align*}
-        {E^{a,L}_{p,t}=\delta_{p}^{L}+\gamma_t^{L} +\sum_{k\neq -2}\beta_{\tilde{p},k}^{L} 1(p\in \tilde p)*1(t=k)+\varepsilon_{p,t}^{L}}
-    \end{align*}
-\begin{itemize}    
-    \item {Same DD as before but using $E^{a,L}_{p,t}$ (expenditures) instead of $\bar b^{L}(x^a_{p,t})$}
-    
-    \item {$\beta^{L}_{p,t}$ captures selection coming from postponement and anticipation}
-    
-    \item {For each normalized point $p$ and $t\geq 0$, we get $E^{c,L}_{p,t}
-        \;=\;
-        E^{a,L}_{p,t}
-        \;-\;
-        \hat \beta^{L}_{p,t}$:}
-    \item {Alternatively, we can work with the original DD where $\beta^{L}_{p,t}$ is an effect on average benefits and then set $E^{c,L}_{p,t}=N^{c}_{p,t}[\bar b^L(x^a_{p,t})-\hat \beta^{L}_{p,t}]$}
+    \item For $q\in\{L,S\}$, recover selection with the same cell DD:
+\end{itemize}
+\vspace{-0.7em}
+{\small
+\begin{align*}
+    y^{a,q}_{p,t}
+    =
+    \delta_{p}^{q}
+    +
+    \gamma_t^{q}
+    +
+    \sum_{k\neq -2}\beta_{\tilde p,k}^{y,q}
+    1(p\in \tilde p)1(t=k)
+    +
+    \varepsilon_{p,t}^{y,q}
+\end{align*}}
+\vspace{-1.0em}
+\begin{itemize}
+    \item $y$ can be either expenditure $E^{a,q}_{p,t}$ or average benefits $\bar b^{q,a}_{p,t}\equiv E^{a,q}_{p,t}/N^a_{p,t}$.
+    \item Expenditure DD:
+    \[
+        \widehat E^{c,q}_{p,t}
+        =
+        E^{a,q}_{p,t}
+        -
+        \widehat\beta^{E,q}_{p,t}.
+    \]
+    \item Avg.-benefit DD plus counterfactual frequencies:
+    \[
+        \widehat E^{c,q}_{p,t}
+        =
+        \widehat N^{c}_{p,t}
+        \left[
+        \bar b^{q,a}_{p,t}
+        -
+        \widehat\beta^{\bar b,q}_{p,t}
+        \right].
+    \]
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Step 2.1: Cntrf. Expenditure $E^{c}_{p,t}=\sum_{i \in \{p|t\}} \sum_t^{T_i} \frac{b^c(x^c_{it})}{(1+r)^t}$}
+\begin{frame}{Step 2.1: No-Reform Counterfactual Expenditure}
 \begin{itemize}
-    \item {Counterfactual expenditures are computed under (i) $b^c$ and (ii) counterfactual choices in the absence of the reform $x_{it}^c$}
-    
-    \item {We use a DD to recover the counterfactual expenditure in each cell}
-\end{itemize}    
-    \begin{align*}
-        {E^{a,c}_{p,t}=\delta_{p}^{a,c}+\gamma_t^{a,c} +\sum_{k\neq -2}\beta_{\tilde{p},k}^{a,c} 1(p\in \tilde p)*1(t=k)+\varepsilon_{p,t}^{a,c}}
-    \end{align*}
-\begin{itemize}    
-    \item {Same DD as before but using $E^{a,c}_{p,t}=\sum_i \sum_t^{T_i} \frac{b^c(x^a_{it})}{(1+r)^t}$}
-    
-    \item {$\beta^{L}_{p,t}$ captures selection coming from postponement and anticipation}
-    
-    \item {For each normalized point $p$ and $t\geq 0$, we get $E^{c}_{p,t}
-        \;=\;
+    \item Expenditures under the no-reform schedule $b^c$ and choices $x^c_{it}$: $E^{c}_{p,t}=\sum_{i \in \{p|t\}} \sum_t^{T_i} \frac{b^c(x^c_{it})}{(1+r)^t}$
+    \item Recover selection with the same cell DD:
+\end{itemize}
+\vspace{-0.7em}
+{\small
+\begin{align*}
+    y^{a,c}_{p,t}
+    =
+    \delta_{p}^{c}
+    +
+    \gamma_t^{c}
+    +
+    \sum_{k\neq -2}\beta_{\tilde p,k}^{y,c}
+    1(p\in \tilde p)1(t=k)
+    +
+    \varepsilon_{p,t}^{y,c}
+\end{align*}}
+\vspace{-1.0em}
+\begin{itemize}
+    \item $y$ can be either expenditure $E^{a,c}_{p,t}$ or average benefits $\bar b^{c,a}_{p,t}\equiv E^{a,c}_{p,t}/N^a_{p,t}$.
+    \item Recover the no-reform counterfactual using either:
+    \[
+        \widehat E^{c}_{p,t}
+        =
         E^{a,c}_{p,t}
-        \;-\;
-        \hat \beta^{a,c}_{p,t}$:}
+        -
+        \widehat\beta^{E,c}_{p,t}
+        \quad\text{or}\quad
+        \widehat E^{c}_{p,t}
+        =
+        \widehat N^{c}_{p,t}
+        \left[
+        \bar b^{c,a}_{p,t}
+        -
+        \widehat\beta^{\bar b,c}_{p,t}
+        \right].
+    \]
 \end{itemize}
 \end{frame}
 
@@ -1721,27 +1761,8 @@
 \begin{frame}{Equivalent Steps for the Pure Slope Reform $b^{S}$ (1/2)}
 \begin{enumerate}
     \item Compute ${b}^S(x^a_{it})$ and {the expenditures in $E^{a,S}_{p,t} = \sum_{i \in \{p|t\}} b^S(x^a_{it})$}
-    \item Estimate the selection effects with the following DD
-    \begin{align*}
-        {E^{a,S}_{p,t}}=\delta_{p}^{S}+\gamma_t^{S} +\sum_{k\neq -2}\beta_{\tilde p,k}^{S} 1(p\in \tilde p)*1(t=k)+\varepsilon_{p,t}^{S}
-    \end{align*}
-    
-    \item Correct expenditure in (1) using selection and get total mec. expend. 
-    \[
-    {
-    E^{c,S}_{p,t}
-    \;=\;
-    E^{a,S}_{p,t}
-    \;-\;
-    \hat \beta^{S}_{p,t}
-    \quad
-    \text{or using old DD }
-    \quad
-    E^{c,S}_{p,t}
-    =
-    N^{c}_{p,t}[\bar b^{S}(x_{p,t}^a)-\hat \beta^S_{p,t}]
-    }
-    \]
+    \item Estimate selection using the general DD from Step 2, with $q=S$
+    \item Recover mechanical expenditure either from the expenditure DD or from average benefits plus $\widehat N^c_{p,t}$
     
     \item Pure-S expenditures correct (1) only for postponement selection:
 \end{enumerate}
