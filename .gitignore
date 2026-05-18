@@ -53,6 +53,14 @@ CLAUDE.md
 # --- Arquivo interno do Claude/Cowork ---
 _docs/zi4yABHg
 
+# --- Tooling local do Codex/agents ---
+# Configuracoes locais podem conter caminhos absolutos deste computador.
+.agents/
+.codex/
+
+# --- Arquivos de importacao ja expandidos no repo ---
+Retirement_Presentations.zip
+
 # ==============================================================================
 # .gitignore for Academic Claude Code Projects
 # ==============================================================================
@@ -134,4 +142,3 @@ scripts/R/_outputs/
 # Output artifacts — uncomment lines below based on your preference
 # *.rds
 # output/**/*.rds
-

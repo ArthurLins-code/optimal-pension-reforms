@@ -226,9 +226,7 @@
         \item the benefit level $b_L$ increased at 85 (95) points for women (men)
         \item the benefit slope $b_S$ was removed after the same threshold  of 85/95 points for women/men
     \end{enumerate} 
-    \begin{itemize}
-    %\item Eligibility at 30 (35) years of contribution for women (men) unchanged
-    \end{itemize}
+    % Eligibility at 30 (35) years of contribution for women (men) unchanged
     \bfootnote{\hyperlink{dataReplacement}{\beamerbutton{Data}}
     \hyperlink{men}{\beamerbutton{Men}}}
 \end{frame}
@@ -294,7 +292,6 @@
     \end{itemize}
     \small
     \begin{align*}
-        \label{eq_nc}
         \small
         \sum_{t=0}^T \sum_i \frac{\overbrace{E[b^a(x_{it}^a)]-E[b^c(x_{it}^c)]}^{\text{Benefit Changes}}-
         \overbrace{\left[E[\tau(x_{it}^a)]-E[\tau(x_{it}^c)]\right]}^{\text{Revenue Changes}}}{(1+r)^t}
@@ -331,15 +328,12 @@
     \end{itemize}
     % Note that these are simulated points at each period t rather than points at claiming. 
     \begin{align*}
-        \label{eq_claiminghaz}
         CH_{ipt} = \sum_{k \neq -2} \beta_{k,\tilde p} 1(p \in \tilde p) \times 1(t = k) + \delta_t + \gamma_{p} +\zeta X_{ip} + \varepsilon_{ipt}
     \end{align*}
     \begin{itemize}
-        \begin{itemize}
-            \item $\beta_{k,\tilde p}$: effect of the reform on CH at $p\in \tilde p$ points
-            \item $\delta_t$, $\gamma_{p}$: time and normalized-points fixed effects
-            \item $X_{ip}$ includes gender, microregion, schooling, race, and birth year fixed effects (at time of claiming). 
-        \end{itemize}
+        \item $\beta_{k,\tilde p}$: effect of the reform on CH at $p\in \tilde p$ points
+        \item $\delta_t$, $\gamma_{p}$: time and normalized-points fixed effects
+        \item $X_{ip}$ includes gender, microregion, schooling, race, and birth year fixed effects (at time of claiming).
     \end{itemize}
 \end{frame}
 
@@ -410,7 +404,6 @@
     \end{itemize}
     {\small
     \begin{align*}
-        \label{eq_nc}
          \sum_i \sum_{t=0}^{T_i} \frac{E[b^a(x^c_{it})]-E[b^c(x_{it}^c)]}{(1+r)^t}
     \end{align*}
     }
@@ -441,7 +434,7 @@
     % The estimate for the average benefit that would have been paid in the absence of the reform at point p and quarter t is estimated as bar b^o_{p,t}-\beta_{t,p}
 \end{frame}
 
-\begin{frame}{Effect on Avg Counterfactual Benefits at $p \in [-2,0)}
+\begin{frame}{Effect on Avg Counterfactual Benefits at $p \in [-2,0)$}
     \centering
     \includegraphics[width=0.8\linewidth]{old-3.pdf}
 \end{frame}
@@ -497,15 +490,13 @@
     \end{itemize}
     \only<1>{\small
     \begin{align*}
-        \label{eq_nc}
         \small
         \sum_{t=0}^T \sum_i \frac{E[b^a(x_{it}^a)-\tau(x_{it}^a)]-E[b^c(x^c_{it})-\tau(x_{it}^c)]}{(1+r)^t}
     \end{align*}
     }
     \only<2>{\small
     \begin{align*}
-        \label{eq_nc}
-        \small
+            \small
         \sum_{t=0}^T \sum_i \frac{E[b^a(x_{it}^a)]-E[b^c(x^c_{it})]}{(1+r)^t}
     \end{align*}
     }
@@ -540,7 +531,7 @@
         \end{align*}
         % technically, we are also holding constant the state of the world in b^a(x,pi). I believe we want the same distribution as in the absence of the reform. 
         % For example, if someone gets fired with a higher probability under the reformed schedule, we want to compute their benefits with the lower probability before the reform was enacted 
-        \item Where $E(SMU_{it}|x) & \equiv E\left(\beta^t \frac{\partial u(x_{it})}{\partial c_{it}}|x_{it}=x\right)$ is the average social marginal utility of consumption for agents with choices $x$
+        \item Where $E(SMU_{it}|x) \equiv E\left(\beta^t \frac{\partial u(x_{it})}{\partial c_{it}}|x_{it}=x\right)$ is the average social marginal utility of consumption for agents with choices $x$
         \item Assuming that pension benefits have no insurance value, and there are no internalities:
     \end{itemize}
     \begin{align*}
@@ -648,7 +639,7 @@
     % Dashed arrows showing Δb_ℓ (vertical) and Δb_s (horizontal)
     \draw[col_after, dashed, thick, -{Stealth[length=2mm]}] (A) -- (B) node[midway,left] {$\Delta b_L$};
 
-    \node at (axis cs:{2},-0.7) {\small $\0$};
+    \node at (axis cs:{2},-0.7) {\small $0$};
 
   \end{axis}
 \end{tikzpicture}
@@ -1567,7 +1558,7 @@
         {E^{a,c}_{p,t}=\delta_{p}^{a,c}+\gamma_t^{a,c} +\sum_{k\neq -2}\beta_{\tilde{p},k}^{a,c} 1(p\in \tilde p)*1(t=k)+\varepsilon_{p,t}^{a,c}}
     \end{align*}
 \begin{itemize}    
-    \item {Same DD as before but using $E^{a,c}_{p,t}=\sum_i \sum_t^{T_i} \frac{b^c(x^a_{it})}{(1+r)^t}}
+    \item {Same DD as before but using $E^{a,c}_{p,t}=\sum_i \sum_t^{T_i} \frac{b^c(x^a_{it})}{(1+r)^t}$}
     
     \item {$\beta^{L}_{p,t}$ captures selection coming from postponement and anticipation}
     
@@ -1665,16 +1656,14 @@
         \item {Remember that all these groups arrive at the threshold in $t-2p$ and claim with $p$ with probability $g_{p,t-2p}$}
         \item {Construct total postponement expenditures in $(p,t)$ as the reallocation of expenditure losses from origin cells}        
         \begin{align*}
-            {
             E^{P,L}_{p,t}
             &=
-            {g_{p,t-2p}}
+            g_{p,t-2p}
             \sum_{x=1}^{\bar x_{t,p}}
             \Bigl(
-            -{E^{P,L}_{-x,t-2(x+p)}}
-            \Bigr) \quad for\ p \in [0,4)
-            }
-        \end{align*}    
+            -E^{P,L}_{-x,t-2(x+p)}
+            \Bigr) \quad \text{for } p \in [0,4)
+        \end{align*}
     \end{itemize}
 \end{frame}
 
@@ -1716,7 +1705,7 @@
         \begin{align*}
              TC^L_t &= \text{BEHAV}_t^{L} - \text{CNTRF}_t, \quad 
              ME^L_t = \text{MECH}_t^{L} - \text{CNTRF}_t \text{ and }\\ 
-            WE^L_t &= ME^L_t \, \left(1-\gamma \frac{c_b - c_{pop}}{c_{pop}}-\right) \Rightarrow WMVPF_t^L = \frac{WE^L_t}{TC^L_t}
+            WE^L_t &= ME^L_t \, \left(1-\gamma \frac{c_b - c_{pop}}{c_{pop}}\right) \Rightarrow WMVPF_t^L = \frac{WE^L_t}{TC^L_t}
         \end{align*}
         
         \item Get avg $\Delta b_L$ in $t=T$ (Q3 2018):
@@ -1791,12 +1780,10 @@
     
     \item Compute total costs, mechanical and welfare effects, and WMVPFs: 
     \begin{align*}
-        {
-        TC^S_t &= \text{BEHAV}_t^{S} - \text{CNTRF}_t, \quad 
-        ME^S_t = \text{MECH}_t^{S} - \text{CNTRF}_t \text{ and }}\\ 
-        {
-        WE^S_t &= ME^S_t \, \left(1-\gamma \frac{c_b - c_{pop}}{c_{pop}}-\right) 
-        \Rightarrow WMVPF_t^S = \frac{WE^S_t}{TC^S_t}}
+        TC^S_t &= \text{BEHAV}_t^{S} - \text{CNTRF}_t, \quad
+        ME^S_t = \text{MECH}_t^{S} - \text{CNTRF}_t \text{ and }\\
+        WE^S_t &= ME^S_t \, \left(1-\gamma \frac{c_b - c_{pop}}{c_{pop}}\right)
+        \Rightarrow WMVPF_t^S = \frac{WE^S_t}{TC^S_t}
     \end{align*}
     
     \item Get avg $\Delta b_S$ using share of men/women ($s_m/s_w$) as weights
@@ -1836,14 +1823,14 @@
         {\footnotesize
         \begin{align*}
             WNSBD_p & = \frac{\sum_t\sum_xE(SMU_{it}|x)[b^p(x)-b(x)]-{WMVPF_T}(ME_p+BE_p)}{ME_p} \\
-            & = \left(1-\gamma \frac{c_b - c_{pop}}{c_{pop}}-\right) - {WMVPF_T}\left(1+\frac{BE_p}{ME_p}\right),\quad \ \text{for} \ p=L,S
+            & = \left(1-\gamma \frac{c_b - c_{pop}}{c_{pop}}\right) - {WMVPF_T}\left(1+\frac{BE_p}{ME_p}\right),\quad \ \text{for} \ p=L,S
         \end{align*}}
         
         %\item Assumption: $SMU_{it}$ is constant ($\gamma \frac{c_b - c_{pop}}{c_{pop}}$) among beneficiaries
         
         \item Lobel (2025) finds that the ${MVPF_T}\approx 1.64$ with incidence of 23\% on firms (zero weight), 12\% on workers (consumption $c_w$) and 65\% on consumers (consumption $c_p$) so that:
         \begin{align*}
-            {WMVPF_T} = \left[.12\gamma \left(1-\gamma \frac{c_w - c_{pop}}{c_{pop}}-\right)+.65\right]1.64
+            {WMVPF_T} = \left[.12\gamma \left(1-\gamma \frac{c_w - c_{pop}}{c_{pop}}\right)+.65\right]1.64
         \end{align*}
     \end{itemize}
     \bfootnote{\hyperlink{expenditure}{\beamerbutton{Back}} }
