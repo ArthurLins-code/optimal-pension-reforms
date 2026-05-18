@@ -10,22 +10,56 @@
 
 pkgs <- c('scales','zoo','binsreg','ggpubr','readstata13','purrr','readxl','did',
           'stargazer','fixest','MatchIt','tidyr','stringr','data.table','dplyr',
-          'lubridate','stringi','foreign','haven','ggplot2','knitr','grid','broom',
+          'lubridate','stringi','foreign','haven','ggplot2','grid','broom',
           'RColorBrewer')
-.libPaths('F:/docs/R-library')
+
+# --- Environment detection ---------------------------------------------------
+if (dir.exists("U:/Documents/Paper/directory_2025")) {
+  dir <- "U:/Documents/Paper/directory_2025"
+  DATA_MODE <- "full"
+  .libPaths('F:/docs/R-library')
+} else if (dir.exists("F:/Users/tucalins/Documents/transf_11_11/directory_2025")) {
+  dir <- "F:/Users/tucalins/Documents/transf_11_11/directory_2025"
+  DATA_MODE <- "full"
+  .libPaths('F:/docs/R-library')
+} else if (dir.exists("C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement")) {
+  dir <- "C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement"
+  DATA_MODE <- "sample"
+} else {
+  stop("No recognized data directory found. Set 'dir' manually.")
+}
+setwd(dir)
+SUFFIX <- if (DATA_MODE == "sample") "_sample" else ""
+message("Gabriel: Data mode = ", DATA_MODE, " | dir = ", dir)
+
 for (pkg in pkgs) library(pkg, character.only = TRUE)
-
-# Directory
-
-dir <- 'U:/Documents/Paper/directory_2025'
-setwd(paste(dir))
 
 set.seed(123)
 
-dt <- fread('working/D3_cross_section.csv.gz') %>% 
-  .[!is.na(dist_claim_cutoff)]
+# Ensure output directories exist
+dir.create('output/F', recursive = TRUE, showWarnings = FALSE)
+dir.create('output/new_counter_claiming/actual_reform_gabriel', recursive = TRUE, showWarnings = FALSE)
+dir.create('tmp', recursive = TRUE, showWarnings = FALSE)
 
-panel <- fread('working/D4_panel_reform.csv.gz')
+# --- Data loading -------------------------------------------------------------
+if (DATA_MODE == "full") {
+  dt <- fread('working/D3_cross_section.csv.gz') %>%
+    .[!is.na(dist_claim_cutoff)]
+  panel <- fread('working/D4_panel_reform.csv.gz')
+} else {
+  # Sample mode: load 5% sample CSVs with column renames
+  dt <- fread(file.path(dir, 'data', 'dt_sampled_anon.csv')) %>%
+    .[!is.na(dist_claim_cutoff)]
+  setnames(dt, 'cpf_anon', 'indiv')
+  gc()
+  message("Cross-section loaded: ", nrow(dt), " obs after filter")
+
+  panel <- fread(file.path(dir, 'data', 'panel_sampled_anon.csv'))
+  setnames(panel, 'cpf_anon', 'indiv')
+  setnames(panel, 'dist_reform', 'dist_reform_quarters')
+  gc()
+  message("Panel loaded: ", nrow(panel), " obs")
+}
 
 a <- panel[indiv %in% sample(dt$indiv, 10)]
 
@@ -149,16 +183,20 @@ plot_count_2014 <- ggarrange(list_plots_count[['-5']],list_plots_count[['-4']],
 
 # Only for post reform period
 
-results <- fread('output/F/F5_table_results.csv') %>% 
-  left_join(dt_claim, by = c('dist_reform_quarters', 'points_norm')) %>% 
-  left_join(dt_elig, by = c('dist_reform_quarters', 'points_norm')) %>% 
-  left_join(dt_inflow, by = c('dist_reform_quarters', 'points_norm')) %>% 
-  .[, cohort := points_norm - dist_reform_quarters/2] %>% 
-  .[,.(t = dist_reform_quarters, p = points_norm, cohort, inflow, claims, elig, 
+results <- fread('output/F/F5_table_results.csv') %>%
+  left_join(dt_claim, by = c('dist_reform_quarters', 'points_norm')) %>%
+  left_join(dt_elig, by = c('dist_reform_quarters', 'points_norm')) %>%
+  left_join(dt_inflow, by = c('dist_reform_quarters', 'points_norm')) %>%
+  .[, cohort := points_norm - dist_reform_quarters/2] %>%
+  .[,.(t = dist_reform_quarters, p = points_norm, cohort, inflow, claims, elig,
        ch = ch_empirical, effect = change_ch_perc, claims_c_old = claims * (freq_count/freq),
-       effect_pp = change_ch_pp)] %>% 
-  .[, ch_c := pmin(ch * (1-effect), 1)] %>% 
+       effect_pp = change_ch_pp)] %>%
+  .[, ch_c := pmin(ch * (1-effect), 1)] %>%
   .[t >= -1]
+# Guard against NaN/Inf from small-sample cells
+results[is.na(ch) | !is.finite(ch), ch := 0]
+results[is.na(effect) | !is.finite(effect), effect := 0]
+results[, ch_c := pmin(pmax(ch * (1 - effect), 0), 1)]
 
 # (2) New strategy
 
@@ -252,14 +290,19 @@ plot_count_2016 <- ggarrange(list_plots_count[['3']],list_plots_count[['4']],
                              list_plots_count[['5']],list_plots_count[['6']], ncol = 2, nrow = 2)
 plot_count_2017 <- ggarrange(list_plots_count[['7']],list_plots_count[['8']],
                              list_plots_count[['9']],list_plots_count[['10']], ncol = 2, nrow = 2)
-plot_count_2018 <- ggarrange(list_plots_count[['11']],list_plots_count[['12']], 
+plot_count_2018 <- ggarrange(list_plots_count[['11']],list_plots_count[['12']],
                              list_plots_count[['13']], ncol = 2, nrow = 2)
 
 # Saving the main dataset with claims in actual and counterfactual cases
 
 dt_save <- dt_final[,.(t, p, claims, claims_c)]
 
-fwrite(dt_save, file = 'tmp/claims_actual_counterfactual_t_p.csv')
+# Full counterfactual counts file — consumed by I4 and I6
+fwrite(dt_save, file = paste0('output/F/new_counterfactual_claim_counts', SUFFIX, '.csv'))
+# Trimmed copies — consumed by Pure and legacy references
+fwrite(dt_save, file = paste0('tmp/claims_actual_counterfactual_t_p', SUFFIX, '.csv'))
+fwrite(dt_save, file = paste0('output/new_counter_claiming/actual_reform_gabriel/claims_actual_counterfactual_t_p', SUFFIX, '.csv'))
+message("Saved claims files with suffix '", SUFFIX, "'")
 
 # All periods
 

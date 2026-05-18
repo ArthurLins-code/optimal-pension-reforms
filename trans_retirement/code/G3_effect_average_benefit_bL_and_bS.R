@@ -269,8 +269,10 @@ dt[male==1,replacement_rate:=0.82+(0.025*(points_norm))]
 dt[male==1, benefits_bL:= fifelse(points_norm<0,benefits_new,benefits_new*(1+(1-0.82)/replacement_rate))]
 dt[male==0, benefits_bL:= fifelse(points_norm<0,benefits_new,benefits_new*(1+(1-0.69)/replacement_rate))]
 # Calculating bS
-dt[male==1, benefits_bS:= fifelse(points_norm<0,benefits_new,benefits_new*(0.082/replacement_rate))]
-dt[male==0, benefits_bS:= fifelse(points_norm<0,benefits_new,benefits_new*(0.069/replacement_rate))]
+# Pure Slope: RR_PS(p) = RR_pbar (constant, slope=0). Slide 25/57.
+# NOTE: previously had 0.082/0.069 (decimal error, off by factor of 10).
+dt[male==1, benefits_bS:= fifelse(points_norm<0,benefits_new,benefits_new*(0.82/replacement_rate))]
+dt[male==0, benefits_bS:= fifelse(points_norm<0,benefits_new,benefits_new*(0.69/replacement_rate))]
 
 # Step 1.1- Calcuting Delta_bL and Delta_bS
 dt[,RR_pbar:= fifelse(male==1,0.82,0.69)]

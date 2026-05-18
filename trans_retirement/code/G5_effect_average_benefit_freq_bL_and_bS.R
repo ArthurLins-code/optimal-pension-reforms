@@ -8,15 +8,25 @@
 
 pkgs <- c('scales','zoo','binsreg','ggpubr','readstata13','purrr','readxl','did',
           'stargazer','fixest','MatchIt','tidyr','stringr','data.table','dplyr',
-          'lubridate','stringi','foreign','haven','ggplot2','knitr','grid','broom',
+          'lubridate','stringi','foreign','haven','ggplot2','grid','broom',
           'RColorBrewer')
-.libPaths('F:/docs/R-library')
+
+# --- Environment detection ---------------------------------------------------
+if (dir.exists("F:/Users/tucalins/Documents/transf_11_11/directory_2025")) {
+  dir <- "F:/Users/tucalins/Documents/transf_11_11/directory_2025"
+  DATA_MODE <- "full"
+  .libPaths('F:/docs/R-library')
+} else if (dir.exists("C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement")) {
+  dir <- "C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement"
+  DATA_MODE <- "sample"
+} else {
+  stop("No recognized data directory found. Set 'dir' manually.")
+}
+setwd(dir)
+message("G5 running in ", DATA_MODE, " mode from: ", dir)
+SUFFIX <- if (DATA_MODE == "sample") "_sample" else ""
+
 for (pkg in pkgs) library(pkg, character.only = TRUE)
-
-# Directory
-
-dir <- "F:/Users/tucalins/Documents/transf_11_11/directory_2025"
-setwd(paste(dir))
 
 set.seed(123)
 
@@ -24,36 +34,57 @@ set.seed(123)
 # DATA ---------------------------------------------------------
 # ******************************************************************************
 
-dt <- fread('working/D1_cross_section.csv.gz') %>% 
-  .[!is.na(dist_claim_cutoff)]
-gc()
-# New variables: Life Expectancy merged into cross_section so we can calculate discounted estimated lifetime benefits
-expectativa <- read_excel(paste0(dir,'/extra/Expectativa_Vida_IBGE.xlsx')) %>% 
-  setDT() %>% 
-  setnames(c('Ano','Idade','Expectativa'), c('table_year', 'age_disc', 'expec_ibge')) 
+if (DATA_MODE == "full") {
+  # [TODO:FUTURE] G5 uses D1 cross-section while most canonical files (I4, E4, H3)
+  # use D3. Keeping D1 for now since this has been working, but should be updated to
+  # D3 in a future revision and results re-verified.
+  dt <- fread('working/D1_cross_section.csv.gz') %>%
+    .[!is.na(dist_claim_cutoff)]
+  gc()
+  # New variables: Life Expectancy merged into cross_section so we can calculate discounted estimated lifetime benefits
+  expectativa <- read_excel(paste0(dir,'/extra/Expectativa_Vida_IBGE.xlsx')) %>%
+    setDT() %>%
+    setnames(c('Ano','Idade','Expectativa'), c('table_year', 'age_disc', 'expec_ibge'))
 
-aux_expectativa <- cross_join(data.table(claim_year = unique(expectativa$table_year)),
-                              data.table(claim_month = seq(1,12,1))) %>%
-  cross_join(data.table(age_disc = unique(expectativa$age_disc))) %>% 
-  setDT()
+  aux_expectativa <- cross_join(data.table(claim_year = unique(expectativa$table_year)),
+                                data.table(claim_month = seq(1,12,1))) %>%
+    cross_join(data.table(age_disc = unique(expectativa$age_disc))) %>%
+    setDT()
 
-# Jan - Nov: table from 1 year before the claiming year
-# Dec: table from the claiming year
+  # Jan - Nov: table from 1 year before the claiming year
+  # Dec: table from the claiming year
 
-aux_expectativa[claim_month < 12, table_year := claim_year - 1]
-aux_expectativa[claim_month == 12, table_year := claim_year - 0]
+  aux_expectativa[claim_month < 12, table_year := claim_year - 1]
+  aux_expectativa[claim_month == 12, table_year := claim_year - 0]
 
-aux_expectativa <- left_join(aux_expectativa, 
-                             expectativa, 
-                             by = c('table_year','age_disc')) %>% 
-  arrange(age_disc, claim_year, claim_month) %>% 
-  na.omit()
-# changing some variables names in dt to simplify the merge
-dt[,claim_month:= month(as.Date(claim_date))]
-dt[, age_disc := floor(age_claim)]
-#adding the life expectancy to the cross_section db
-dt <- left_join(dt, aux_expectativa,
-                by = c('claim_year','claim_month','age_disc'))
+  aux_expectativa <- left_join(aux_expectativa,
+                               expectativa,
+                               by = c('table_year','age_disc')) %>%
+    arrange(age_disc, claim_year, claim_month) %>%
+    na.omit()
+  # changing some variables names in dt to simplify the merge
+  dt[,claim_month:= month(as.Date(claim_date))]
+  dt[, age_disc := floor(age_claim)]
+  #adding the life expectancy to the cross_section db
+  dt <- left_join(dt, aux_expectativa,
+                  by = c('claim_year','claim_month','age_disc'))
+
+  ### New variables: Normalized Points
+  dt[, points_d := floor(points_claim)] %>%
+    .[, points_norm := ifelse(male == 0, points_d - 85, points_d - 95)]
+
+  ### New variable: Claim quarter relative to reform
+  dt[, dist_reform := 4*(claim_quarter - 2015.25)]
+
+} else {
+  # Sample mode: dt_sampled_anon.csv is a 5% sample of D1 with life expectancy
+  # already merged and points_norm/dist_reform already computed.
+  dt <- fread(file.path(dir, 'data', 'dt_sampled_anon.csv')) %>%
+    .[!is.na(dist_claim_cutoff)]
+  gc()
+  message("Sample loaded: ", nrow(dt), " obs after filtering")
+}
+
 # Calculating Present Discounted Value (PDV) at claim date of all benefits (lifetime)
 r_annual<- 0.06
 r_q<- (1+r_annual)^(1/4)-1
@@ -69,15 +100,6 @@ dt[,ann_factor_q:= fifelse(
   (1-(1+r_q)^(-quarters_remaining_of_life))/r_q,
   0
 )]
-
-### New variables: Normalized Points
-
-dt[, points_d := floor(points_claim)] %>% 
-  .[, points_norm := ifelse(male == 0, points_d - 85, points_d - 95)]
-
-### New variable: Claim quarter relative to reform
-
-dt[, dist_reform := 4*(claim_quarter - 2015.25)]
 
 ### Restricting to -30/30
 
@@ -312,15 +334,26 @@ plots_old
 dt[male==0,replacement_rate:=0.69+(0.021*(points_norm))]
 dt[male==1,replacement_rate:=0.82+(0.025*(points_norm))]
 
-# Now we'll use the counterfactual reforms' designs to use RR and define both bL(x'it) and bS(xit') => 
+# Now we'll use the counterfactual reforms' designs to use RR and define both bL(x'it) and bS(xit') =>
 # Which are both bL and bS (benefits under the counterfactual level and slope reforms) for the post-reform choices
 # Benefits under the counterfactual reforms
 # Calculating bL
+# NOTE: The division by `replacement_rate` produces benefits_bL = pv_benefits_new * RR_PL / RR_pre,
+# which differs from the absolute formula pv_benefits_new * RR_PL. This ratio-based approach
+# is a POTENTIALLY PROBLEMATIC ASSUMPTION — it adjusts benefits relative to the pre-reform
+# schedule rather than in absolute terms. The extra 1/RR_pre factor varies only by points_norm
+# (not dist_reform), so the points_norm FE in the DD absorbs the level effect, but the DD
+# coefficient captures beta * f(points_norm) where f = 1/RR_pre, which varies across groups.
+# The same assumption applies to benefits_bS below.
+# [ASSUMPTION: ratio-based bL/bS formula — verify derivation against canonical deck appendix]
 dt[male==1, benefits_bL:= fifelse(points_norm<0,pv_benefits_new,pv_benefits_new*(1+(1-0.82)/replacement_rate))]
 dt[male==0, benefits_bL:= fifelse(points_norm<0,pv_benefits_new,pv_benefits_new*(1+(1-0.69)/replacement_rate))]
 # Calculating bS
-dt[male==1, benefits_bS:= fifelse(points_norm<0,pv_benefits_new,pv_benefits_new*(0.082/replacement_rate))]
-dt[male==0, benefits_bS:= fifelse(points_norm<0,pv_benefits_new,pv_benefits_new*(0.069/replacement_rate))]
+# Pure Slope: RR_PS(p) = RR_pbar (constant, slope=0). Slide 25/57.
+# Values 0.82 (men) and 0.69 (women) are the intercepts from slide 10/56.
+# NOTE: previously had 0.082/0.069 (decimal error, off by factor of 10).
+dt[male==1, benefits_bS:= fifelse(points_norm<0,pv_benefits_new,pv_benefits_new*(0.82/replacement_rate))]
+dt[male==0, benefits_bS:= fifelse(points_norm<0,pv_benefits_new,pv_benefits_new*(0.69/replacement_rate))]
 
 
 # Step 1.1- Calcuting Delta_bL and Delta_bS
@@ -393,7 +426,7 @@ for (g in c('[-6,-3]','[-2,-1]','[0,1]','[2,6]','[7,15]')) {
   
   formula <- as.formula(paste0('avg_benefits_bS ~ i(dist_reform, `treat_', g, '`, ref = -2) | dist_reform + points_norm'))
   
-  models_bL[[paste0('treat_bS_',g)]] <- feols(data = dt_agg[!is.na(get(paste0('treat_',g)))& dist_reform<=15],
+  models_bS[[paste0('treat_bS_',g)]] <- feols(data = dt_agg[!is.na(get(paste0('treat_',g)))& dist_reform<=15],
                                               fml = formula,
                                               cluster = 'points_norm')
   
@@ -544,9 +577,12 @@ plots_bS
 # Now we'll use the point estimates and the calculated b(xit') to calculate b(xit) for both reforms, which means calculate b^L(xit) and b^S(xit)
 # getting all the data together in one df, which will have estimations of the variables above for both reforms, with the column "reform" indicating the reform we are putting data of in each line.
 # ******************************************************************************
-data_counterfactual_reforms_step_2 <- merge(rbind(dt_agg[dist_reform >= 0,.(points_norm, dist_reform, reform = 'bL', avg_benefits = avg_benefits_bL, group=points_norm)],
-                                                 dt_agg[dist_reform >= 0,.(points_norm, dist_reform, reform= 'bS', avg_benefits = avg_benefits_bS, group=points_norm)]),
-                                           results_counterfactual[,.(group=as.numeric(group), dist_reform = claim_quarter, reform, point_estimate)],
+# FIX: original code set group=points_norm (integer) on left and as.numeric(group)
+# on right (NA from string '[-6,-3]'), so the merge always produced zero rows.
+# Fix: use the string `group` column from dt_agg on both sides; keep points_norm as-is.
+data_counterfactual_reforms_step_2 <- merge(rbind(dt_agg[dist_reform >= 0,.(points_norm, dist_reform, group, reform = 'bL', avg_benefits = avg_benefits_bL)],
+                                                 dt_agg[dist_reform >= 0,.(points_norm, dist_reform, group, reform= 'bS', avg_benefits = avg_benefits_bS)]),
+                                           results_counterfactual[,.(group, dist_reform = claim_quarter, reform, point_estimate)],
                                            by = c('group','dist_reform','reform'))
 #calculating the counterfactual reform benefits with pre-reform choices for each normalized point and quarter
 data_counterfactual_reforms_step_2[,avg_reform_benefits_pre_reform_choices:= avg_benefits-point_estimate]
@@ -566,7 +602,7 @@ dt_wide<- dcast(data_counterfactual_reforms_step_2,
 
 
 #then, we'll match with the data that has the info for frequencies N^L (named claims_L in the data) and N^S(named claims_S in the data), calculated in the previous file
-dt_all_pure_reforms<- fread("output/F/new_counterfactual_claim_counts_with_pure_schedules_3.csv")
+dt_all_pure_reforms<- fread(paste0("output/F/new_counterfactual_claim_counts_with_pure_schedules_3", SUFFIX, ".csv"))
 #renaming the variables p and t so they are named points_norm and dist_reform to ease the merge below
 setnames(dt_all_pure_reforms,c("p","t"),c("points_norm","dist_reform"))
 #merging both databases
@@ -575,8 +611,8 @@ dt_merged<- merge(dt_all_pure_reforms,dt_wide,by=c("dist_reform","points_norm"),
 
 #Now we'll calculate the Mechanical expenditures for every quarter following the slides
 MECH_by_qtr<- dt_merged[,
-                        .(MECH_L= sum(claims_L*avg_reform_benefits_pre_reform_choices_bL,na.rm=TRUE),
-                          MECH_S= sum(claims_S*avg_reform_benefits_pre_reform_choices_bS,na.rm=TRUE)),
+                        .(MECH_L= sum(claims_c*avg_reform_benefits_pre_reform_choices_bL,na.rm=TRUE),
+                          MECH_S= sum(claims_c*avg_reform_benefits_pre_reform_choices_bS,na.rm=TRUE)),
                         by=dist_reform]
 
 # Step 4: Average Post Pure-Reform Benefits
@@ -617,12 +653,9 @@ dt_origin_lookup<- dt_merged[, .(
 dt_origin_lookup[,P_tp:= N_c-N_a]
 
 # Step 4.3- Integrate into the database the values we need to calculate Beta^(L,P)_(p,t), which are N^c (named claims_c), N^a (named claims) and Beta^L_(-x,t-2*(x+2)) from the lookup table
-dt_origin_of_pstpnmnt_merged_w_lookup_merge<- merge(dt_origin_of_pstpnmnt,dt_origin_lookup,
+dt_origin_of_pstpnmnt_merged_w_lookup<- merge(dt_origin_of_pstpnmnt,dt_origin_lookup,
                                               by=c("origin_p","origin_t"),
                                               all.x = TRUE)
-dt_origin_of_pstpnmnt_merged_w_lookup_left<- left_join(dt_origin_of_pstpnmnt,dt_origin_lookup,
-                                                       by=c("origin_p","origin_t"))
-oi<-dt_origin_of_pstpnmnt_merged_w_lookup[points_norm==1 & dist_reform==6]
 #Step 4.4- Calculate beta^(L,P)_(p,t)
 #turning the database into a data.frame to ease grouped by calculations
 dt_beta<- as.data.frame(dt_origin_of_pstpnmnt_merged_w_lookup)
@@ -646,8 +679,19 @@ Beta_SP_table_data_filtered<- dt_beta
 Beta_SP_matrix<- xtabs(Beta_SP~dist_reform+points_norm,data=Beta_SP_table_data_filtered)
 Beta_SP_matrix
 
+# Step 4.5 (previously missing)- Merge Beta_LP and Beta_SP back into dt_merged.
+# dt_beta has multiple rows per (points_norm, dist_reform) due to expansion by x.
+# Beta_LP and Beta_SP are already aggregated per (p,t) pair (via group_by), so we
+# collapse to unique values before merging.
+beta_unique <- dt_beta[, .(Beta_LP = first(Beta_LP),
+                           Beta_SP = first(Beta_SP)),
+                       by = .(points_norm, dist_reform)]
+dt_merged_with_betas <- merge(dt_merged, beta_unique,
+                              by = c("points_norm", "dist_reform"),
+                              all.x = TRUE)
+
 # Step 4.7- We'll calculate Beta^L,A and Beta^S,A clearly also
-dt_merged_with_betas<-as.data.table(dt_merged_with_betas)
+dt_merged_with_betas <- as.data.table(dt_merged_with_betas)
 dt_merged_with_betas[,Beta_LA:=point_estimate_bL-Beta_LP]
 dt_merged_with_betas[,Beta_SA:=point_estimate_bS-Beta_SP]
 
@@ -680,6 +724,11 @@ BEHAV_by_qtr<- dt_merged_with_betas[,.(BEHAV_L= sum(claims_L*avg_post_pure_refor
 # Calculating the counterfactual benefit outlays by quarter
 
 ### Intermediate calculations #####
+# [TODO:REVISE] G5 reads G2_table_results.csv here (density-based estimates from G2),
+# but G5 is a frequency-based upgrade and should not reference earlier G-stage outputs.
+# G5 should use its own selection correction or the F-stage/non-G-stage sources only.
+# This is a POTENTIAL SOURCE OF ERROR: the density-based estimates in G2 may not be
+# consistent with the frequency-based approach used in the rest of G5.
 results_selection <- fread('output/G/G2_table_results.csv')
 
 aux1 <- results_selection[period == 'old' & dist_reform >= 0 & dist_reform <= 12, .(dist_reform, points_norm, delta_ben = (avg_benefits - point_estimate)*3)]
@@ -722,22 +771,24 @@ dt_results<- dt_welfare_pure_reforms[,
 # ******************************************************************************
 # SAVING ---------------------------------------------------------
 # ******************************************************************************
-out <- merge(rbind(dt_agg[dist_reform >= 0,.(points_norm, dist_reform, period = 'new', avg_benefits_pv = avg_benefits_new_pv, group)],
-                   dt_agg[dist_reform >= 0,.(points_norm, dist_reform, period = 'old', avg_benefits_pv = avg_benefits_old_pv, group)]),
+# FIX: dt_agg was overwritten at line 380 with different column names
+# (avg_pv_benefits_new/old instead of avg_benefits_new/old_pv)
+out <- merge(rbind(dt_agg[dist_reform >= 0,.(points_norm, dist_reform, period = 'new', avg_benefits_pv = avg_pv_benefits_new, group)],
+                   dt_agg[dist_reform >= 0,.(points_norm, dist_reform, period = 'old', avg_benefits_pv = avg_pv_benefits_old, group)]),
              results[,.(group, dist_reform = claim_quarter, period, point_estimate)],
              by = c('group','dist_reform','period'))
-fwrite(out, file = 'output/G/G5_table_results_selection.csv')
+fwrite(out, file = paste0('output/G/G5_table_results_selection', SUFFIX, '.csv'))
 
 
 out_cf <- DT_With_avg_benefits
 
-fwrite(out_cf, file = 'output/G/G5_table_results_contrafactual_reforms_and_benefits_freq.csv')
+fwrite(out_cf, file = paste0('output/G/G5_table_results_contrafactual_reforms_and_benefits_freq', SUFFIX, '.csv'))
 
 
-ggsave(plots_new, filename = 'output/G/G4_eventstudy_benefits_new.pdf',
+ggsave(plots_new, filename = paste0('output/G/G4_eventstudy_benefits_new', SUFFIX, '.pdf'),
        height = 6, width = 6)
 
-ggsave(plots_old, filename = 'output/G/G4_eventstudy_benefits_old.pdf',
+ggsave(plots_old, filename = paste0('output/G/G4_eventstudy_benefits_old', SUFFIX, '.pdf'),
        height = 6, width = 6)
 
 ggsave(list_plots_new[['new_[-6,-3]']], filename = 'output/G/G4_eventstudy_benegits_new_1.pdf', 

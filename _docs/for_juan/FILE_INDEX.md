@@ -12,7 +12,7 @@ Localização provável: pasta compartilhada `versões do artigo/` (ou equivalen
 | `Paper versions/NBER_Application_16_11_25.pdf` | NBER application (versão clean) | Números-âncora ali são mais antigos (MVPF ≈ 0.21); usar apresentação 8 para números atuais. |
 | `Paper versions/NBER_Application_arthur_footnotes.pdf` | NBER application com footnotes que Arthur adicionou | |
 | `Paper versions/grant_proposal_late_october.pdf` | Grant proposal (fim out/2025) | Contém deliverables Q1–Q3 2026 sobre Pure L/S + Surrogate. |
-| `Presentations/Retirement_Presentations (8).pdf` | **Apresentação mais recente, 20/abr/2026** | **Fonte canônica dos números-âncora atuais**: MVPF 0.31, WMVPF 0.26, WMVPF_bL 0.68, WMVPF_bS 0.71. |
+| `Presentations/Retirement_Presentations (10).pdf` | **Apresentação mais recente, 15/mai/2026** | **Fonte canônica dos números-âncora atuais**: MVPF 0.31, WMVPF 0.26, WMVPF_bL 0.68, WMVPF_bS 0.71. |
 | `Presentations/paper_presentation_late_october.pdf` | Apresentação de out/2025 | Histórica. |
 
 ## Notas de reunião
@@ -62,7 +62,7 @@ trans_retirement/
 ## Como referenciar na IA
 
 Quando a IA do Juan precisar dos números atuais:
-> "Leia `Presentations/Retirement_Presentations (8).pdf` para os números-âncora."
+> "Leia `Presentations/Retirement_Presentations (10).pdf` para os números-âncora."
 
 Quando precisar entender a matemática da decomposição:
 > "Leia `memory/03_pure_reforms_math.md` (está no for_juan/) e confira contra Seção 7 de `Paper versions/Early_Retirement_Benefits_atualizado_11_11_2025.pdf`."

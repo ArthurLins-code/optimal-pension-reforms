@@ -1,6 +1,6 @@
 # 03 — Matemática das reformas Pure L e Pure S
 
-Este arquivo detalha as assunções (A1–A4), as fórmulas de contrafactual em frequências (F7 / new_counterfactual_claiming3_pure.R), e a derivação de WMVPF_bL / WMVPF_bS. Notação segue a apresentação 20/abr/2026 e o paper.
+Este arquivo detalha as assunções (A1–A4), as fórmulas de contrafactual em frequências (F7 / new_counterfactual_claiming3_pure.R), e a derivação de WMVPF_bL / WMVPF_bS. Notação segue a apresentação 15/mai/2026 (`Retirement_Presentations (10).pdf`) e o paper.
 
 ## Notação
 
@@ -105,7 +105,7 @@ dW_obs ≈ WMVPF_bL · dbL_obs + WMVPF_bS · dbS_obs
 
 Se `WMVPF_bL < WMVPF_bS`, a reforma **local ótima** é `↑ bS, ↓ bL` (budget-neutral): aumentar a inclinação, reduzir o nível.
 
-## Números da apresentação (20/abr/2026)
+## Números da apresentação (15/mai/2026)
 
 | Objeto | Valor |
 |--------|-------|

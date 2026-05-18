@@ -41,14 +41,18 @@ Cálculos Juan*.pdf
 Thumbs.db
 desktop.ini
 
+# --- Dados locais (5% sample — NEVER commit) ---
+data_local/
+*.csv.gz
+
 # --- Arquivos temporários genéricos ---
 *.tmp
 *.bak
 *~
 
-# --- CLAUDE.md raiz (é diferente do _docs/CLAUDE.md) ---
-# O CLAUDE.md na raiz parece estar vazio; a versão real está em _docs/
-CLAUDE.md
+# --- CLAUDE.md raiz ---
+# CLAUDE.md is now tracked (project configuration for Claude Code)
+# CLAUDE.md
 
 # --- Arquivo interno do Claude/Cowork ---
 _docs/zi4yABHg

@@ -408,7 +408,7 @@ list_did[['2_tax_ipw_noyear']] <- feols(data = panel_did2[year != 2019 ],
                                          cluster = 'indiv',
                                          weights = ~ipw)
 ggsave(fn_estudy1('2_tax_ipw_noyear', 'Tax collection - Large sample (IPW), no Year FE'),
-       filename = 'output/H/H3_2_tax_ipw_noyearr.pdf', height = 3, width = 5)
+       filename = 'output/H/H3_2_tax_ipw_noyear.pdf', height = 3, width = 5)
 
 # Taxes, Small, Year FE yes, IPW yes
 list_did[['1_tax_ipw_year']] <- feols(data = panel_did1[year != 2019 & dist_claim_quarters >= -10 & dist_claim_quarters <= 10],
