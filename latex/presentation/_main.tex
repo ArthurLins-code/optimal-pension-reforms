@@ -292,12 +292,12 @@
     \end{itemize}
 \end{frame}
 
-\begin{frame}{Negative Effect on CH Right Below the threshold $p\in [-2,0)$}
+\begin{frame}{Negative Effect on CH Below the Threshold $p\in [-2,0)$}
     \centering
     \includegraphics[width=0.8\linewidth]{F4_eventstudy_agg_2.pdf}
 \end{frame}
 
-\begin{frame}[label=ChDdRightAbove]{Positive Effect on CH Right Above the Threshold $p \in[0,2)$}
+\begin{frame}[label=ChDdRightAbove]{Positive Effect on CH Above the Threshold $p \in[0,2)$}
     \centering
     \includegraphics[width=0.8\linewidth]{F4_eventstudy_agg_3.pdf}
     \bfootnote{\hyperlink{chDdOther}{\beamerbutton{Other Point Ranges}} \hyperlink{trend}{\beamerbutton{Raw Trends}}\hyperlink{chToFrequencies}{\beamerbutton{CH to Frequencies}}}
@@ -348,27 +348,30 @@
     }
     \begin{itemize}
         \item Mechanical Effect: Counterfactual increase in benefit outlays under the reformed schedule but in the absence of behavioral responses
-        \item Can recover $\sum_t b^a(\mathbf{x_{it}^a})/(1+r)^t$ and $\sum_t b^c(\mathbf{x_{it}^a})/(1+r)^t$ but need:
-        \begin{enumerate}
-            \item counterfactual benefits $\sum_t b^c(\mathbf{x_{it}^c})/(1+r)^t$
-            \item mechanical benefits $\sum_t b^a(\mathbf{x^c_{it}})/(1+r)^t$
-        \end{enumerate}
+        \item Can recover $b^a(\mathbf{x_{it}^a})$ and $b^c(\mathbf{x_{it}^a})$ but need $b^a(\mathbf{x_{it}^c})$ and $b^c(\mathbf{x_{it}^c})$
+        % \begin{enumerate}
+        %     \item counterfactual benefits $\sum_t b^c(\mathbf{x_{it}^c})/(1+r)^t$
+        %     \item mechanical benefits $\sum_t b^a(\mathbf{x^c_{it}})/(1+r)^t$
+        % \end{enumerate}
         \item With the counterfactual claiming frequencies $N^c_{p,t}$, we just need the avg counterfactual and mechanical benefits at each normalized point
+        \begin{align*}
+            \bar b^c_{p,t} \equiv \frac{1}{N_{p,t}^c}\sum_{i:p(x_{it})=p}\sum_t \frac{b^c(x_{it}^c)}{(1+r)^t}
+        \end{align*}
     \end{itemize}
 \end{frame}
 
-\begin{frame}{Average Counterfactual Benefits: $\frac{1}{N_{p,t}^c}\sum_{i:p(x_{it})=p}\sum_t \frac{b^c(x_{it}^c)}{(1+r)^t}$}
+\begin{frame}{Average Counterfactual Benefits}
 % This should be the sum of the PDV (from the perpective of the refomr) of benefits for those who claim at t with p points from t=0 to T_i.
 % So p(x_it) = p only if i claims at t with p.
     \begin{itemize}
-        \item $\bar{b}^{c,a}_{p,t} \equiv \frac{1}{N_{p,t}} \sum_{i:p(x_{it}^a)=p}\sum_t b^c(x_{it}^a)/(1+r)^t$: average PDV of benefits that would have been paid to those claiming with $p$ normalized points in quarter $t$ under the counterfactual schedule and actual choices
+        \item Only measure $\bar{b}^{c,a}_{p,t} \equiv \frac{1}{N_{p,t}} \sum_{i:p(x_{it}^a)=p}\sum_t b^c(x_{it}^a)/(1+r)^t$
         \item Problem: \textit{Bunchers} could be positively selected (eg, higher wages)
         \item Identification Assumption: $\bar{b}^{c,a}_{p,t}$ for $p\geq -6$ would remain parallel to the ones in $p<-6$ in the absence of the reform
         \item The DiD recovers the effect of the reform on these average benefits $\beta^{c,a}_{k,p}$ at each normalized point $p$ and quarter $k$:
          \begin{align*}
             \bar{b}^{c,a}_{p,t}=\delta_p^{c,a}+\gamma_t^{c,a} +\sum_{k\neq -2}\beta_{p,k}^{c,a} 1(p\in \tilde p)*1(t=k)+\varepsilon_{p,t}^{c,a}
         \end{align*}
-        \item $\bar{b}^{c,a}_{p,t}-\hat \beta_{p,t}^{c,a}$ is an estimate for $\frac{1}{N_{p,t}^c}\sum_{i:p(x_{it})=p}\sum_t \frac{b^c(x^c_{it})}{(1+r)^t}$
+        \item $\bar{b}^{c,a}_{p,t}-\hat \beta_{p,t}^{c,a}$ is an estimate for $\bar b^c_{p,t}$
     \end{itemize}
     % The estimate for the average benefit that would have been paid in the absence of the reform at point p and quarter t is estimated as bar b^o_{p,t}-\beta_{t,p}
 \end{frame}
@@ -388,7 +391,7 @@
 \begin{frame}[label=avgMechanicalBenefits]{Average Mechanical Benefits: $\frac{1}{N^c_{p,t}}\sum_{i:p(x_{it})=p} \sum_t \frac{b^a(x_{it}^c)}{(1+r)^t}$}
     \begin{itemize}
         %\item We correct the observed benefit outlay in each point $p$ and quarter $t$ by the selection of individuals that responded to the reform
-        \item $\bar{b}^{a,a}_{p,t} \equiv \frac{1}{N_{p,t}}\sum_{i:p(x_{it}^a)=p}\sum_t \frac{b^a(x_{it}^a)}{(1+r)^t}$: average PDV of benefits paid to those claiming with $p$ normalized points in quarter $t$ under the actual schedule and choices $\Rightarrow$ Need to correct for behavioral responses
+        \item Only measure $\bar{b}^{a,a}_{p,t} \equiv \frac{1}{N_{p,t}}\sum_{i:p(x_{it}^a)=p}\sum_t \frac{b^a(x_{it}^a)}{(1+r)^t}$
         \item Identification Assumption: $\bar{b}^{a,a}_{p,t}$ for $p\geq -6$ would remain parallel to the ones in $p<-6$ in the absence of the reform
         \item The following DiD recovers the effect of the reform on these average benefits $\beta^{a,a}_{k,p}$ at each normalized point $p$ and quarter $k$:
          \begin{align*}
@@ -505,11 +508,7 @@
 
 \begin{frame}[label=twoCounterfactualReforms]{Optimal and two Counterfactual Reforms}
     \begin{itemize}
-        \item Optimal reform of $b()$ depends on the welfare effects of $\Delta b_S()$ and $\Delta b_L()$ (Bergstrom et al, 2026)
-        \begin{itemize}
-            \item Increase expenditure on parameter with highest WPIC
-            \item Decrease expenditure on parameter with lowest WPIC
-        \end{itemize}
+        \item Optimal reform depends on the welfare effects of $\Delta b_S$ and $\Delta b_L$
     \end{itemize}
     \centering
     \begin{minipage}[b]{0.47\textwidth}
@@ -620,21 +619,21 @@
 
 \section{Optimal Reform}
 
-\begin{frame}[label=optimal]{Optimal Budget-Balanced Reform}
+\begin{frame}[label=optimal]{Optimal Local Budget-Balanced Reform}
     \begin{itemize}
-        \item Which schedule reform increases welfare the most?
+        \item Which local budget-balanced reform increases welfare the most?
         \begin{itemize}
             \item Local in the sense that the government can only increase costs and revenues by a fixed amount set to $C(b^c,b^a)\approx R\$250 B$
-        \end{itemize}
-        \item Implementation advantage:
-        \begin{itemize}
-            \item Optimal pension \textbf{schedule} depends on sufficient statistics under the \textbf{optimal} schedule
-            \item Optimal pension \textbf{reform} depends on sufficient statistics under the \textbf{observed} schedule
         \end{itemize}
         \item $WMVPF_{b_L} \approx 0.68<0.71\approx WMVPF_{b_S}$
         \begin{itemize}
             \item $\Delta b_S^*=0.081$: 350\% increase (baseline was 0.023)
             \item $\Delta b_L^*=-791$: 26\% drop (baseline was 3014.76)
+        \end{itemize}
+        \item Implementation advantage:
+        \begin{itemize}
+            \item Optimal pension \textbf{schedule} depends on sufficient statistics under the \textbf{optimal} schedule
+            \item Optimal pension \textbf{reform} depends on sufficient statistics under the \textbf{observed} schedule
         \end{itemize}
     \end{itemize}
     \bfootnote{\hyperlink{optimalDetails}{\beamerbutton{Details}}}
@@ -684,20 +683,20 @@
     \begin{itemize}
         \item Suppose instead that the government would like to expand Social Security, financing it with payroll taxes
         \item Bergstrom et al (2026) show that in that case the optimal expenditure would be on the parameter with the largest $WNSBD$, i.e.:
-        {\scriptsize
+        {
         \begin{align*}
             WNSBD_p= \frac{WE_p-WMVPF_T*TC_p}{ME_p}, \ \text{for} \ p=b_L,b_S
         \end{align*}}
         %NSBD net social benefit per dollar
         % How much welfare would increase if we spent one dollar with p and then financed that expenditure with a payroll tax increase
-        \item Where $WMVPF_T$ is the payroll tax WMVPF
-        \begin{itemize}
-            \item Combining findings from Lobel (2025) + POF's consumption measures, we calculate $WMVPF_T = 1.53$
-        \end{itemize}
+        \item Where $WMVPF_T$ is the payroll tax WMVPF (Lobel, 2025)
+        % \begin{itemize}
+        %     \item Combining findings from Lobel (2025) + POF's consumption measures, we calculate $WMVPF_T = 1.53$
+        % \end{itemize}
         \item All other inputs come directly from the above analysis
         \begin{itemize}
             \item $WNSBD_{b_S}\approx -0.96>-1.04\approx WNSBD_{b_L}$
-            \item Optimal reform would increase $b_S$ by $\Delta b_S^*=.081$ and finance it with a payroll tax increase
+            \item Optimal reform: $\Delta b_S^*=.081$ and finance it with a payroll tax increase
         \end{itemize}
     \end{itemize}
     \bfootnote{\hyperlink{payroll}{\beamerbutton{Details}} }
