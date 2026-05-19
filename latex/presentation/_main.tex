@@ -4,8 +4,7 @@
 \begin{document}
 \title[Optimal Pension Reforms]{\large{Optimal Pension Reforms:} \\ An Application to the Brazilian Administrative Data}
 \author{Gustavo Gonzaga (PUC-Rio) \\ Gabriel Lemos (MIT Sloan) \\ Juan Rios (PUC-Rio)}
-\date{IPEA Rio de Janeiro}
-\date{\today}
+\date{RIDGE \\ \today}
 
 
 
@@ -360,7 +359,7 @@
     \end{itemize}
 \end{frame}
 
-\begin{frame}{Average Counterfactual Benefits}
+\begin{frame}[label=avgCounterfactualBenefits]{Average Counterfactual Benefits}
 % This should be the sum of the PDV (from the perpective of the refomr) of benefits for those who claim at t with p points from t=0 to T_i.
 % So p(x_it) = p only if i claims at t with p.
     \begin{itemize}
@@ -373,6 +372,7 @@
         \end{align*}
         \item $\bar{b}^{c,a}_{p,t}-\hat \beta_{p,t}^{c,a}$ is an estimate for $\bar b^c_{p,t}$
     \end{itemize}
+    \bfootnote{\hyperlink{npv}{\beamerbutton{PDV Details}}}
     % The estimate for the average benefit that would have been paid in the absence of the reform at point p and quarter t is estimated as bar b^o_{p,t}-\beta_{t,p}
 \end{frame}
 
@@ -388,7 +388,7 @@
 \end{frame}
 
 
-\begin{frame}[label=avgMechanicalBenefits]{Average Mechanical Benefits: $\frac{1}{N^c_{p,t}}\sum_{i:p(x_{it})=p} \sum_t \frac{b^a(x_{it}^c)}{(1+r)^t}$}
+\begin{frame}{Average Mechanical Benefits: $\frac{1}{N^c_{p,t}}\sum_{i:p(x_{it})=p} \sum_t \frac{b^a(x_{it}^c)}{(1+r)^t}$}
     \begin{itemize}
         %\item We correct the observed benefit outlay in each point $p$ and quarter $t$ by the selection of individuals that responded to the reform
         \item Only measure $\bar{b}^{a,a}_{p,t} \equiv \frac{1}{N_{p,t}}\sum_{i:p(x_{it}^a)=p}\sum_t \frac{b^a(x_{it}^a)}{(1+r)^t}$
@@ -399,7 +399,6 @@
         \end{align*}
         \item $\bar{b}^{a,a}_{p,t}-\hat \beta_{p,t}^{a,a}$ is an estimate for $\frac{1}{N^c_{p,t}}\sum_{i:p(x_{it})=p}\sum_t \frac{b^a(x^c_{it})}{(1+r)^t}$
     \end{itemize}
-    \bfootnote{\hyperlink{npv}{\beamerbutton{PDV Details}}}
 \end{frame}
 
 \begin{frame}{Effect on Avg Actual Benefits at $p \in [-2,0)$}
@@ -607,14 +606,10 @@
 %     % A little deceiving because there are individuals that claim that would not have claimed at all up to the end of 2018 (they are not in the counterfactual frequencies but are also anticipators)
 % \end{frame}
 
-\begin{frame}{Frequencies under Pure \textbf{Level} Reform:
+\begin{frame}[label=pureLevelFrequencies]{Frequencies under Pure \textbf{Level} Reform:
     \only<1>{Q3 2015}\only<2>{Q4 2015}\only<3>{Q1 2016}\only<4>{Q2 2016}\only<5>{Q3 2016}\only<6>{Q4 2016}\only<7>{Q1 2017}\only<8>{Q2 2017}\only<9>{Q3 2017}\only<10>{Q4 2017}\only<11>{Q1 2018}\only<12>{Q2 2018}\only<13>{Q3 2018}}
      \only<1>{\includegraphics[width=.9\linewidth]{frequenciesLQ0.pdf}}\only<2>{\includegraphics[width=.9\linewidth]{frequenciesLQ1.pdf}}\only<3>{\includegraphics[width=.9\linewidth]{frequenciesLQ2.pdf}}\only<4>{\includegraphics[width=.9\linewidth]{frequenciesLQ3.pdf}}\only<5>{\includegraphics[width=.9\linewidth]{frequenciesLQ4.pdf}}\only<6>{\includegraphics[width=.9\linewidth]{frequenciesLQ5.pdf}}\only<7>{\includegraphics[width=.9\linewidth]{frequenciesLQ6.pdf}}\only<8>{\includegraphics[width=.9\linewidth]{frequenciesLQ7.pdf}}\only<9>{\includegraphics[width=.9\linewidth]{frequenciesLQ8.pdf}}\only<10>{\includegraphics[width=.9\linewidth]{frequenciesLQ9.pdf}}\only<11>{\includegraphics[width=.9\linewidth]{frequenciesLQ10.pdf}}\only<12>{\includegraphics[width=.9\linewidth]{frequenciesLQ11.pdf}}\only<13>{\includegraphics[width=.9\linewidth]{frequenciesLQ12.pdf}}
-\end{frame}
-
-\begin{frame}{Frequencies under Pure \textbf{Slope} Reform:
-    \only<1>{Q3 2015}\only<2>{Q4 2015}\only<3>{Q1 2016}\only<4>{Q2 2016}\only<5>{Q3 2016}\only<6>{Q4 2016}\only<7>{Q1 2017}\only<8>{Q2 2017}\only<9>{Q3 2017}\only<10>{Q4 2017}\only<11>{Q1 2018}\only<12>{Q2 2018}\only<13>{Q3 2018}}
-     \only<1>{\includegraphics[width=.9\linewidth]{frequenciesSQ0.pdf}}\only<2>{\includegraphics[width=.9\linewidth]{frequenciesSQ1.pdf}}\only<3>{\includegraphics[width=.9\linewidth]{frequenciesSQ2.pdf}}\only<4>{\includegraphics[width=.9\linewidth]{frequenciesSQ3.pdf}}\only<5>{\includegraphics[width=.9\linewidth]{frequenciesSQ4.pdf}}\only<6>{\includegraphics[width=.9\linewidth]{frequenciesSQ5.pdf}}\only<7>{\includegraphics[width=.9\linewidth]{frequenciesSQ6.pdf}}\only<8>{\includegraphics[width=.9\linewidth]{frequenciesSQ7.pdf}}\only<9>{\includegraphics[width=.9\linewidth]{frequenciesSQ8.pdf}}\only<10>{\includegraphics[width=.9\linewidth]{frequenciesSQ9.pdf}}\only<11>{\includegraphics[width=.9\linewidth]{frequenciesSQ10.pdf}}\only<12>{\includegraphics[width=.9\linewidth]{frequenciesSQ11.pdf}}\only<13>{\includegraphics[width=.9\linewidth]{frequenciesSQ12.pdf}}
+    \bfootnote{\hyperlink{pureSlopeFrequencies}{\beamerbutton{Pure-S Frequencies}}}
 \end{frame}
 
 \section{Optimal Reform}
@@ -927,7 +922,7 @@
         \item Since monthly benefits are constant, we can estimate $b_i^{PDV}$
         \item On-going: estimate $\tau_i^{PDV}$ using Surrogate Indexes (Athey et al, 2025)
     \end{itemize}
-    \bfootnote{\hyperlink{avgMechanicalBenefits}{\beamerbutton{Back}} \hyperlink{npvTaxes}{\beamerbutton{Surrogate Indexes}}}
+    \bfootnote{\hyperlink{avgCounterfactualBenefits}{\beamerbutton{Back}} \hyperlink{npvTaxes}{\beamerbutton{Surrogate Indexes}}}
 \end{frame}
 
 \begin{frame}[label=mechanicalOther]{Effect on Avg Post-Reform Benefits at $p \in [\bar p-6,\bar p-2)$}
@@ -1023,6 +1018,12 @@
         \end{enumerate}
     \end{itemize}
     \bfootnote{\hyperlink{twoCounterfactualReforms}{\beamerbutton{Back}} \hyperlink{pureL}{\beamerbutton{Pure-L Frequencies Details}}}
+\end{frame}
+
+\begin{frame}[label=pureSlopeFrequencies]{Frequencies under Pure \textbf{Slope} Reform:
+    \only<1>{Q3 2015}\only<2>{Q4 2015}\only<3>{Q1 2016}\only<4>{Q2 2016}\only<5>{Q3 2016}\only<6>{Q4 2016}\only<7>{Q1 2017}\only<8>{Q2 2017}\only<9>{Q3 2017}\only<10>{Q4 2017}\only<11>{Q1 2018}\only<12>{Q2 2018}\only<13>{Q3 2018}}
+     \only<1>{\includegraphics[width=.9\linewidth]{frequenciesSQ0.pdf}}\only<2>{\includegraphics[width=.9\linewidth]{frequenciesSQ1.pdf}}\only<3>{\includegraphics[width=.9\linewidth]{frequenciesSQ2.pdf}}\only<4>{\includegraphics[width=.9\linewidth]{frequenciesSQ3.pdf}}\only<5>{\includegraphics[width=.9\linewidth]{frequenciesSQ4.pdf}}\only<6>{\includegraphics[width=.9\linewidth]{frequenciesSQ5.pdf}}\only<7>{\includegraphics[width=.9\linewidth]{frequenciesSQ6.pdf}}\only<8>{\includegraphics[width=.9\linewidth]{frequenciesSQ7.pdf}}\only<9>{\includegraphics[width=.9\linewidth]{frequenciesSQ8.pdf}}\only<10>{\includegraphics[width=.9\linewidth]{frequenciesSQ9.pdf}}\only<11>{\includegraphics[width=.9\linewidth]{frequenciesSQ10.pdf}}\only<12>{\includegraphics[width=.9\linewidth]{frequenciesSQ11.pdf}}\only<13>{\includegraphics[width=.9\linewidth]{frequenciesSQ12.pdf}}
+    \bfootnote{\hyperlink{pureLevelFrequencies}{\beamerbutton{Back}}}
 \end{frame}
 
 \begin{frame}[label=theory]{Two-Step Agent Problem}
@@ -1450,7 +1451,7 @@
 
     \item {Compute total expenditure in each cell $(p,t)$ as:}
     \begin{align*}
-        {E^{a,L}_{p,t} \equiv \sum_{i \in \{p|t\}} \sum_t^{T_i} \frac{b^L(x^a_{it})}{(1+r)^t}}
+        {E^{a,L}_{p,t} \equiv \sum_{i \in \{p|t\}} \sum_{\tau=t}^{T_i} \frac{b^L(x^a_{i\tau})}{(1+r)^{\tau}}}
     \end{align*}
 
     \item {Note this corresponds to $N^a_{p,t}\,\bar b^L(x^a_{p,t})$ in the previous notation :}
@@ -1533,7 +1534,10 @@
 
 \begin{frame}{Step 2.1: No-Reform Counterfactual Expenditure}
 \begin{itemize}
-    \item Expenditures under the no-reform schedule $b^c$ and choices $x^c_{it}$: $E^{c}_{p,t}=\sum_{i \in \{p|t\}} \sum_t^{T_i} \frac{b^c(x^c_{it})}{(1+r)^t}$
+    \item Expenditures under the no-reform schedule $b^c$ and choices $x^c_{it}$: 
+    \begin{align*}
+        E^{c}_{p,t}=\sum_{i \in \{p|t\}} \sum_{\tau=t}^{T_i} \frac{b^c(x^c_{i\tau})}{(1+r)^{\tau}}
+    \end{align*}
     \item Recover selection with the same cell DD:
 \end{itemize}
 \vspace{-0.7em}
@@ -1589,7 +1593,7 @@
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Step 4: Pure-L Expenditures $E^{L}_{p,t}=\sum_{i \in \{p|t\}}\sum_i^{T_i} b^L(x^L_{it})$}
+\begin{frame}{Step 4: Pure-L Expenditures $E^{L}_{p,t}=\sum_{i \in \{p|t\}}\sum_{\tau=t}^{T_i} \frac{b^L(x^L_{i\tau})}{(1+r)^{\tau}}$}
 \begin{itemize}
     \item Since pure level reform generates {postponement} but no {anticipation}, we only need to remove selection from the latter
 
