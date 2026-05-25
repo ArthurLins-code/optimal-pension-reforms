@@ -724,14 +724,24 @@ BEHAV_by_qtr<- dt_merged_with_betas[,.(BEHAV_L= sum(claims_L*avg_post_pure_refor
 # Calculating the counterfactual benefit outlays by quarter
 
 ### Intermediate calculations #####
-# [TODO:REVISE] G5 reads G2_table_results.csv here (density-based estimates from G2),
-# but G5 is a frequency-based upgrade and should not reference earlier G-stage outputs.
-# G5 should use its own selection correction or the F-stage/non-G-stage sources only.
-# This is a POTENTIAL SOURCE OF ERROR: the density-based estimates in G2 may not be
-# consistent with the frequency-based approach used in the rest of G5.
-results_selection <- fread('output/G/G2_table_results.csv')
-
-aux1 <- results_selection[period == 'old' & dist_reform >= 0 & dist_reform <= 12, .(dist_reform, points_norm, delta_ben = (avg_benefits - point_estimate)*3)]
+# FIX (Juan Point 3): Replaced G2 import (quarterly units, ~R$6,700) with G5's own
+# first-round DD results (PV lifetime units, ~R$380,000), consistent with MECH/BEHAV.
+# - avg_pv_benefits_old: from dt_agg (L380), PV lifetime units (3 * benefit * ann_factor_q)
+# - point_estimate: from results (L211, models_old DD at L177-183), PV units
+# - Control group [-15,-7]: point_estimate = 0 (no reform effect, always treat=0)
+# Previously: results_selection <- fread('output/G/G2_table_results.csv')
+#             aux1 <- results_selection[period=='old'&..., delta_ben=(avg_benefits-point_estimate)*3]
+aux1 <- merge(
+  dt_agg[dist_reform >= 0 & dist_reform <= 12,
+         .(points_norm, dist_reform, group, avg_pv_benefits_old)],
+  results[period == 'old' & claim_quarter >= 0 & claim_quarter <= 12,
+          .(group, dist_reform = claim_quarter, point_estimate)],
+  by = c('group', 'dist_reform'),
+  all.x = TRUE
+)
+aux1[is.na(point_estimate), point_estimate := 0]  # control group: no reform effect
+aux1 <- aux1[, .(dist_reform, points_norm,
+                 delta_ben = avg_pv_benefits_old - point_estimate)]
 ######
 
 DT_With_avg_benefits<- merge(dt_merged_with_betas, aux1, by=c("dist_reform","points_norm"),all.x = TRUE)
