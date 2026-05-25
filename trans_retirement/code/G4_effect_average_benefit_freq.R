@@ -10,13 +10,23 @@ pkgs <- c('scales','zoo','binsreg','ggpubr','readstata13','purrr','readxl','did'
           'stargazer','fixest','MatchIt','tidyr','stringr','data.table','dplyr',
           'lubridate','stringi','foreign','haven','ggplot2','knitr','grid','broom',
           'RColorBrewer')
-.libPaths('F:/docs/R-library')
+
+# --- Environment detection ---------------------------------------------------
+if (dir.exists("F:/Users/tucalins/Documents/transf_11_11/directory_2025")) {
+  dir <- "F:/Users/tucalins/Documents/transf_11_11/directory_2025"
+  DATA_MODE <- "full"
+  .libPaths('F:/docs/R-library')
+} else if (dir.exists("C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement")) {
+  dir <- "C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement"
+  DATA_MODE <- "sample"
+} else {
+  stop("No recognized data directory found. Set 'dir' manually.")
+}
+setwd(dir)
+message("G4 running in ", DATA_MODE, " mode from: ", dir)
+SUFFIX <- if (DATA_MODE == "sample") "_sample" else ""
+
 for (pkg in pkgs) library(pkg, character.only = TRUE)
-
-# Directory
-
-dir <- "F:/Users/tucalins/Documents/transf_11_11/directory_2025"
-setwd(paste(dir))
 
 set.seed(123)
 
@@ -24,36 +34,54 @@ set.seed(123)
 # DATA ---------------------------------------------------------
 # ******************************************************************************
 
-dt <- fread('working/D1_cross_section.csv.gz') %>% 
-  .[!is.na(dist_claim_cutoff)]
+if (DATA_MODE == "full") {
+  dt <- fread('working/D1_cross_section.csv.gz') %>%
+    .[!is.na(dist_claim_cutoff)]
 
-# New variables: Life Expectancy merged into cross_section so we can calculate discounted estimated lifetime benefits
-expectativa <- read_excel(paste0(dir,'/extra/Expectativa_Vida_IBGE.xlsx')) %>% 
-  setDT() %>% 
-  setnames(c('Ano','Idade','Expectativa'), c('table_year', 'age_disc', 'expec_ibge')) 
+  # New variables: Life Expectancy merged into cross_section so we can calculate discounted estimated lifetime benefits
+  expectativa <- read_excel(paste0(dir,'/extra/Expectativa_Vida_IBGE.xlsx')) %>%
+    setDT() %>%
+    setnames(c('Ano','Idade','Expectativa'), c('table_year', 'age_disc', 'expec_ibge'))
 
-aux_expectativa <- cross_join(data.table(claim_year = unique(expectativa$table_year)),
-                              data.table(claim_month = seq(1,12,1))) %>%
-  cross_join(data.table(age_disc = unique(expectativa$age_disc))) %>% 
-  setDT()
+  aux_expectativa <- cross_join(data.table(claim_year = unique(expectativa$table_year)),
+                                data.table(claim_month = seq(1,12,1))) %>%
+    cross_join(data.table(age_disc = unique(expectativa$age_disc))) %>%
+    setDT()
 
-# Jan - Nov: table from 1 year before the claiming year
-# Dec: table from the claiming year
+  # Jan - Nov: table from 1 year before the claiming year
+  # Dec: table from the claiming year
 
-aux_expectativa[claim_month < 12, table_year := claim_year - 1]
-aux_expectativa[claim_month == 12, table_year := claim_year - 0]
+  aux_expectativa[claim_month < 12, table_year := claim_year - 1]
+  aux_expectativa[claim_month == 12, table_year := claim_year - 0]
 
-aux_expectativa <- left_join(aux_expectativa, 
-                             expectativa, 
-                             by = c('table_year','age_disc')) %>% 
-  arrange(age_disc, claim_year, claim_month) %>% 
-  na.omit()
-# changing some variables names in dt to simplify the merge
-dt[,claim_month:= month(as.Date(claim_date))]
-dt[, age_disc := floor(age_claim)]
-#adding the life expectancy to the cross_section db
-dt <- left_join(dt, aux_expectativa,
-                    by = c('claim_year','claim_month','age_disc'))
+  aux_expectativa <- left_join(aux_expectativa,
+                               expectativa,
+                               by = c('table_year','age_disc')) %>%
+    arrange(age_disc, claim_year, claim_month) %>%
+    na.omit()
+  # changing some variables names in dt to simplify the merge
+  dt[,claim_month:= month(as.Date(claim_date))]
+  dt[, age_disc := floor(age_claim)]
+  #adding the life expectancy to the cross_section db
+  dt <- left_join(dt, aux_expectativa,
+                      by = c('claim_year','claim_month','age_disc'))
+
+  ### New variables: Normalized Points
+  dt[, points_d := floor(points_claim)] %>%
+    .[, points_norm := ifelse(male == 0, points_d - 85, points_d - 95)]
+
+  ### New variable: Claim quarter relative to reform
+  dt[, dist_reform := 4*(claim_quarter - 2015.25)]
+
+} else {
+  # Sample mode: dt_sampled_anon.csv already has points_d, points_norm,
+  # dist_reform, claim_month, age_disc, expec_ibge pre-computed
+  dt <- fread(file.path(dir, 'data', 'dt_sampled_anon.csv')) %>%
+    .[!is.na(dist_claim_cutoff)]
+  gc()
+  message("G4 sample loaded: ", nrow(dt), " obs after filtering")
+}
+
 # Calculating Present Discounted Value (PDV) at claim date of all benefits (lifetime)
 r_annual<- 0.06
 r_q<- (1+r_annual)^(1/4)-1
@@ -69,15 +97,6 @@ dt[,ann_factor_q:= fifelse(
   (1-(1+r_q)^(-quarters_remaining_of_life))/r_q,
   0
 )]
-
-### New variables: Normalized Points
-
-dt[, points_d := floor(points_claim)] %>% 
-  .[, points_norm := ifelse(male == 0, points_d - 85, points_d - 95)]
-
-### New variable: Claim quarter relative to reform
-
-dt[, dist_reform := 4*(claim_quarter - 2015.25)]
 
 ### Restricting to -30/30
 
@@ -307,32 +326,32 @@ out <- merge(rbind(dt_agg[dist_reform >= 0,.(points_norm, dist_reform, period = 
              results[,.(group, dist_reform = claim_quarter, period, point_estimate)],
              by = c('group','dist_reform','period'))
 
-fwrite(out, file = 'output/G/G4_table_results.csv')
+fwrite(out, file = paste0('output/G/G4_table_results', SUFFIX, '.csv'))
 
-ggsave(plots_new, filename = 'output/G/G4_eventstudy_benefits_new.pdf',
+ggsave(plots_new, filename = paste0('output/G/G4_eventstudy_benefits_new', SUFFIX, '.pdf'),
        height = 6, width = 6)
 
-ggsave(plots_old, filename = 'output/G/G4_eventstudy_benefits_old.pdf',
+ggsave(plots_old, filename = paste0('output/G/G4_eventstudy_benefits_old', SUFFIX, '.pdf'),
        height = 6, width = 6)
 
-ggsave(list_plots_new[['new_[-6,-3]']], filename = 'output/G/G4_eventstudy_benegits_new_1.pdf', 
+ggsave(list_plots_new[['new_[-6,-3]']], filename = paste0('output/G/G4_eventstudy_benegits_new_1', SUFFIX, '.pdf'),
        height = 3, width = 4)
-ggsave(list_plots_new[['new_[-2,-1]']], filename = 'output/G/G4_eventstudy_benegits_new_2.pdf', 
+ggsave(list_plots_new[['new_[-2,-1]']], filename = paste0('output/G/G4_eventstudy_benegits_new_2', SUFFIX, '.pdf'),
        height = 3, width = 4)
-ggsave(list_plots_new[['new_[0,1]']], filename = 'output/G/G4_eventstudy_benegits_new_3.pdf', 
+ggsave(list_plots_new[['new_[0,1]']], filename = paste0('output/G/G4_eventstudy_benegits_new_3', SUFFIX, '.pdf'),
        height = 3, width = 4)
-ggsave(list_plots_new[['new_[2,6]']], filename = 'output/G/G4_eventstudy_benegits_new_4.pdf', 
+ggsave(list_plots_new[['new_[2,6]']], filename = paste0('output/G/G4_eventstudy_benegits_new_4', SUFFIX, '.pdf'),
        height = 3, width = 4)
-ggsave(list_plots_new[['new_[7,15]']], filename = 'output/G/G4_eventstudy_benegits_new_5.pdf', 
+ggsave(list_plots_new[['new_[7,15]']], filename = paste0('output/G/G4_eventstudy_benegits_new_5', SUFFIX, '.pdf'),
        height = 3, width = 4)
 
-ggsave(list_plots_old[['old_[-6,-3]']], filename = 'output/G/G4_eventstudy_benegits_old_1.pdf', 
+ggsave(list_plots_old[['old_[-6,-3]']], filename = paste0('output/G/G4_eventstudy_benegits_old_1', SUFFIX, '.pdf'),
        height = 3, width = 4)
-ggsave(list_plots_old[['old_[-2,-1]']], filename = 'output/G/G4_eventstudy_benegits_old_2.pdf', 
+ggsave(list_plots_old[['old_[-2,-1]']], filename = paste0('output/G/G4_eventstudy_benegits_old_2', SUFFIX, '.pdf'),
        height = 3, width = 4)
-ggsave(list_plots_old[['old_[0,1]']], filename = 'output/G/G4_eventstudy_benegits_old_3.pdf', 
+ggsave(list_plots_old[['old_[0,1]']], filename = paste0('output/G/G4_eventstudy_benegits_old_3', SUFFIX, '.pdf'),
        height = 3, width = 4)
-ggsave(list_plots_old[['old_[2,6]']], filename = 'output/G/G4_eventstudy_benegits_old_4.pdf', 
+ggsave(list_plots_old[['old_[2,6]']], filename = paste0('output/G/G4_eventstudy_benegits_old_4', SUFFIX, '.pdf'),
        height = 3, width = 4)
-ggsave(list_plots_old[['old_[7,15]']], filename = 'output/G/G4_eventstudy_benegits_old_5.pdf', 
+ggsave(list_plots_old[['old_[7,15]']], filename = paste0('output/G/G4_eventstudy_benegits_old_5', SUFFIX, '.pdf'),
        height = 3, width = 4)
