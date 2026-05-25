@@ -55,7 +55,7 @@ CONS_INSS      <- 1536.4
 CONS_POP       <- 1473.1
 R_ANNUAL       <- 0.06
 REFORM_QUARTER <- 2015.25
-MAX_HORIZON    <- 12L
+MAX_HORIZON    <- 13L
 
 R_Q <- (1 + R_ANNUAL)^(1/4) - 1
 ETA <- 1 - GAMMA_BASELINE * (CONS_INSS - CONS_POP) / CONS_POP
@@ -192,11 +192,11 @@ n_claims <- dt_cs[d_claim_post_reform == 1 & claim_quarter <= 2018.25,
 cf_counts <- fread(paste0('output/F/new_counterfactual_claim_counts', SUFFIX, '.csv'))
 setnames(cf_counts, c("t","p"), c("dist_reform","points_norm"), skip_absent = TRUE)
 
-# G4: selection-corrected average benefits (full data -- scale-independent)
-results_selection <- fread('output/G/G4_table_results.csv')
+# G4: selection-corrected average benefits (sample-aware via SUFFIX)
+results_selection <- fread(paste0('output/G/G4_table_results', SUFFIX, '.csv'))
 
-# H2: tax elasticity DD estimates (full data -- scale-independent)
-results_taxes <- fread('output/H/H2_table_results.csv')
+# H2: tax elasticity DD estimates (sample-aware via SUFFIX)
+results_taxes <- fread(paste0('output/H/H2_table_results', SUFFIX, '.csv'))
 
 message("Step C: Loaded cf_counts (", nrow(cf_counts), " rows), ",
         "G4 (", nrow(results_selection), " rows), ",
@@ -844,8 +844,13 @@ if (PURE_REFORM_AVAILABLE) {
   message("Pure reform section skipped -- missing upstream data.")
 }
 
+#Cumulative plots
 p_pure_L
 p_pure_S
+
+#Quarter-by-quarter plots
+p_pure_L_t
+p_pure_S_t
 # ########################################################################
 # ########################################################################
 #
