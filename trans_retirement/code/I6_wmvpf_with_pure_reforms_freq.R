@@ -173,18 +173,29 @@ message("\n=== PART 1: Actual Reform WMVPF (I4 replication) ===")
 # --- Step A: b'(x') = actual expenditure from panel -------------------------
 # Individual-level sum of PDV benefits for all post-reform claimants, by quarter.
 # This is naturally cumulative because the panel includes all prior cohorts.
+#
+# MAX_CLAIM_QUARTER aligns the panel filter with the counterfactual horizon.
+# Previously hardcoded to 2018.25, which excluded the t=13 (2018.50) cohort
+# from b'(x') while counterfactual series (b(x), b'(x)) still included it —
+# causing a truncation-artifact drop in TC at the rightmost quarter.
+#
+# NOTE: TC < 0 at t=0 is expected — postponement front-loads apparent savings
+# because b'(x') is small (few claims under new schedule) while b(x) already
+# includes a full cohort that would have claimed under the old schedule.
 
-tot_ben_period <- panel[d_claim_post_reform == 1 & claim_quarter <= 2018.25,
+MAX_CLAIM_QUARTER <- REFORM_QUARTER + MAX_HORIZON / 4  # 2015.25 + 13/4 = 2018.50
+
+tot_ben_period <- panel[d_claim_post_reform == 1 & claim_quarter <= MAX_CLAIM_QUARTER,
   .(total_benefits_payment = sum(benefits_new_pv, na.rm = TRUE)),
   by = .(dist_reform)]
 
 message("Step A: total_benefits_payment computed for ",
         nrow(tot_ben_period[dist_reform >= 0 & dist_reform <= MAX_HORIZON]),
-        " quarters")
+        " quarters (claim_quarter <= ", MAX_CLAIM_QUARTER, ")")
 
 # --- Step B: Number of claims per cell ---------------------------------------
 
-n_claims <- dt_cs[d_claim_post_reform == 1 & claim_quarter <= 2018.25,
+n_claims <- dt_cs[d_claim_post_reform == 1 & claim_quarter <= MAX_CLAIM_QUARTER,
   .(num_claims = .N), by = .(dist_reform, points_norm)]
 
 # --- Step C: External files --------------------------------------------------
