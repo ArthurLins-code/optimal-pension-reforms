@@ -346,14 +346,17 @@ dt[male==1,replacement_rate:=0.82+(0.025*(points_norm))]
 # coefficient captures beta * f(points_norm) where f = 1/RR_pre, which varies across groups.
 # The same assumption applies to benefits_bS below.
 # [ASSUMPTION: ratio-based bL/bS formula — verify derivation against canonical deck appendix]
-dt[male==1, benefits_bL:= fifelse(points_norm<0,pv_benefits_new,pv_benefits_new*(1+(1-0.82)/replacement_rate))]
-dt[male==0, benefits_bL:= fifelse(points_norm<0,pv_benefits_new,pv_benefits_new*(1+(1-0.69)/replacement_rate))]
+dt[male==1, benefits_bL:= fifelse(points_norm<0,pv_benefits_old,pv_benefits_old*(1+(1-0.82)/replacement_rate))]
+dt[male==0, benefits_bL:= fifelse(points_norm<0,pv_benefits_old,pv_benefits_old*(1+(1-0.69)/replacement_rate))]
+
 # Calculating bS
 # Pure Slope: RR_PS(p) = RR_pbar (constant, slope=0). Slide 25/57.
 # Values 0.82 (men) and 0.69 (women) are the intercepts from slide 10/56.
 # NOTE: previously had 0.082/0.069 (decimal error, off by factor of 10).
-dt[male==1, benefits_bS:= fifelse(points_norm<0,pv_benefits_new,pv_benefits_new*(0.82/replacement_rate))]
-dt[male==0, benefits_bS:= fifelse(points_norm<0,pv_benefits_new,pv_benefits_new*(0.69/replacement_rate))]
+dt[male==1, benefits_bS:= fifelse(points_norm<0,
+                                  pv_benefits_old,
+                                  pv_benefits_old*(0.82/replacement_rate))]
+dt[male==0, benefits_bS:= fifelse(points_norm<0,pv_benefits_old,pv_benefits_old*(0.69/replacement_rate))]
 
 
 # Step 1.1- Calcuting Delta_bL and Delta_bS
