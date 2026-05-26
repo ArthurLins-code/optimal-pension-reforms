@@ -530,7 +530,8 @@ if (PURE_REFORM_AVAILABLE) {
 
   # p ≥ 4: no postponement inflow (implicit on 41/47)
   g5_data[points_norm >= 4, E_P_L := 0]
-
+  g5_data[is.na(E_P_L), E_P_L := 0]
+  
   # Assemble E^L (appendix 39/47):
   #   p < 0:             E^L = E^{a,L}  (actual, postponement already in E^P)
   #   p ≥ 0, t = −1:     E^L = E^{a,L}  (pre-reform, postponement in both worlds)
@@ -550,7 +551,6 @@ if (PURE_REFORM_AVAILABLE) {
 
   # Origin losses: E^{P,S}_{p,t} = E^{a,S} − E^{c,S}  for p < 0
   g5_data[points_norm < 0, E_P_S := E_a_S - E_c_S]
-
   # Reallocation: for p ∈ [0,4), t ≥ 0
   # E^{P,S}_{p,t} = −g_{p,t−2p} · Σ_{x=1}^{x̄} E^{P,S}_{−x, t−2(x+p)}
   #
@@ -581,7 +581,7 @@ if (PURE_REFORM_AVAILABLE) {
 
   # p ≥ 4: no postponement inflow
   g5_data[points_norm >= 4, E_P_S := 0]
-
+  g5_data[is.na(E_P_S), E_P_S := 0]
   # Assemble E^S (appendix 44/47 — DIFFERENT from E^L!):
   #   p < 0:       E^S = E^{c,S}           (counterfactual at origins)
   #   p ≥ 0:       E^S = E^{a,S} − E^{P,S}  (actual minus postponement)
