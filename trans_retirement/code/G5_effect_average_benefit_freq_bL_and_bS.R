@@ -782,6 +782,185 @@ dt_results<- dt_welfare_pure_reforms[,
                                        WVMVPF_S=(MECH_S-CNTRF*gamma*(cons_inss-cons_pop)/cons_pop)/(BEHAV_S-CNTRF)
                                      )]
 # ******************************************************************************
+# REPLACEMENT RATE SCHEDULES UNDER PURE REFORMS --------------------------------
+# ******************************************************************************
+
+# Empirical replacement rate (same definition as E4)
+dt[, actual_repl_rate := benef_size / sal_benef]
+dt[male==0, L_repl_rate_women :=  benefits_bL / (sal_benef * 3 * ann_factor_q)]
+dt[male==1, L_repl_rate_men :=  benefits_bL / (sal_benef * 3 * ann_factor_q)]
+dt[male==0, S_repl_rate_women := benefits_bS / (sal_benef * 3 * ann_factor_q)]
+dt[male==1, S_repl_rate_men :=  benefits_bS / (sal_benef * 3 * ann_factor_q)]
+
+
+# Empirical pre-reform average RR by integer points
+emp_pre_w <- dt[male == 0 & d_claim_post_reform == 0 & !is.na(actual_repl_rate) &
+                  points_d >= 65 & points_d <= 100,
+                .(avg_rr = mean(actual_repl_rate, na.rm = TRUE)), by = points_d]
+
+emp_pre_m <- dt[male == 1 & d_claim_post_reform == 0 & !is.na(actual_repl_rate) &
+                  points_d >= 80 & points_d <= 110,
+                .(avg_rr = mean(actual_repl_rate, na.rm = TRUE)), by = points_d]
+
+# Empirical Post-pure Reform average RR by integer points
+
+## For the L Reform
+emp_L_RR_w <- dt[male == 0 & d_claim_post_reform == 0 & !is.na(L_repl_rate_women) &
+                  points_d >= 65 & points_d <= 100,
+                .(avg_rr = mean(L_repl_rate_women, na.rm = TRUE)), by = points_d]
+
+emp_L_RR_m <- dt[male == 1 & d_claim_post_reform == 0 & !is.na(L_repl_rate_men) &
+                  points_d >= 80 & points_d <= 110,
+                .(avg_rr = mean(L_repl_rate_men, na.rm = TRUE)), by = points_d]
+
+## For the S Reform
+emp_S_RR_w <- dt[male == 0 & d_claim_post_reform == 0 & !is.na(S_repl_rate_women) &
+                   points_d >= 65 & points_d <= 100,
+                 .(avg_rr = mean(S_repl_rate_women, na.rm = TRUE)), by = points_d]
+
+emp_S_RR_m <- dt[male == 1 & d_claim_post_reform == 0 & !is.na(S_repl_rate_men) &
+                   points_d >= 80 & points_d <= 110,
+                 .(avg_rr = mean(S_repl_rate_men, na.rm = TRUE)), by = points_d]
+
+# --- Combine empirical pre-reform scatter + pure reform RR for each plot ---
+data_bL_w <- rbind(emp_pre_w[, .(points_d, avg_rr, series = 'Pre-reform')],
+                   emp_L_RR_w[, .(points_d, avg_rr, series = 'Pure Level Reform')])
+data_bS_w <- rbind(emp_pre_w[, .(points_d, avg_rr, series = 'Pre-reform')],
+                   emp_S_RR_w[, .(points_d, avg_rr, series = 'Pure Slope Reform')])
+data_bL_m <- rbind(emp_pre_m[, .(points_d, avg_rr, series = 'Pre-reform')],
+                   emp_L_RR_m[, .(points_d, avg_rr, series = 'Pure Level Reform')])
+data_bS_m <- rbind(emp_pre_m[, .(points_d, avg_rr, series = 'Pre-reform')],
+                   emp_S_RR_m[, .(points_d, avg_rr, series = 'Pure Slope Reform')])
+
+# --- Women - Pure Level (bL) ---
+plot_rr_bL_women <- data_bL_w %>%
+  ggplot(aes(x = points_d, y = avg_rr, color = series))+
+  geom_vline(xintercept = 85, linetype = 'dashed', linewidth = 0.3)+
+  geom_point(size = 1.5, alpha = 0.6, position = position_dodge(width = 0.2))+
+  scale_x_continuous(breaks = seq(65, 100, 5))+
+  scale_y_continuous(breaks = seq(0, 1.5, 0.1))+
+  scale_color_brewer(palette = 'Dark2')+
+  theme_classic()+
+  guides(color = guide_legend(nrow = 2))+
+  theme(axis.title.x = element_text(family='serif', size = 10),
+        axis.title.y = element_text(family='serif', size = 10),
+        axis.text.x = element_text(family='serif', size = 10),
+        axis.text.y = element_text(family='serif', size = 10),
+        axis.line = element_line(linewidth = 0.3),
+        axis.ticks = element_line(linewidth = 0.3),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_line(linewidth = 0.3),
+        legend.justification = c(0,1),
+        legend.position = c(0,1),
+        legend.direction = 'horizontal',
+        legend.key.height = unit(2, units = 'mm'),
+        legend.key.width = unit(2, units = 'mm'),
+        legend.title = element_blank(),
+        legend.text = element_text(family = 'serif', size = 10),
+        legend.background = element_rect(color = 'black', fill = 'white', linewidth = 0.2))+
+  xlab('Points')+
+  ylab('Replacement Rate')
+
+plot_rr_bL_women
+
+# --- Women - Pure Slope (bS) ---
+plot_rr_bS_women <- data_bS_w %>%
+  ggplot(aes(x = points_d, y = avg_rr, color = series))+
+  geom_vline(xintercept = 85, linetype = 'dashed', linewidth = 0.3)+
+  geom_point(size = 1.5, alpha = 0.6, position = position_dodge(width = 0.4))+
+  scale_x_continuous(breaks = seq(65, 100, 5))+
+  scale_y_continuous(breaks = seq(0, 1.5, 0.1))+
+  scale_color_brewer(palette = 'Dark2')+
+  theme_classic()+
+  guides(color = guide_legend(nrow = 2))+
+  theme(axis.title.x = element_text(family='serif', size = 10),
+        axis.title.y = element_text(family='serif', size = 10),
+        axis.text.x = element_text(family='serif', size = 10),
+        axis.text.y = element_text(family='serif', size = 10),
+        axis.line = element_line(linewidth = 0.3),
+        axis.ticks = element_line(linewidth = 0.3),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_line(linewidth = 0.3),
+        legend.justification = c(0,1),
+        legend.position = c(0,1),
+        legend.direction = 'horizontal',
+        legend.key.height = unit(2, units = 'mm'),
+        legend.key.width = unit(2, units = 'mm'),
+        legend.title = element_blank(),
+        legend.text = element_text(family = 'serif', size = 10),
+        legend.background = element_rect(color = 'black', fill = 'white', linewidth = 0.2))+
+  xlab('Points')+
+  ylab('Replacement Rate')
+
+plot_rr_bS_women
+
+# --- Men - Pure Level (bL) ---
+plot_rr_bL_men <- data_bL_m %>%
+  ggplot(aes(x = points_d, y = avg_rr, color = series))+
+  geom_vline(xintercept = 95, linetype = 'dashed', linewidth = 0.3)+
+  geom_point(size = 1.5, alpha = 0.6, position = position_dodge(width = 0.4))+
+  scale_x_continuous(breaks = seq(80, 110, 5))+
+  scale_y_continuous(breaks = seq(0, 1.5, 0.1))+
+  scale_color_brewer(palette = 'Dark2')+
+  theme_classic()+
+  guides(color = guide_legend(nrow = 2))+
+  theme(axis.title.x = element_text(family='serif', size = 10),
+        axis.title.y = element_text(family='serif', size = 10),
+        axis.text.x = element_text(family='serif', size = 10),
+        axis.text.y = element_text(family='serif', size = 10),
+        axis.line = element_line(linewidth = 0.3),
+        axis.ticks = element_line(linewidth = 0.3),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_line(linewidth = 0.3),
+        legend.justification = c(0,1),
+        legend.position = c(0,1),
+        legend.direction = 'horizontal',
+        legend.key.height = unit(2, units = 'mm'),
+        legend.key.width = unit(2, units = 'mm'),
+        legend.title = element_blank(),
+        legend.text = element_text(family = 'serif', size = 10),
+        legend.background = element_rect(color = 'black', fill = 'white', linewidth = 0.2))+
+  xlab('Points')+
+  ylab('Replacement Rate')
+
+plot_rr_bL_men
+
+# --- Men - Pure Slope (bS) ---
+plot_rr_bS_men <- data_bS_m %>%
+  ggplot(aes(x = points_d, y = avg_rr, color = series))+
+  geom_vline(xintercept = 95, linetype = 'dashed', linewidth = 0.3)+
+  geom_point(size = 1.5, alpha = 0.6, position = position_dodge(width = 0.4))+
+  scale_x_continuous(breaks = seq(80, 110, 5))+
+  scale_y_continuous(breaks = seq(0, 1.5, 0.1))+
+  scale_color_brewer(palette = 'Dark2')+
+  theme_classic()+
+  guides(color = guide_legend(nrow = 2))+
+  theme(axis.title.x = element_text(family='serif', size = 10),
+        axis.title.y = element_text(family='serif', size = 10),
+        axis.text.x = element_text(family='serif', size = 10),
+        axis.text.y = element_text(family='serif', size = 10),
+        axis.line = element_line(linewidth = 0.3),
+        axis.ticks = element_line(linewidth = 0.3),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_line(linewidth = 0.3),
+        legend.justification = c(0,1),
+        legend.position = c(0,1),
+        legend.direction = 'horizontal',
+        legend.key.height = unit(2, units = 'mm'),
+        legend.key.width = unit(2, units = 'mm'),
+        legend.title = element_blank(),
+        legend.text = element_text(family = 'serif', size = 10),
+        legend.background = element_rect(color = 'black', fill = 'white', linewidth = 0.2))+
+  xlab('Points')+
+  ylab('Replacement Rate')
+
+plot_rr_bS_men
+
+# ******************************************************************************
 # SAVING ---------------------------------------------------------
 # ******************************************************************************
 # FIX: dt_agg was overwritten at line 380 with different column names
@@ -823,5 +1002,15 @@ ggsave(list_plots_old[['old_[0,1]']], filename = 'output/G/G4_eventstudy_benegit
        height = 3, width = 4)
 ggsave(list_plots_old[['old_[2,6]']], filename = 'output/G/G4_eventstudy_benegits_old_4.pdf', 
        height = 3, width = 4)
-ggsave(list_plots_old[['old_[7,15]']], filename = 'output/G/G4_eventstudy_benegits_old_5.pdf', 
+ggsave(list_plots_old[['old_[7,15]']], filename = 'output/G/G4_eventstudy_benegits_old_5.pdf',
        height = 3, width = 4)
+
+# Replacement rate schedules under pure reforms
+ggsave(plot_rr_bL_women, filename = paste0('output/G/G5_pension_schedule_bL_women', SUFFIX, '.pdf'),
+       height = 3, width = 5)
+ggsave(plot_rr_bL_men, filename = paste0('output/G/G5_pension_schedule_bL_men', SUFFIX, '.pdf'),
+       height = 3, width = 5)
+ggsave(plot_rr_bS_women, filename = paste0('output/G/G5_pension_schedule_bS_women', SUFFIX, '.pdf'),
+       height = 3, width = 5)
+ggsave(plot_rr_bS_men, filename = paste0('output/G/G5_pension_schedule_bS_men', SUFFIX, '.pdf'),
+       height = 3, width = 5)
