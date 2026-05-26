@@ -18,13 +18,27 @@
 pkgs <- c('scales','zoo','binsreg','ggpubr','readstata13','purrr','readxl','did',
           'stargazer','fixest','MatchIt','tidyr','stringr','data.table','dplyr',
           'lubridate','stringi','foreign','haven','ggplot2','knitr','grid','broom')
-.libPaths('F:/docs/R-library')
+
+# --- Environment detection ---------------------------------------------------
+if (dir.exists("F:/Users/tucalins/Documents/transf_11_11/directory_2025")) {
+  dir <- "F:/Users/tucalins/Documents/transf_11_11/directory_2025"
+  DATA_MODE <- "full"
+  .libPaths('F:/docs/R-library')
+} else if (dir.exists("U:/Documents/transf_11_11/directory_2025")) {
+  dir <- "U:/Documents/transf_11_11/directory_2025"
+  DATA_MODE <- "full"
+  .libPaths('F:/docs/R-library')
+} else if (dir.exists("C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement")) {
+  dir <- "C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement"
+  DATA_MODE <- "sample"
+} else {
+  stop("No recognized data directory found. Set 'dir' manually.")
+}
+setwd(dir)
+message("E4 running in ", DATA_MODE, " mode from: ", dir)
+SUFFIX <- if (DATA_MODE == "sample") "_sample" else ""
+
 for (pkg in pkgs) library(pkg, character.only = TRUE)
-
-# Directory
-
-dir <- 'U:/Documents/transf_11_11/directory_2025'
-setwd(paste(dir))
 
 set.seed(123)
 
@@ -32,10 +46,23 @@ set.seed(123)
 # DATA ---------------------------------------------------------
 # ******************************************************************************
 
-dt <- fread('working/D3_cross_section.csv.gz') %>% 
-  .[!is.na(dist_claim_cutoff)]
-
-panel <- fread('working/D4_panel_reform.csv.gz')
+if (DATA_MODE == "full") {
+  dt <- fread('working/D3_cross_section.csv.gz') %>%
+    .[!is.na(dist_claim_cutoff)]
+  panel <- fread('working/D4_panel_reform.csv.gz')
+} else {
+  dt <- fread('data/dt_sampled_anon.csv') %>%
+    .[!is.na(dist_claim_cutoff)]
+  panel <- fread('data/panel_sampled_anon.csv')
+  # Harmonize column names: sample panel uses year_quarter, full uses year_month
+  if ("year_quarter" %in% names(panel) && !"year_month" %in% names(panel)) {
+    setnames(panel, "year_quarter", "year_month")
+  }
+  # Add dist_reform_quarters alias if missing (same variable, different name)
+  if (!"dist_reform_quarters" %in% names(panel) && "dist_reform" %in% names(panel)) {
+    panel[, dist_reform_quarters := dist_reform]
+  }
+}
 
 # ******************************************************************************
 # PLOTS ---------------------------------------------------------
@@ -464,6 +491,85 @@ plot9 <- df9_3 %>%
 
 plot9
 
+# 10 - Pension schedule (Replacement Rate vs Points) - by gender --------
+
+# Replacement rate = benef_size / sal_benef (actual benefit / benefit salary)
+dt[, repl_rate := benef_size / sal_benef]
+
+# Women (cutoff at 85 points)
+sched_w <- dt[male == 0 & !is.na(repl_rate) & points_d >= 65 & points_d <= 100,
+              .(avg_rr = mean(repl_rate, na.rm = TRUE)),
+              by = .(points_d, d_claim_post_reform)]
+
+plot_sched_women <- sched_w %>%
+  ggplot(aes(x = points_d, y = avg_rr, color = factor(d_claim_post_reform)))+
+  geom_vline(xintercept = 85, linetype = 'dashed', linewidth = 0.3)+
+  geom_point(size = 1.5, alpha = 0.85)+
+  scale_x_continuous(breaks = seq(65, 100, 5))+
+  scale_y_continuous(breaks = seq(0, 1.5, 0.1))+
+  scale_color_brewer(palette = 'Dark2',
+                     labels = c('0' = 'Before June 2015', '1' = 'After June 2015'))+
+  theme_classic()+
+  guides(color = guide_legend(nrow = 2))+
+  theme(axis.title.x = element_text(family='serif', size = 10),
+        axis.title.y = element_text(family='serif', size = 10),
+        axis.text.x = element_text(family='serif', size = 10),
+        axis.text.y = element_text(family='serif', size = 10),
+        axis.line = element_line(linewidth = 0.3),
+        axis.ticks = element_line(linewidth = 0.3),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_line(linewidth = 0.3),
+        legend.justification = c(0,1),
+        legend.position = c(0,1),
+        legend.direction = 'horizontal',
+        legend.key.height = unit(2, units = 'mm'),
+        legend.key.width = unit(2, units = 'mm'),
+        legend.title = element_blank(),
+        legend.text = element_text(family = 'serif', size = 10),
+        legend.background = element_rect(color = 'black', fill = 'white', linewidth = 0.2))+
+  xlab('Points')+
+  ylab('Replacement Rate')
+
+plot_sched_women
+
+# Men (cutoff at 95 points)
+sched_m <- dt[male == 1 & !is.na(repl_rate) & points_d >= 80 & points_d <= 110,
+              .(avg_rr = mean(repl_rate, na.rm = TRUE)),
+              by = .(points_d, d_claim_post_reform)]
+
+plot_sched_men <- sched_m %>%
+  ggplot(aes(x = points_d, y = avg_rr, color = factor(d_claim_post_reform)))+
+  geom_vline(xintercept = 95, linetype = 'dashed', linewidth = 0.3)+
+  geom_point(size = 1.5, alpha = 0.85)+
+  scale_x_continuous(breaks = seq(80, 110, 5))+
+  scale_y_continuous(breaks = seq(0, 1.5, 0.1))+
+  scale_color_brewer(palette = 'Dark2',
+                     labels = c('0' = 'Before June 2015', '1' = 'After June 2015'))+
+  theme_classic()+
+  guides(color = guide_legend(nrow = 2))+
+  theme(axis.title.x = element_text(family='serif', size = 10),
+        axis.title.y = element_text(family='serif', size = 10),
+        axis.text.x = element_text(family='serif', size = 10),
+        axis.text.y = element_text(family='serif', size = 10),
+        axis.line = element_line(linewidth = 0.3),
+        axis.ticks = element_line(linewidth = 0.3),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_line(linewidth = 0.3),
+        legend.justification = c(0,1),
+        legend.position = c(0,1),
+        legend.direction = 'horizontal',
+        legend.key.height = unit(2, units = 'mm'),
+        legend.key.width = unit(2, units = 'mm'),
+        legend.title = element_blank(),
+        legend.text = element_text(family = 'serif', size = 10),
+        legend.background = element_rect(color = 'black', fill = 'white', linewidth = 0.2))+
+  xlab('Points')+
+  ylab('Replacement Rate')
+
+plot_sched_men
+
 # ******************************************************************************
 # SAVING ---------------------------------------------------------
 # ******************************************************************************
@@ -487,4 +593,10 @@ ggsave(plot8, filename = 'output/E/E4_claiming_density_women.pdf',
        height = 3, width = 5)
 
 ggsave(plot9, filename = 'output/E/E4_claiming_density_men.pdf',
+       height = 3, width = 5)
+
+ggsave(plot_sched_women, filename = 'output/E/E4_pension_schedule_women.pdf',
+       height = 3, width = 5)
+
+ggsave(plot_sched_men, filename = 'output/E/E4_pension_schedule_men.pdf',
        height = 3, width = 5)
