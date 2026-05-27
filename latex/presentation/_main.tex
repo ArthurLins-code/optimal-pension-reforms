@@ -125,11 +125,44 @@
 
 \end{frame}
 
-% \begin{frame}{Outline}
-%   \tableofcontents
-% \end{frame}
+\begin{frame}[label=literature]{Related Literature}
+\begin{enumerate}
+    \item \textbf{Effects of pension reforms on claiming and retirement}
+    \vspace{0.3em}
+
+    \begin{itemize}
+        \item Friedberg (2000), Manoli \& Weber (2016), Seibold (2021), Lalive et al (2023),  Giupponi (2025)
+        \vspace{0.3em}
+        \item[\textcolor{violet}{$\rightarrow$}] \textcolor{violet}{The reform allows us to disentangle responses to levels and slope}
+
+    \end{itemize}
+
+    \vspace{0.3em}
+
+    \item \textbf{Pension welfare analysis and optimal design}
+    \vspace{0.3em}
+
+    \begin{itemize}
+         \item Huggett and Parra (2010), Hosseini and Shourideh (2019), Giesecke and Jager (2021), Haller (2022), Kolsrud et al (2024), Seibold and Reck (2025), McKiernan (2022), Ndiaye and Yu (2025),
+        \item[\textcolor{violet}{$\rightarrow$}] \textcolor{violet}{Disentangle welfare effect of different policy parameters and inform optimal policy reform based on sufficient statistics}
+    \end{itemize}
+    \item \textbf{Sufficient statistics for welfare analysis and optimal policies}
+    \vspace{0.3em}
+    \begin{itemize}
+        \item Feldstein (1999), Chetty (2009), Kleven (2018), Hendren and Sprung-Keyser (2020), Bergstrom et al (2026)
+        \item[\textcolor{violet}{$\rightarrow$}] \textcolor{violet}{Use sufficient statistics framework to guide optimal local policy reform}
+    \end{itemize}
+\end{enumerate}
+\bfootnote{\hyperlink{findings}{\beamerbutton{Back}}}
+\end{frame}
+
+\begin{frame}{Outline}
+  \tableofcontents
+\end{frame}
 
 \section{Institutional Background and Data}
+
+\roadmapframe{1}
 
 \begin{frame}[label=lengthService]{Length-of-Service Pension Schedule}
     \begin{itemize}
@@ -193,6 +226,8 @@
 
 \section{Model}
 
+\roadmapframe{2}
+
 \begin{frame}[label=model]
 \frametitle{Agent's problem}
 \begin{itemize}
@@ -253,6 +288,8 @@
 \end{frame}
 
 \section{Empirical Strategy}
+
+\roadmapframe{3}
 
 % \begin{frame}[label=pdvOverview]{Empirical Strategy: Overview}
 % \begin{itemize}
@@ -489,7 +526,26 @@
 \bfootnote{\hyperlink{survey}{\beamerbutton{Survey Evidence}}}
 \end{frame}
 
+\begin{frame}[label=survey]{ELSI: Consumption by Normalized Points}
+    \centering
+    \includegraphics[height=0.72\textheight,keepaspectratio]{ELSI.jpg}
+    % Roughly constant,
+    % It doesnt seem like redistribution within beneficiaries was that important
+    \bfootnote{\hyperlink{wmvpfMvpf}{\beamerbutton{Back}} \hyperlink{pofResults}{\beamerbutton{POF}}}
+\end{frame}
+
+\begin{frame}[label=pofResults]{POF Results}
+    \centering
+    \includegraphics[width=\textwidth]{plot_expenditures_groups.pdf}
+    % Pension beneficiaries consumed 8.2% more
+    % Their marginal utility is therefore lower.
+    % Welfare effect < Mechanical effect
+    \bfootnote{\hyperlink{wmvpfMvpf}{\beamerbutton{Back}}}
+\end{frame}
+
 \section{Welfare Effect of the Reform}
+
+\roadmapframe{4}
 
 \begin{frame}[label=welfareGraph]{Welfare Weighted MVPF}
     \begin{figure}
@@ -504,6 +560,8 @@
 \end{frame}
 
 \section{Disentangling Responses to $\Delta b_L$ and $\Delta b_S$}
+
+\roadmapframe{5}
 
 \begin{frame}[label=twoCounterfactualReforms]{Optimal and two Counterfactual Reforms}
     \begin{itemize}
@@ -606,6 +664,20 @@
 %     % A little deceiving because there are individuals that claim that would not have claimed at all up to the end of 2018 (they are not in the counterfactual frequencies but are also anticipators)
 % \end{frame}
 
+\begin{frame}[label=pureLStep]{Disentangling Responses: Overview}
+    \begin{itemize}
+        \item We estimate the welfare effects of these pure reforms in 5 steps
+        \begin{enumerate}
+            \item \alt<2>{\textbf{Estimate frequencies under pure-L reform, redistributing postponement missing mass to future bunching regions}}{Estimate frequencies under pure-L reform, redistributing postponement missing mass to future bunching regions}
+            \item Estimate frequencies under pure-S reform, removing the postponement found in (1) from the actual bunching
+            \item Estimate the mechanical expenditures under both reforms but without responses, correcting for all selection
+            \item Estimate the expenditures under each reform, correcting only for anticipation (postponement) selection
+            \item Compute welfare effects and total costs from 1-4 and compute the WMVPFs
+        \end{enumerate}
+    \end{itemize}
+    \bfootnote{\hyperlink{twoCounterfactualReforms}{\beamerbutton{Back}} \hyperlink{pureL}{\beamerbutton{Pure-L Frequencies Details}}}
+\end{frame}
+
 \begin{frame}[label=pureLevelFrequencies]{Frequencies under Pure \textbf{Level} Reform:
     \only<1>{Q3 2015}\only<2>{Q4 2015}\only<3>{Q1 2016}\only<4>{Q2 2016}\only<5>{Q3 2016}\only<6>{Q4 2016}\only<7>{Q1 2017}\only<8>{Q2 2017}\only<9>{Q3 2017}\only<10>{Q4 2017}\only<11>{Q1 2018}\only<12>{Q2 2018}\only<13>{Q3 2018}}
      \only<1>{\includegraphics[width=.9\linewidth]{frequenciesLQ0.pdf}}\only<2>{\includegraphics[width=.9\linewidth]{frequenciesLQ1.pdf}}\only<3>{\includegraphics[width=.9\linewidth]{frequenciesLQ2.pdf}}\only<4>{\includegraphics[width=.9\linewidth]{frequenciesLQ3.pdf}}\only<5>{\includegraphics[width=.9\linewidth]{frequenciesLQ4.pdf}}\only<6>{\includegraphics[width=.9\linewidth]{frequenciesLQ5.pdf}}\only<7>{\includegraphics[width=.9\linewidth]{frequenciesLQ6.pdf}}\only<8>{\includegraphics[width=.9\linewidth]{frequenciesLQ7.pdf}}\only<9>{\includegraphics[width=.9\linewidth]{frequenciesLQ8.pdf}}\only<10>{\includegraphics[width=.9\linewidth]{frequenciesLQ9.pdf}}\only<11>{\includegraphics[width=.9\linewidth]{frequenciesLQ10.pdf}}\only<12>{\includegraphics[width=.9\linewidth]{frequenciesLQ11.pdf}}\only<13>{\includegraphics[width=.9\linewidth]{frequenciesLQ12.pdf}}
@@ -613,6 +685,8 @@
 \end{frame}
 
 \section{Optimal Reform}
+
+\roadmapframe{6}
 
 \begin{frame}[label=optimal]{Optimal Local Budget-Balanced Reform}
     \begin{itemize}
@@ -768,37 +842,6 @@
 \end{frame}
 
 \appendix
-
-\begin{frame}[label=literature]{Related Literature}
-\begin{enumerate}
-    \item \textbf{Effects of pension reforms on claiming and retirement}
-    \vspace{0.3em}
-
-    \begin{itemize}
-        \item Friedberg (2000), Manoli \& Weber (2016), Seibold (2021), Lalive et al (2023),  Giupponi (2025)
-        \vspace{0.3em}
-        \item[\textcolor{violet}{$\rightarrow$}] \textcolor{violet}{The reform allows us to disentangle responses to levels and slope}
-
-    \end{itemize}
-
-    \vspace{0.3em}
-
-    \item \textbf{Pension welfare analysis and optimal design}
-    \vspace{0.3em}
-
-    \begin{itemize}
-         \item Huggett and Parra (2010), Hosseini and Shourideh (2019), Giesecke and Jager (2021), Haller (2022), Kolsrud et al (2024), Seibold and Reck (2025), McKiernan (2022), Ndiaye and Yu (2025),
-        \item[\textcolor{violet}{$\rightarrow$}] \textcolor{violet}{Disentangle welfare effect of different policy parameters and inform optimal policy reform based on sufficient statistics}
-    \end{itemize}
-    \item \textbf{Sufficient statistics for welfare analysis and optimal policies}
-    \vspace{0.3em}
-    \begin{itemize}
-        \item Feldstein (1999), Chetty (2009), Kleven (2018), Hendren and Sprung-Keyser (2020), Bergstrom et al (2026)
-        \item[\textcolor{violet}{$\rightarrow$}] \textcolor{violet}{Use sufficient statistics framework to guide optimal local policy reform}
-    \end{itemize}
-\end{enumerate}
-\bfootnote{\hyperlink{findings}{\beamerbutton{Back}}}
-\end{frame}
 
 \begin{frame}[label=retirementBrazil]{Retirement Pensions in Brazil}
     \begin{itemize}
@@ -987,37 +1030,6 @@
     \end{itemize}
     \bfootnote{\hyperlink{costReform}{\beamerbutton{Back}}}
     % The estimate for the average benefit that would have been paid in the absence of the reform at point p and quarter t is estimated as bar b^o_{p,t}-\beta_{t,p}
-\end{frame}
-
-\begin{frame}[label=survey]{ELSI: Consumption by Normalized Points}
-    \centering
-    \includegraphics[width=\textwidth]{ELSI.jpg}
-    % Roughly constant,
-    % It doesnt seem like redistribution within beneficiaries was that important
-    \bfootnote{\hyperlink{wmvpfMvpf}{\beamerbutton{Back}} \hyperlink{pofResults}{\beamerbutton{POF}}}
-\end{frame}
-
-\begin{frame}[label=pofResults]{POF Results}
-    \centering
-    \includegraphics[width=\textwidth]{plot_expenditures_groups.pdf}
-    % Pension beneficiaries consumed 8.2% more
-    % Their marginal utility is therefore lower.
-    % Welfare effect < Mechanical effect
-    \bfootnote{\hyperlink{wmvpfMvpf}{\beamerbutton{Back}}}
-\end{frame}
-
-\begin{frame}[label=pureLStep]{Disentangling Responses: Overview}
-    \begin{itemize}
-        \item We estimate the welfare effects of these pure reforms in 5 steps
-        \begin{enumerate}
-            \item \alt<2>{\textbf{Estimate frequencies under pure-L reform, redistributing postponement missing mass to future bunching regions}}{Estimate frequencies under pure-L reform, redistributing postponement missing mass to future bunching regions}
-            \item Estimate frequencies under pure-S reform, removing the postponement found in (1) from the actual bunching
-            \item Estimate the mechanical expenditures under both reforms but without responses, correcting for all selection
-            \item Estimate the expenditures under each reform, correcting only for anticipation (postponement) selection
-            \item Compute welfare effects and total costs from 1-4 and compute the WMVPFs
-        \end{enumerate}
-    \end{itemize}
-    \bfootnote{\hyperlink{twoCounterfactualReforms}{\beamerbutton{Back}} \hyperlink{pureL}{\beamerbutton{Pure-L Frequencies Details}}}
 \end{frame}
 
 \begin{frame}[label=pureSlopeFrequencies]{Frequencies under Pure \textbf{Slope} Reform:
