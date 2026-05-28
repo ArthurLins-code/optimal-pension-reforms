@@ -108,7 +108,7 @@
     \item What was the reform's welfare effect?
     \begin{itemize}
         %\item $MVPF=WTP/Cost$ is the beneficiaries' willingness to pay for each \$1 spent on the reform (Hendren and Sprung-Keyser, 2020)
-        \item We find that $MVPF \approx 0.31$ and $WMVPF\equiv  \eta MVPF\approx 0.26$
+        \item We find that $MVPF \approx 0.26$ and $WMVPF\equiv  \eta MVPF\approx 0.21$
         \item Where $\eta$ is the average welfare weight on beneficiaries of the reform
         \item $WMVPF$ is the welfare effect for each \$1 spent
     \end{itemize}
@@ -116,9 +116,9 @@
     \item Bergstrom, Dodds and Rios (2026) show that the optimal (welfare-maximizing) reform should spend on (raise revenue from) policies with highest (lowest) welfare per internal cost (WPIC)
     \begin{itemize}
         %\item Policymaker should spend on (raise revenue from) policies with highest (lowest) WMVPFs (Bergstrom, Dodds and Rios, 2026)
-        \item For budget-neutral, WPIC = WMVPF $\Rightarrow$ increase benefit slope and decrease benefit level
+        \item For budget-neutral, WPIC = WMVPF $\Rightarrow$ spend on benefit level (highest WMVPF policy)
         %\item (Preliminary) Optimal reform consists of increasing benefit slope and decreasing benefit level
-        \item For expenditure financed by payroll tax, WPIC = WNSBD $\Rightarrow$ increase benefit slope and finance it with the payroll tax
+        \item For expenditure financed by payroll tax, WPIC = WNSBD $\Rightarrow$ increase benefit slope (highest WNSBD policy)
     \end{itemize}
 \end{itemize}
 \bfootnote{\hyperlink{literature}{\beamerbutton{Literature}}}
@@ -685,12 +685,13 @@
     \begin{itemize}
         \item Which local budget-balanced reform increases welfare the most?
         \begin{itemize}
-            \item Local in the sense that the government can only increase costs and revenues by a fixed amount set to $C(b^c,b^a)\approx R\$250 B$
+            \item Local in the sense that the government can only increase costs and revenues by $min\{C(b^c,b^S),C(b^c,b^L)\}\approx R\$2.5 B$
         \end{itemize}
-        \item $WMVPF_{b_L} \approx 0.68<0.71\approx WMVPF_{b_S}$
+        \item $WMVPF_{b_S} \approx -2.43<1.56\approx WMVPF_{b_L}$:
         \begin{itemize}
-            \item $\Delta b_S^*=0.081$: 350\% increase (baseline was 0.023)
-            \item $\Delta b_L^*=-791$: 26\% drop (baseline was 3014.76)
+            \item $\Delta b_L^*=0.056$: Spend on the highest WMVPF parameter
+            \item $\Delta b_S^*=0.023$: Raise revenue by \underline{increasing} the slope
+            % b_S negative WMVPF indicates that increasing b_S, which increases welfare, decreases expenditures. So to raise revenue, we would increase b_S and welfare at the same time. 
         \end{itemize}
         \item Implementation advantage:
         \begin{itemize}
@@ -716,7 +717,7 @@
   ]
 
     % Axis labels
-    \node[anchor=south, rotate=0] at (axis description cs:0,1) {$b$};
+    \node[anchor=south, rotate=0] at (axis description cs:0,1) {$b/w$};
     \node[anchor=south, rotate=0] at (axis description cs:1.05,-0.07) {$p$};
 
     % Black baseline line
@@ -726,7 +727,7 @@
     \addplot[very thick,col_after,domain=0:2] {1.1+1.5*x};
 
     % Orange horizontal line
-    \addplot[very thick,col_after,domain=2:3.5] {-6.2+4.5*x};
+    \addplot[very thick,col_after,domain=2:3] {-4.2+4.5*x};
 
     %\node[col_after] at (axis cs:3,4.6) {$\Delta b_S$};
 
@@ -741,30 +742,29 @@
 \end{tikzpicture}
 \end{frame}
 
-\begin{frame}[label=expenditure]{The Optimal Expenditure Reform}
-    \begin{itemize}
-        \item Suppose instead that the government would like to expand Social Security, financing it with payroll taxes
-        \item Bergstrom et al (2026) show that in that case the optimal expenditure would be on the parameter with the largest $WNSBD$, i.e.:
+\begin{frame}[label=expenditure]{The Optimal Mechanical Expenditure Reform}
+    \begin{itemize}\item Suppose the government evaluates local reforms to Social Security, using payroll taxes to close any mechanical fiscal gap
+\item Relevant statistic is the welfare gain net of the payroll-tax adjustment per dollar of mechanical cost (Garcia and Heckman, 2022):
         {
         \begin{align*}
             WNSBD_p= \frac{WE_p-WMVPF_T*TC_p}{ME_p}, \ \text{for} \ p=b_L,b_S
         \end{align*}}
         %NSBD net social benefit per dollar
-        % How much welfare would increase if we spent one dollar with p and then financed that expenditure with a payroll tax increase
+        % How much welfare would increase if we spent one dollar with p and then financed that expenditure and its fiscal externalities with a payroll tax increase
         \item Where $WMVPF_T$ is the payroll tax WMVPF (Lobel, 2025)
         % \begin{itemize}
         %     \item Combining findings from Lobel (2025) + POF's consumption measures, we calculate $WMVPF_T = 1.53$
         % \end{itemize}
         \item All other inputs come directly from the above analysis
         \begin{itemize}
-            \item $WNSBD_{b_S}\approx -0.96>-1.04\approx WNSBD_{b_L}$
-            \item Optimal reform: $\Delta b_S^*=.081$ and finance it with a payroll tax increase
+            \item $WNSBD_{b_S}\approx 1.35>0.01\approx WNSBD_{b_L}$
+            \item Optimal reform: $\Delta b_S^*=.023$ and cut payroll taxes with savings
         \end{itemize}
     \end{itemize}
     \bfootnote{\hyperlink{payroll}{\beamerbutton{Details}} }
 \end{frame}
 
-\begin{frame}{Optimal Expenditure Reform Financed by Payroll}
+\begin{frame}{Optimal Expenditure Reform with Payroll-Tax Rebate}
 \centering
 \begin{tikzpicture}
   \begin{axis}[
@@ -809,14 +809,14 @@
         \item We document large behavioral responses to the 2015 pension reform
         \item These responses, alongside the relatively higher consumption of beneficiaries, yield a low welfare effect per dollar spent
         \begin{itemize}
-            \item WMVPF = 0.26 and MVPF = 0.32
+            \item WMVPF = 0.21 and MVPF = 0.26
         \end{itemize}
-        \item The welfare effect per dollar is larger for $b_S$ than for $b_L$ implying that the optimal budget-neutral reform would
+        \item The welfare effect per dollar is larger for $b_L$ than for $b_S$ implying that the optimal budget-neutral reform would
         \begin{itemize}
-            \item Increase the benefit slope
-            \item Decrease the benefit level
+            \item Raise revenue from the benefit slope
+            \item Spend on the benefit level
         \end{itemize}
-        \item If the government wants to spend optimally closing the budget with payroll taxes, it should increase the slope
+        \item If the government wants to spend optimally closing the budget with payroll taxes, it should spend with the benefit slope
     \end{itemize}
 \end{frame}
 %-----------------------------------------------------------
@@ -1793,12 +1793,13 @@
     \begin{itemize}
         \item Which schedule reform increases welfare the most?
         \begin{itemize}
-            \item Local in the sense that the government can only increase costs and revenues by a fixed amount set to $C(b^c,b^a)$
+            \item Local in the sense that the government can only increase costs and revenues by a fixed amount set to $\epsilon \equiv min\{C(b^c,b^S),C(b^c,b^L)\}$
+            % This is because we dont want to infer beyond the variation we observe in the pure reforms. 
         \end{itemize}
         \item If the policymaker needs to balance its budget with $b_S$ and $b_L$:
         \begin{itemize}
-            \item Increase $b_S$ so that $dC/db_S * \Delta b_S^* = C(b^c,b^a)$
-            \item Decrease $b_L$ so that $dC/db_L * \Delta b_L^* = -C(b^c,b^a)$
+            \item Raise revenue with $b_S$ so that $dC/db_S * \Delta b_S^* = -\epsilon$
+            \item Spend with $b_L$ so that $dC/db_L * \Delta b_L^* = \epsilon$
         \end{itemize}
         \item Estimate $dC/db_S$ ($dC/db_L$) with $C(b,b_S)/\Delta b_S$ ($C(b,b_L)/\Delta b_L$)
         \item Implementation advantage:
