@@ -101,3 +101,34 @@
 \definecolor{col_before}{HTML}{489c74}
 \definecolor{col_after}{HTML}{cc640c}
 
+\newcommand{\roadmapdot}[2]{%
+  \ifnum#1<#2
+    \fill[col_before] (#1,0) circle (0.105);
+  \else
+    \ifnum#1=#2
+      \fill[col_after] (#1,0) circle (0.13);
+    \else
+      \fill[black!18] (#1,0) circle (0.105);
+    \fi
+  \fi
+}
+
+\newcommand{\roadmapdots}[1]{%
+  \begin{tikzpicture}[x=0.85cm,y=0.85cm,baseline]
+    \foreach \i in {1,...,6} {\roadmapdot{\i}{#1}}
+  \end{tikzpicture}
+}
+
+\newcommand{\roadmapitem}[3]{%
+  \ifnum#2=#1
+    \item \textbf{\textcolor{col_after}{#3}}
+  \else
+    \item #3
+  \fi
+}
+
+\newcommand{\roadmapframe}[1]{%
+  \begin{frame}{Roadmap}
+    \tableofcontents[currentsection]
+  \end{frame}
+}
