@@ -22,7 +22,7 @@
 \begin{frame}
 \frametitle{Motivation}
     \begin{itemize}
-        \item Pension reform has become a central policy issue also in developed countries, but Brazil is an interesting case
+        \item Pension reform has become a central issue around the globe, but Brazil is an interesting case
         \begin{itemize}
             \item Brazil spends heavily on pensions: 10.4\% of GDP in 2019 (OECD average: 7.7\%)
             \item This high spending occurs despite a relatively low old-age dependency ratio: 15.8\% in 2022 (OECD average: 31.3\%)
@@ -271,7 +271,7 @@
 
 \begin{frame}{Welfare Analysis}
     \begin{itemize}
-        \item By the envelope theorem, the welfare effect per dollar spent in the reform from $b^c$ to $b^a$ is:
+        \item The welfare effect per dollar spent in the reform from $b^c$ to $b^a$, by the envelope theorem, is:
         \begin{align*}
             WMVPF(b^c,b^a)=\frac{\sum_t \sum_i E\left(\beta^t \frac{\partial u(x_{it})}{\partial c_{it}}[b^a(x^c_{it})-b^c(x^c_{it})]\right)}{C(b^c,b^a)}
         \end{align*}
@@ -376,7 +376,7 @@
 
 \begin{frame}[label=MEandFE]{Mechanical Effect and Willingness-to-Pay}
     \begin{itemize}
-        \item WTP is captured by mechanical effect (envelope theorem)
+        \item The mechanical effect is:
     \end{itemize}
     {\small
     \begin{align*}
@@ -527,21 +527,13 @@
 \bfootnote{\hyperlink{survey}{\beamerbutton{Survey Evidence}}}
 \end{frame}
 
-\begin{frame}[label=survey]{ELSI: Consumption by Normalized Points}
-    \centering
-    \includegraphics[height=0.72\textheight,keepaspectratio]{ELSI.jpg}
-    % Roughly constant,
-    % It doesnt seem like redistribution within beneficiaries was that important
-    \bfootnote{\hyperlink{wmvpfMvpf}{\beamerbutton{Back}} \hyperlink{pofResults}{\beamerbutton{POF}}}
-\end{frame}
-
 \begin{frame}[label=pofResults]{POF Results}
     \centering
     \includegraphics[width=\textwidth]{plot_expenditures_groups.pdf}
     % Pension beneficiaries consumed 8.2% more
     % Their marginal utility is therefore lower.
     % Welfare effect < Mechanical effect
-    \bfootnote{\hyperlink{wmvpfMvpf}{\beamerbutton{Back}}}
+    \bfootnote{\hyperlink{survey}{\beamerbutton{ELSI}}}
 \end{frame}
 
 
@@ -553,7 +545,7 @@
         \includegraphics[width=0.8\linewidth]{I6_plot_cumsum_actual_reform_multby20_sample.pdf}
     \end{figure}
     \begin{itemize}
-        \item $WMVPF \approx 0.21$ (>3 for BF)
+        \item $MVPF \approx 0.26$ (>3 for BF)
     \end{itemize}
 \end{frame}
 
@@ -744,7 +736,7 @@
 \end{frame}
 
 \begin{frame}[label=expenditure]{The Optimal Mechanical Expenditure Reform}
-    \begin{itemize}\item Suppose the government evaluates local reforms to Social Security, using payroll taxes to close any mechanical fiscal gap
+    \begin{itemize}\item Suppose the government evaluates which parameter to spend mechanically, using payroll taxes to close any fiscal gap
 \item Relevant statistic is the welfare gain net of the payroll-tax adjustment per dollar of mechanical cost (Garcia and Heckman, 2022):
         {
         \begin{align*}
@@ -752,7 +744,7 @@
         \end{align*}}
         %NSBD net social benefit per dollar
         % How much welfare would increase if we spent one dollar with p and then financed that expenditure and its fiscal externalities with a payroll tax increase
-        \item Where $WMVPF_T$ is the payroll tax WMVPF (Lobel, 2025)
+        \item Where $WMVPF_T$ is the payroll tax WMVPF
         % \begin{itemize}
         %     \item Combining findings from Lobel (2025) + POF's consumption measures, we calculate $WMVPF_T = 1.53$
         % \end{itemize}
@@ -817,7 +809,7 @@
             \item Raise revenue from the benefit slope
             \item Spend on the benefit level
         \end{itemize}
-        \item If the government wants to spend optimally closing the budget with payroll taxes, it should spend on the benefit slope
+        \item If the government wants to spend mechanically closing the budget with payroll taxes, it should spend on the benefit slope
     \end{itemize}
 \end{frame}
 %-----------------------------------------------------------
@@ -1024,6 +1016,14 @@
     \end{itemize}
     \bfootnote{\hyperlink{costReform}{\beamerbutton{Back}}}
     % The estimate for the average benefit that would have been paid in the absence of the reform at point p and quarter t is estimated as bar b^o_{p,t}-\beta_{t,p}
+\end{frame}
+
+\begin{frame}[label=survey]{ELSI: Consumption by Normalized Points}
+    \centering
+    \includegraphics[height=0.72\textheight,keepaspectratio]{ELSI.jpg}
+    % Roughly constant,
+    % It doesnt seem like redistribution within beneficiaries was that important
+    \bfootnote{\hyperlink{pofResults}{\beamerbutton{Back}}}
 \end{frame}
 
 \begin{frame}[label=pureSlopeFrequencies]{Frequencies under Pure \textbf{Slope} Reform:
