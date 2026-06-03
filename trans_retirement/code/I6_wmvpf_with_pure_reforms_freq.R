@@ -318,14 +318,11 @@ out_actual <- dt_wmvpf[, .(
   `ME` = counterfactual_benefits_new - counterfactual_benefits,
   `TC` = total_benefits_payment - counterfactual_benefits,
   `FE` = total_benefits_payment - counterfactual_benefits_new,
-  net_cost, mech_cost, fiscal_ext, welfare,
-  ME_cumsum= cumsum(mech_cost),
-  TC_cumsum= cumsum(net_cost),
-  WE_cumsum= cumsum(welfare)
+  net_cost, mech_cost, fiscal_ext, welfare
 )]
 
 out_actual[, (names(out_actual)[names(out_actual) != 'dist_reform']) :=
-  lapply(.SD, function(x) round(x / 1e6, 2)),
+  lapply(.SD, function(x) round(x / 1e9, 2)),
   .SDcols = names(out_actual)[names(out_actual) != 'dist_reform']
 ]
 
@@ -341,7 +338,7 @@ p_actual <- ggplot(out_actual, aes(x = dist_reform)) +
   scale_x_continuous(breaks = seq(2015, 2019, 1),
                      minor_breaks = seq(2015, 2019.25, 0.25),
                      guide = guide_axis(minor.ticks = TRUE)) +
-  scale_y_continuous(labels = scales::label_dollar(prefix = 'R$ ', suffix = ' M')) +
+  scale_y_continuous(labels = scales::label_dollar(prefix = 'R$ ', suffix = ' B')) +
   scale_color_brewer(palette = 'Set1',
                      labels = c('1' = 'Mechanical Effect',
                                 '2' = 'Total Cost',
@@ -373,47 +370,6 @@ p_actual <- ggplot(out_actual, aes(x = dist_reform)) +
 
 p_actual
 
-p_actual_cumsum <- ggplot(out_actual, aes(x = dist_reform)) +
-  geom_line(aes(y = ME_cumsum, color = factor(1)), linetype = 'solid', linewidth = 0.4) +
-  geom_line(aes(y = TC_cumsum, color = factor(2)), linetype = 'solid', linewidth = 0.4) +
-  geom_line(aes(y = WE_cumsum, color = factor(3)), linetype = 'longdash', linewidth = 0.4) +
-  geom_point(aes(y = ME_cumsum, color = factor(1)), shape = 17) +
-  geom_point(aes(y = TC_cumsum, color = factor(2)), shape = 17) +
-  geom_point(aes(y = WE_cumsum, color = factor(3)), shape = 17) +
-  scale_x_continuous(breaks = seq(2015, 2019, 1),
-                     minor_breaks = seq(2015, 2019.25, 0.25),
-                     guide = guide_axis(minor.ticks = TRUE)) +
-  scale_y_continuous(labels = scales::label_dollar(prefix = 'R$ ', suffix = ' M')) +
-  scale_color_brewer(palette = 'Set1',
-                     labels = c('1' = 'Mechanical Effect',
-                                '2' = 'Total Cost',
-                                '3' = 'Welfare Effect')) +
-  theme_classic() +
-  guides(color = guide_legend(nrow = 3, order = 1)) +
-  theme(axis.title.x = element_text(family = 'serif'),
-        axis.title.y = element_text(family = 'serif'),
-        axis.text.x  = element_text(family = 'serif'),
-        axis.text.y  = element_text(family = 'serif'),
-        axis.line     = element_line(linewidth = 0.3),
-        axis.ticks    = element_line(linewidth = 0.3),
-        plot.title    = element_text(hjust = 0.5, family = 'serif', size = 12),
-        panel.grid.minor   = element_blank(),
-        panel.grid.major.x = element_blank(),
-        panel.grid.major.y = element_line(linewidth = 0.3),
-        legend.position      = c(0, 1),
-        legend.justification = c(0, 1),
-        legend.direction     = 'horizontal',
-        legend.key.height = unit(0, units = 'mm'),
-        legend.key.width  = unit(0, units = 'mm'),
-        legend.spacing    = unit(0, units = 'mm'),
-        legend.title      = element_blank(),
-        legend.text       = element_text(family = 'serif', size = 10),
-        legend.background = element_rect(color = 'black', fill = 'white', linewidth = 0.2)) +
-  xlab('Quarter') +
-  ylab(NULL) +
-  ggtitle(paste0('Actual Reform: WMVPF = ', round(wmvpf_actual, 3)))
-
-p_actual_cumsum
 # ########################################################################
 # ########################################################################
 #
@@ -992,25 +948,20 @@ message("Saved: output/I/I6_summary", SUFFIX, ".csv")
 # Plots
 ggsave(p_actual,
        filename = paste0('output/I/I6_plot_actual_reform', SUFFIX, '.pdf'),
-       height = 2.8, width = 4.2)
+       height = 3.8, width = 5)
 message("Saved: output/I/I6_plot_actual_reform", SUFFIX, ".pdf")
-
-ggsave(p_actual_cumsum,
-       filename = paste0('output/I/I6_plot_cumsum_actual_reform', SUFFIX, '.pdf'),
-       height = 2.8, width = 4.2)
-message("Saved: output/I/I6_plot_cumsum_actual_reform", SUFFIX, ".pdf")
 
 if (PURE_REFORM_AVAILABLE && exists("p_pure_L")) {
   ggsave(p_pure_L,
          filename = paste0('output/I/I6_plot_pure_L_reform', SUFFIX, '.pdf'),
-         height = 2.8, width = 4.2)
+         height = 3.8, width = 5)
   message("Saved: output/I/I6_plot_pure_L_reform", SUFFIX, ".pdf")
 }
 
 if (PURE_REFORM_AVAILABLE && exists("p_pure_S")) {
   ggsave(p_pure_S,
          filename = paste0('output/I/I6_plot_pure_S_reform', SUFFIX, '.pdf'),
-         height = 2.8, width = 4.2)
+         height = 3.8, width = 5)
   message("Saved: output/I/I6_plot_pure_S_reform", SUFFIX, ".pdf")
 }
 
@@ -1018,14 +969,14 @@ if (PURE_REFORM_AVAILABLE && exists("p_pure_S")) {
 if (PURE_REFORM_AVAILABLE && exists("p_pure_L_t")) {
   ggsave(p_pure_L_t,
          filename = paste0('output/I/I6_plot_pure_L_reform_per_qtr', SUFFIX, '.pdf'),
-         height = 2.8, width = 4.2)
+         height = 3.8, width = 5)
   message("Saved: output/I/I6_plot_pure_L_reform_per_qtr", SUFFIX, ".pdf")
 }
 
 if (PURE_REFORM_AVAILABLE && exists("p_pure_S_t")) {
   ggsave(p_pure_S_t,
          filename = paste0('output/I/I6_plot_pure_S_reform_per_qtr', SUFFIX, '.pdf'),
-         height = 2.8, width = 4.2)
+         height = 3.8, width = 5)
   message("Saved: output/I/I6_plot_pure_S_reform_per_qtr", SUFFIX, ".pdf")
 }
 
@@ -1035,9 +986,9 @@ MULT <- 20
 
 # Actual reform cumsum ×20
 out_actual_x20 <- copy(out_actual)
-out_actual_x20[, `:=`(ME_cumsum = ME_cumsum * MULT,
-                       TC_cumsum = TC_cumsum * MULT,
-                       WE_cumsum = WE_cumsum * MULT)]
+out_actual_x20[, `:=`(ME_cumsum = ME * MULT,
+                       TC_cumsum = TC * MULT,
+                       WE_cumsum = welfare * MULT)]
 p_actual_cumsum_x20 <- ggplot(out_actual_x20, aes(x = dist_reform)) +
   geom_line(aes(y = ME_cumsum, color = factor(1)), linetype = 'solid', linewidth = 0.4) +
   geom_line(aes(y = TC_cumsum, color = factor(2)), linetype = 'solid', linewidth = 0.4) +
@@ -1048,7 +999,7 @@ p_actual_cumsum_x20 <- ggplot(out_actual_x20, aes(x = dist_reform)) +
   scale_x_continuous(breaks = seq(2015, 2019, 1),
                      minor_breaks = seq(2015, 2019.25, 0.25),
                      guide = guide_axis(minor.ticks = TRUE)) +
-  scale_y_continuous(labels = scales::label_dollar(prefix = 'R$ ', suffix = ' M')) +
+  scale_y_continuous(labels = scales::label_dollar(prefix = 'R$ ', suffix = ' B')) +
   scale_color_brewer(palette = 'Set1',
                      labels = c('1' = 'Mechanical Effect',
                                 '2' = 'Total Cost',
@@ -1071,10 +1022,9 @@ p_actual_cumsum_x20 <- ggplot(out_actual_x20, aes(x = dist_reform)) +
         legend.text       = element_text(family = 'serif', size = 10)) +
   xlab('Quarter') + ylab(NULL) +
   ggtitle(paste0('Actual Reform: WMVPF = ', round(wmvpf_actual, 3)))
-
 ggsave(p_actual_cumsum_x20,
        filename = paste0('output/I/I6_plot_cumsum_actual_reform_multby20', SUFFIX, '.pdf'),
-       height = 2.8, width = 4.2)
+       height = 3.8, width = 5)
 message("Saved: output/I/I6_plot_cumsum_actual_reform_multby20", SUFFIX, ".pdf")
 
 # Pure reform cumulative ×20
@@ -1106,7 +1056,7 @@ if (PURE_REFORM_AVAILABLE && exists("out_L")) {
 
   ggsave(p_pure_L_x20,
          filename = paste0('output/I/I6_plot_pure_L_reform_multby20', SUFFIX, '.pdf'),
-         height = 2.8, width = 4.2)
+         height = 3.8, width = 5)
   message("Saved: output/I/I6_plot_pure_L_reform_multby20", SUFFIX, ".pdf")
 }
 
@@ -1138,7 +1088,7 @@ if (PURE_REFORM_AVAILABLE && exists("out_S")) {
 
   ggsave(p_pure_S_x20,
          filename = paste0('output/I/I6_plot_pure_S_reform_multby20', SUFFIX, '.pdf'),
-         height = 2.8, width = 4.2)
+         height = 3.8, width = 5)
   message("Saved: output/I/I6_plot_pure_S_reform_multby20", SUFFIX, ".pdf")
 }
 
