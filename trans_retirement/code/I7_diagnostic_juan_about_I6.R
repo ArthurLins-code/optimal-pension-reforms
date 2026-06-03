@@ -302,7 +302,47 @@ if ("delta_ben" %in% names(g5)) {
 }
 
 # ==============================================================================
-# PART 7: Save outputs
+# PART 7: Counterfactual benefits b(x) by points_norm (I6 "show Juan" table)
+#
+# Lifted from I6 PART 1, Step D.  I6 computes b(x)_t = cumsum_t( sum_p
+# delta_ben * claims_c ); here the inner sum is broken out BY points_norm at a
+# fixed quarter (dist_reform == 9) so Juan can see how the counterfactual
+# benefit distributes across points_norm.
+#   delta_ben        = avg_benefits_pv - point_estimate   (G4, period = 'old')
+#   num_claims_count = claims_c                            (F-stage counts)
+# ==============================================================================
+
+message("\n--- PART 7: counterfactual b(x) by points_norm (I6 Step D table) ---")
+
+MAX_HORIZON <- 13L   # same horizon as I6
+
+# F-stage counterfactual counts + G4 selection-corrected benefits (sample-aware)
+cf_counts <- fread(paste0('output/F/new_counterfactual_claim_counts', SUFFIX, '.csv'))
+setnames(cf_counts, c("t", "p"), c("dist_reform", "points_norm"), skip_absent = TRUE)
+results_selection <- fread(paste0('output/G/G4_table_results', SUFFIX, '.csv'))
+
+aux1 <- results_selection[period == 'old' & dist_reform >= 0 & dist_reform <= MAX_HORIZON,
+  .(dist_reform, points_norm, delta_ben = (avg_benefits_pv - point_estimate))]
+
+aux2 <- cf_counts[dist_reform %in% 0:MAX_HORIZON,
+  .(dist_reform, points_norm, num_claims_count = claims_c)]
+
+aux3_provisory <- full_join(aux1, aux2, by = c('dist_reform', 'points_norm')) %>%
+  .[, prod := delta_ben * num_claims_count] %>%
+  .[, .(counterfactual_benefits_t = sum(prod, na.rm = TRUE)),
+    by = c("dist_reform", "points_norm")]
+
+tabela_cntrf <- aux3_provisory[dist_reform == 9 & points_norm <= 15 & points_norm >= -6]
+
+message("\nCounterfactual b(x) by points_norm at dist_reform = 9:")
+print(tabela_cntrf[order(points_norm)], digits = 6)
+
+out_cntrf <- paste0('output/I/I7_diagnostic_cntrf_by_points_norm', SUFFIX, '.csv')
+fwrite(tabela_cntrf[order(points_norm)], out_cntrf)
+message("Saved: ", out_cntrf)
+
+# ==============================================================================
+# PART 8: Save outputs
 # ==============================================================================
 
 out_micro <- paste0('output/I/I7_diagnostic_by_points_norm', SUFFIX, '.csv')
