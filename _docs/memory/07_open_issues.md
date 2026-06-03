@@ -97,6 +97,12 @@ Itens que precisam de decisão, input externo, ou investigação. Ordenados por 
 - Pivot point escolhido em `p̄` ou em algum ponto fixo abaixo?
 - **Perguntar:** robustez a diferentes pivots.
 
+### O12. Stale worktree metadata dirs in `.git/worktrees/`
+- **Sintoma:** 3 diretórios órfãos em `.git/worktrees/` (`ecstatic-lederberg-fc835b`, `interesting-engelbart-520505`, `stupefied-nightingale-3dbe65`) não puderam ser deletados por lock do OneDrive.
+- Git já não os rastreia (`git worktree prune` marcou como inválidos, mas falhou ao deletar).
+- **Ação:** deletar manualmente pelo File Explorer (ou pausar OneDrive sync antes). Depois rodar `git worktree prune` para confirmar.
+- **Também:** deletar worktree `naughty-bardeen-3342ff` e branch `claude/naughty-bardeen-3342ff` quando a sessão Claude Code que o criou terminar.
+
 ## Decisões já tomadas (arquivo)
 
 - F7 (frequências) é canônico, F6 (densidades) deprecated.

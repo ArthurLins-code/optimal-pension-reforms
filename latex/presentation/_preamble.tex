@@ -1,0 +1,134 @@
+\documentclass[xcolor=pdftex,dvipsnames,table,notheorems]{beamer}
+\usetheme{Madrid}
+\usepackage{lmodern}
+\setbeamercovered{dynamic}
+\usepackage{wrapfig}
+\setbeamertemplate{navigation symbols}{}
+\usepackage[absolute,overlay]{textpos}
+%\usepackage{hyperref}
+\usepackage{graphics}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath, amssymb,mathtools}
+\usepackage[ansinew]{inputenc}
+\usepackage{hyperref}
+\usepackage{bbm} 
+\usepackage{graphicx}
+\usepackage{appendixnumberbeamer}
+\usepackage{color}
+%\usepackage{xcolor}
+\usepackage{subcaption}
+\usepackage{centernot}
+\usepackage{booktabs}
+\usepackage{threeparttable}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage{comment}
+\setbeamercovered{invisible}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{soul}
+\usepackage{xcolor}
+\usepackage{comment}
+
+\newcommand\independent{\protect\mathpalette{\protect\independenT}{\perp}}
+\def\independenT#1#2{\mathrel{\rlap{$#1#2$}\mkern2mu{#1#2}}}
+
+\usepackage{amsthm}
+\setbeamertemplate{theorems}[numbered]
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}{Corollary}[theorem]
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{assumption}{Assumption}
+\newtheorem{definition}{Definition}
+
+
+\newcommand*{\boxedcolor}{red}
+\makeatletter
+\renewcommand{\boxed}[1]{\textcolor{\boxedcolor}{%
+  \fbox{\normalcolor\m@th$\displaystyle#1$}}}
+  
+  \newcommand{\sym}[1]{\rlap{#1}}
+
+\let\estinput=\input% define a new input command so that we can still flatten the document
+
+\newcommand{\estwide}[3]{
+		\vspace{.85ex}{
+			\begin{tabular*}
+			{\textwidth}{@{\hskip\tabcolsep\extracolsep\fill}l*{#2}{#3}}
+			\toprule
+			\estinput{#1}
+			\bottomrule
+			\addlinespace[.85ex]
+			\end{tabular*}
+			}
+		}
+
+\newcommand\norm[1]{\left\lVert#1\right\rVert}
+
+
+\captionsetup[figtext]{justification=justified,font=footnotesize}
+
+\newcommand{\figtext}[1]{%
+% 	\vspace{-1.9ex}
+\captionsetup{options=figtext}
+\caption*{\hspace{6pt}\hangindent=1.5em #1}
+}
+\newcommand{\Figtext}[1]{%
+\begin{tablenotes}[para,flushleft]
+\hspace{6pt}
+\hangindent=1.85em
+#1
+\end{tablenotes}
+}
+\newcommand{\Fignote}[1]{\Figtext{\emph{Note:~}~#1}}
+\newcommand{\Figsource}[1]{\Figtext{\emph{Source:~}~#1}}
+
+
+\usecolortheme[named=Blue]{structure}
+
+\setbeamertemplate{caption}[numbered]{}
+
+
+\newcommand\bfootnote[1]{%
+  \begingroup
+  \renewcommand\thefootnote{}\footnote{#1}%
+  \addtocounter{footnote}{-1}%
+  \endgroup
+}
+
+\definecolor{col_before}{HTML}{489c74}
+\definecolor{col_after}{HTML}{cc640c}
+
+\newcommand{\roadmapdot}[2]{%
+  \ifnum#1<#2
+    \fill[col_before] (#1,0) circle (0.105);
+  \else
+    \ifnum#1=#2
+      \fill[col_after] (#1,0) circle (0.13);
+    \else
+      \fill[black!18] (#1,0) circle (0.105);
+    \fi
+  \fi
+}
+
+\newcommand{\roadmapdots}[1]{%
+  \begin{tikzpicture}[x=0.85cm,y=0.85cm,baseline]
+    \foreach \i in {1,...,6} {\roadmapdot{\i}{#1}}
+  \end{tikzpicture}
+}
+
+\newcommand{\roadmapitem}[3]{%
+  \ifnum#2=#1
+    \item \textbf{\textcolor{col_after}{#3}}
+  \else
+    \item #3
+  \fi
+}
+
+\newcommand{\roadmapframe}[1]{%
+  \begin{frame}{Roadmap}
+    \tableofcontents[currentsection]
+  \end{frame}
+}
