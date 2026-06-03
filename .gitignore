@@ -57,6 +57,11 @@ data_local/
 # --- Arquivo interno do Claude/Cowork ---
 _docs/zi4yABHg
 
+# --- I7 diagnostic report + reference appendix (docs/outputs, not code) ---
+_docs/I7_diagnostic_report.md
+_docs/I7_diagnostic_report.pdf
+_docs/reference/
+
 # ==============================================================================
 # .gitignore for Academic Claude Code Projects
 # ==============================================================================
