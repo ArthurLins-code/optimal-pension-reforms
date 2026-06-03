@@ -1030,9 +1030,10 @@ message("Saved: output/I/I6_plot_cumsum_actual_reform_multby20", SUFFIX, ".pdf")
 # Pure reform cumulative ×20
 if (PURE_REFORM_AVAILABLE && exists("out_L")) {
   out_L_x20 <- copy(out_L)
-  out_L_x20[, `:=`(ME_L_cum = ME_L_cum * MULT,
-                    TC_L_cum = TC_L_cum * MULT,
-                    WE_L_cum = WE_L_cum * MULT)]
+  # ×20 shown in R$ BILLIONS: out_L is in millions, so * MULT / 1e3 -> billions
+  out_L_x20[, `:=`(ME_L_cum = ME_L_cum * MULT / 1e3,
+                    TC_L_cum = TC_L_cum * MULT / 1e3,
+                    WE_L_cum = WE_L_cum * MULT / 1e3)]
   p_pure_L_x20 <- ggplot(out_L_x20, aes(x = quarter)) +
     geom_line(aes(y = ME_L_cum, color = factor(1)), linetype = 'solid', linewidth = 0.4) +
     geom_line(aes(y = TC_L_cum, color = factor(2)), linetype = 'solid', linewidth = 0.4) +
@@ -1043,7 +1044,7 @@ if (PURE_REFORM_AVAILABLE && exists("out_L")) {
     scale_x_continuous(breaks = seq(2015, 2019, 1),
                        minor_breaks = seq(2015, 2019.25, 0.25),
                        guide = guide_axis(minor.ticks = TRUE)) +
-    scale_y_continuous(labels = scales::label_dollar(prefix = 'R$ ', suffix = ' M')) +
+    scale_y_continuous(labels = scales::label_dollar(prefix = 'R$ ', suffix = ' B')) +
     wmvpf_color_scale +
     guides(color = guide_legend(nrow = 1, order = 1)) +
     theme_wmvpf +
@@ -1062,9 +1063,10 @@ if (PURE_REFORM_AVAILABLE && exists("out_L")) {
 
 if (PURE_REFORM_AVAILABLE && exists("out_S")) {
   out_S_x20 <- copy(out_S)
-  out_S_x20[, `:=`(ME_S_cum = ME_S_cum * MULT,
-                    TC_S_cum = TC_S_cum * MULT,
-                    WE_S_cum = WE_S_cum * MULT)]
+  # ×20 shown in R$ BILLIONS: out_S is in millions, so * MULT / 1e3 -> billions
+  out_S_x20[, `:=`(ME_S_cum = ME_S_cum * MULT / 1e3,
+                    TC_S_cum = TC_S_cum * MULT / 1e3,
+                    WE_S_cum = WE_S_cum * MULT / 1e3)]
   p_pure_S_x20 <- ggplot(out_S_x20, aes(x = quarter)) +
     geom_line(aes(y = ME_S_cum, color = factor(1)), linetype = 'solid', linewidth = 0.4) +
     geom_line(aes(y = TC_S_cum, color = factor(2)), linetype = 'solid', linewidth = 0.4) +
@@ -1075,7 +1077,7 @@ if (PURE_REFORM_AVAILABLE && exists("out_S")) {
     scale_x_continuous(breaks = seq(2015, 2019, 1),
                        minor_breaks = seq(2015, 2019.25, 0.25),
                        guide = guide_axis(minor.ticks = TRUE)) +
-    scale_y_continuous(labels = scales::label_dollar(prefix = 'R$ ', suffix = ' M')) +
+    scale_y_continuous(labels = scales::label_dollar(prefix = 'R$ ', suffix = ' B')) +
     wmvpf_color_scale +
     guides(color = guide_legend(nrow = 1, order = 1)) +
     theme_wmvpf +
