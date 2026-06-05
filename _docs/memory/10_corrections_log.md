@@ -238,3 +238,37 @@ cpf_anon→indiv rename. Also removed unused knitr and deduplicated lubridate.
 **Description:** `knitr` was in the package list but never used. `lubridate` appeared
 twice. Same xfun incompatibility as G5.
 **Resolution:** FIXED — removed knitr, deduplicated lubridate.
+
+### [LEARN:juan-diag-nc] Juan Point 1 — N^c "too small" is a sample/aggregation artifact (2026-05-25)
+**Stage:** F/G
+**File:** I7_diagnostic_juan_about_I6.R
+**Severity:** N/A (investigation, no bug)
+**Description:** Juan flagged N^c_{-6..0} looking small vs the frequency graphs (>2000).
+`claims_c` is per-cell (p,t) on the 5% sample; summed over p ∈ [-6,0] at t=0 it is ~1,126,
+which ×20 ≈ 22,520 — consistent with the >2,000 Juan saw in aggregated frequency graphs.
+**Resolution:** NO ACTION — values are correct; Juan was comparing pre-aggregated numbers.
+(Full write-up: gitignored `_docs/I7_diagnostic_report.md`, §2.)
+
+### [LEARN:juan-diag-beta] Juan Point 2 — β̂^c(G4) ≠ β̂^bS(G5) for p<0 is a spec mismatch, not a concept error (2026-05-25)
+**Stage:** G
+**File:** G4_effect_average_benefit_freq.R, G5_..._bL_and_bS.R; investigated in I7b_beta_comparison_diagnostic.R
+**Severity:** MAJOR (G4-vs-G5 only; does NOT affect I6)
+**Description:** Juan's theory holds: for p<0 the slope schedule = counterfactual, so the DD
+dependent variables are identical and the betas should match. Within G5, β̂^bL = β̂^bS
+(diff = 0) ✅. But G4 vs G5 betas differ (~R$10k) ❌ from two regression-spec differences:
+(1) G5 caps `dist_reform <= 15`, G4 has no cap; (2) G5 aggregates with `na.rm=TRUE`, G4
+without. With two-way FEs (dist_reform + points_norm) both shift the time-FE estimation.
+**Resolution:** OPEN (follow-up) — harmonize the two specs and re-check betas. No internal
+inconsistency in I6: PART 2 uses G5 only; PART 1 (CNTRF) uses G4. (Full write-up: §3.)
+
+### [LEARN:juan-diag-units] Juan Point 3 — b_bar_c (~R$6.7k) vs b_bar_S (~R$300-500k) is a unit mismatch (2026-05-25)
+**Stage:** G/I
+**File:** G5_..._bL_and_bS.R (delta_ben from G2), I6_wmvpf_with_pure_reforms_freq.R
+**Severity:** MAJOR (resolved for I6)
+**Description:** The ~R$6.7k figure is G5's `delta_ben`, read from G2 (density-based) in
+QUARTERLY units (×3, no annuity), while every pure-reform benefit column is lifetime PV
+(×3×ann_factor_q). Confirmed: mean(benefits_bS)/mean(benefits_old) ≈ 3×ann_factor_q
+(ratio_vs_3ann ≈ 1.0, deviation <0.4%) for all p<0 — purely a unit difference, not a calc error.
+**Resolution:** RESOLVED for I6 — the I6 rebuild (commit f215955) no longer reads delta_ben;
+PART 1 CNTRF uses G4 directly (already PV). The G5 delta_ben read (L727-734) stays a known
+[TODO:REVISE]; candidate for removal since I6 no longer depends on it. (Full write-up: §4.)

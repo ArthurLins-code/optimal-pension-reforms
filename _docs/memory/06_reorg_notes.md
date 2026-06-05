@@ -102,3 +102,20 @@ Para cada sugestão:
 ## Regra geral
 
 **Não renomear / não mover** sem grep prévio em `.R`/`.do`/`.tex` por referências ao nome. Prefire criar copy + deprecate old do que rename in-place.
+
+## `_docs/reference/` — apêndice da apresentação extraído em PNG (gitignored)
+
+**Data:** 2026-06-05
+
+`_docs/reference/appendix_pure_reform/` contém 30 PNGs (frames 18–47/47) + `INDEX.md`,
+extraídos página a página do PDF da apresentação canônica (`Retirement_Presentations (10).pdf`,
+apêndice das reformas puras).
+
+**Por quê:** o Claude Code não conseguia abrir/ler o PDF da apresentação diretamente.
+Extrair os slides do apêndice como imagens foi o contorno para dar ao agente acesso à
+referência canônica (notação e fórmulas das reformas puras) durante o rebuild de I6/G5.
+
+**Por que NÃO commitamos:** são imagens binárias de referência, regeneráveis a partir do
+PDF-fonte, e não fazem parte do deliverable. Estão no `.gitignore` (`_docs/reference/`).
+Quem precisar das imagens regenera do PDF; o conhecimento que elas carregam já está
+destilado em `03_pure_reforms_math.md` e `09_notation_registry.md`.

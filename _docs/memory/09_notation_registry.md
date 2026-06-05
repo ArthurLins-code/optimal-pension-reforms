@@ -30,3 +30,28 @@ Canonical source: `Retirement_Presentations (old strat reverted).pdf`
 | WNSBD | Welfare Net Social Benefit per Dollar | Slide 54/56 | For optimal expenditure problem |
 | SMU_it | Social Marginal Utility of consumption | Slide 15/56 | E(beta^t * du/dc | x) |
 | RR | Replacement rate (benefit / contribution wage) | Slide 10/56 | Women: 0.69 + 0.021p; Men: 0.82 + 0.025p |
+
+## Mapa símbolo ↔ variável de código ↔ linguagem (pipeline reformas puras)
+
+Do diagnóstico I7 das indagações do Juan (WhatsApp, 23–25/05/2026). Ponte entre a notação
+dos slides, os nomes das variáveis em R, e os termos informais usados no grupo "Retirement".
+
+| Conceito | Slides | Código (R) | WhatsApp |
+|----------|--------|-----------|----------|
+| Frequência contrafactual | N^c_{p,t} | `claims_c` | "N^c" |
+| Frequência observada | N^a_{p,t} | `claims` | — |
+| PV benefício antigo / novo | PV(b^old/new) | `pv_benefits_old/new` = `3 * benefits_* * ann_factor_q` | — |
+| Benefício pure-level / pure-slope | b^L_i / b^S_i | `benefits_bL` / `benefits_bS` | "b_bar_S" |
+| Média celular bL / bS | b̄^L_{p,t} / b̄^S_{p,t} | `avg_benefits_bL` / `avg_benefits_bS` | — |
+| Benefício contrafactual (pós-DD) | b̄^c(x_a) − β̂ | `avg_reform_benefits_pre_reform_choices_*` | "b_bar_c" |
+| Beta DD contrafactual (G4) | β̂^{b̄,c} | G4 `point_estimate` (period='old') | "β^{b_bar_c}" |
+| Beta DD bL / bS (G5) | β̂^{b̄,L/S} | G5 `point_estimate_bL/bS` | "β^{b_bar_S}" |
+| Betas postponement / anticipação | β̂^{*,P/A} | `Beta_LP/SP`, `Beta_LA/SA` | — |
+| Fator anuidade trimestral | a_q | `ann_factor_q` | "ann_factor_q" |
+| Benefício trimestral (G2, densidade) | — | `delta_ben` = `(avg_benefits − point_estimate) * 3` | "R$ 6.700" |
+| MECH / BEHAV / CNTRF por trimestre | MECH^q_t, BEHAV^q_t, CNTRF_t | `MECH_L/S`, `BEHAV_L/S`, `CNTRF` | — |
+
+**Identidade para p < 0** (schedule S = contrafactual abaixo do cutoff): por indivíduo
+`pv_benefits_old = pv_benefits_new = benefits_bL = benefits_bS`, logo β̂^{bL} = β̂^{bS}
+dentro do G5. A diferença β̂^c(G4) vs β̂^bS(G5) vem de spec da regressão, não de conceito
+(ver `10_corrections_log.md`, [LEARN:juan-diag-beta]).
