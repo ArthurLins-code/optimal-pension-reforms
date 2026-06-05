@@ -10,15 +10,25 @@
 
 pkgs <- c('scales','zoo','binsreg','ggpubr','readstata13','purrr','readxl','did',
           'stargazer','fixest','MatchIt','tidyr','stringr','data.table','dplyr',
-          'lubridate','stringi','foreign','haven','ggplot2','knitr','grid','broom',
-          'RColorBrewer','lubridate')
-.libPaths('F:/docs/R-library')
+          'lubridate','stringi','foreign','haven','ggplot2','grid','broom',
+          'RColorBrewer')
+
+# --- Environment detection ---------------------------------------------------
+if (dir.exists("F:/Users/tucalins/Documents/transf_11_11/directory_2025")) {
+  dir <- "F:/Users/tucalins/Documents/transf_11_11/directory_2025"
+  DATA_MODE <- "full"
+  .libPaths('F:/docs/R-library')
+} else if (dir.exists("C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement")) {
+  dir <- "C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement"
+  DATA_MODE <- "sample"
+} else {
+  stop("No recognized data directory found. Set 'dir' manually.")
+}
+setwd(dir)
+message("I4: Data mode = ", DATA_MODE, " | dir = ", dir)
+SUFFIX <- if (DATA_MODE == "sample") "_sample" else ""
+
 for (pkg in pkgs) library(pkg, character.only = TRUE)
-
-# Directory
-
-dir <- "F:/Users/tucalins/Documents/transf_11_11/directory_2025"
-setwd(paste(dir))
 
 set.seed(123)
 
@@ -26,114 +36,85 @@ set.seed(123)
 # DATA ---------------------------------------------------------
 # ******************************************************************************
 
-dt_gab <- fread('working/D3_cross_section.csv.gz')
-gc()
-dt_gab[, points_d := floor(points_claim)] %>% 
-  .[, points_norm := ifelse(male == 0, points_d - 85, points_d - 95)]
-dt_gab[, dist_reform := 4*(claim_quarter - 2015.25)]
+if (DATA_MODE == "full") {
+  dt_gab <- fread('working/D3_cross_section.csv.gz')
+  gc()
+  dt_gab[, points_d := floor(points_claim)] %>%
+    .[, points_norm := ifelse(male == 0, points_d - 85, points_d - 95)]
+  dt_gab[, dist_reform := 4*(claim_quarter - 2015.25)]
 
-# New variables: Life Expectancy merged into cross_section so we can calculate discounted estimated lifetime benefits
-expectativa <- read_excel(paste0(dir,'/extra/Expectativa_Vida_IBGE.xlsx')) %>% 
-  setDT() %>% 
-  setnames(c('Ano','Idade','Expectativa'), c('table_year', 'age_disc', 'expec_ibge')) 
+  # New variables: Life Expectancy merged into cross_section
+  expectativa <- read_excel(paste0(dir,'/extra/Expectativa_Vida_IBGE.xlsx')) %>%
+    setDT() %>%
+    setnames(c('Ano','Idade','Expectativa'), c('table_year', 'age_disc', 'expec_ibge'))
 
-aux_expectativa <- cross_join(data.table(claim_year = unique(expectativa$table_year)),
-                              data.table(claim_month = seq(1,12,1))) %>%
-  cross_join(data.table(age_disc = unique(expectativa$age_disc))) %>% 
-  setDT()
+  aux_expectativa <- cross_join(data.table(claim_year = unique(expectativa$table_year)),
+                                data.table(claim_month = seq(1,12,1))) %>%
+    cross_join(data.table(age_disc = unique(expectativa$age_disc))) %>%
+    setDT()
 
-# Jan - Nov: table from 1 year before the claiming year
-# Dec: table from the claiming year
+  aux_expectativa[claim_month < 12, table_year := claim_year - 1]
+  aux_expectativa[claim_month == 12, table_year := claim_year - 0]
 
-aux_expectativa[claim_month < 12, table_year := claim_year - 1]
-aux_expectativa[claim_month == 12, table_year := claim_year - 0]
+  aux_expectativa <- left_join(aux_expectativa,
+                               expectativa,
+                               by = c('table_year','age_disc')) %>%
+    arrange(age_disc, claim_year, claim_month) %>%
+    na.omit()
+  dt_gab[,claim_month:= month(as.Date(claim_date))]
+  dt_gab[, age_disc := floor(age_claim)]
+  dt_gab <- left_join(dt_gab, aux_expectativa,
+                      by = c('claim_year','claim_month','age_disc'))
+  gc()
 
-aux_expectativa <- left_join(aux_expectativa, 
-                             expectativa, 
-                             by = c('table_year','age_disc')) %>% 
-  arrange(age_disc, claim_year, claim_month) %>% 
-  na.omit()
-# changing some variables names in dt_gab to simplify the merge
-dt_gab[,claim_month:= month(as.Date(claim_date))]
-dt_gab[, age_disc := floor(age_claim)]
-#adding the life expectancy to the cross_section db
-dt_gab <- left_join(dt_gab, aux_expectativa,
-                    by = c('claim_year','claim_month','age_disc'))
-gc()
-# Now onto the panel db
-panel <- fread('working/D2_panel.csv.gz')
-# Correcting benefit payments
-gc()
-panel[, 'benefits' := NULL]
-#bring PDV into the panel (constant per individual)
-panel <- left_join(panel, dt_gab[,.(indiv, benef_size,expec_ibge,fp_est,points_norm)], by = 'indiv')
+  # Panel
+  panel <- fread('working/D2_panel.csv.gz')
+  gc()
+  panel[, 'benefits' := NULL]
+  panel <- left_join(panel, dt_gab[,.(indiv, benef_size,expec_ibge,fp_est,points_norm)], by = 'indiv')
 
-### Benefits under new schedule
+  ### Benefits under new schedule
+  panel[d_claim_post_reform == 1, benefits_new_claim := benef_size]
+  panel[d_claim_post_reform == 0 & points_norm < 0, benefits_new_claim := benef_size]
+  panel[d_claim_post_reform == 0 & points_norm >= 0 & fp_est >= 1, benefits_new_claim := benef_size]
+  panel[d_claim_post_reform == 0 & points_norm >= 0 & fp_est < 1, benefits_new_claim := benef_size/fp_est]
 
-panel[d_claim_post_reform == 1, benefits_new_claim := benef_size]
-panel[d_claim_post_reform == 0 & points_norm < 0, benefits_new_claim := benef_size]
-panel[d_claim_post_reform == 0 & points_norm >= 0 & fp_est >= 1, benefits_new_claim := benef_size]
-panel[d_claim_post_reform == 0 & points_norm >= 0 & fp_est < 1, benefits_new_claim := benef_size/fp_est]
+  ### Benefits under the old schedule
+  panel[d_claim_post_reform == 0, benefits_old_claim := benef_size]
+  panel[d_claim_post_reform == 1 & points_norm < 0, benefits_old_claim := benef_size]
+  panel[d_claim_post_reform == 1 & points_norm >= 0 & fp_est >= 1, benefits_old_claim := benef_size]
+  panel[d_claim_post_reform == 1 & points_norm >= 0 & fp_est < 1, benefits_old_claim := benef_size*fp_est]
 
-### Benefits under the old schedule
+  # PDV calculations
+  r_annual<- 0.06
+  r_q<- (1+r_annual)^(1/4)-1
+  panel[,quarters_remaining_at_claim:= pmax(round(4*expec_ibge),0)]
+  panel[,quarters_elapsed:= pmax(dist_claim,0)]
+  panel[,quarters_remaining_of_life:= pmax(quarters_remaining_at_claim-quarters_elapsed,0)]
+  panel[,ann_factor_q:=fifelse(
+    quarters_remaining_of_life>=0,
+    (1-(1+r_q)^(-quarters_remaining_of_life))/r_q,
+    0)]
+  panel[, benefits:= fifelse(dist_claim>=0, 3*benef_size* ann_factor_q, 0)]
+  panel[, benefits_old_pv:= fifelse(dist_claim>=0, 3*benefits_old_claim*ann_factor_q, 0)]
+  panel[, benefits_new_pv:= fifelse(dist_claim>=0, 3*benefits_new_claim*ann_factor_q, 0)]
 
-panel[d_claim_post_reform == 0, benefits_old_claim := benef_size]
-panel[d_claim_post_reform == 1 & points_norm < 0, benefits_old_claim := benef_size]
-panel[d_claim_post_reform == 1 & points_norm >= 0 & fp_est >= 1, benefits_old_claim := benef_size]
-panel[d_claim_post_reform == 1 & points_norm >= 0 & fp_est < 1, benefits_old_claim := benef_size*fp_est]
+  panel[, points_d := floor(points_quarter)] %>%
+    .[, points_norm := ifelse(male == 0, points_d - 85, points_d - 95)]
+  panel[, dist_reform := 4*(year_quarter - 2015.25)]
 
-# Calculating Present Discounted Value (PDV) at claim date of all benefits (lifetime)
-r_annual<- 0.06
-#calculating quarterly discount rate
-r_q<- (1+r_annual)^(1/4)-1
+} else {
+  # Sample mode: pre-computed sample CSVs with all derived columns
+  dt_gab <- fread(file.path(dir, 'data', 'dt_sampled_anon.csv'))
+  setnames(dt_gab, 'cpf_anon', 'indiv')
+  gc()
+  message("Cross-section loaded: ", nrow(dt_gab), " obs")
 
-# calculating total expected remaining quarters at claim
-panel[,quarters_remaining_at_claim:= pmax(round(4*expec_ibge),0)]
-
-# calculating total quarters passed since claim
-panel[,quarters_elapsed:= pmax(dist_claim,0)]
-
-#Calculating remaining quarters of life each period
-panel[,quarters_remaining_of_life:= pmax(quarters_remaining_at_claim-quarters_elapsed,0)]
-
-
-# Calculating quarterly annuity factor using PG formula
-panel[,ann_factor_q:=fifelse( 
-  quarters_remaining_of_life>=0,
-  (1-(1+r_q)^(-quarters_remaining_of_life))/r_q,
-  0)]
-
-## Calculating the remaining present-value of benefits in each person-quarter
-
-# Benefit Present Value in each person-quarter= PV of remaining benefits as of that quarter
-# Since benef_size is monthly, we do 3*benef_size for quarterly payments
-panel[, benefits:= fifelse(
-  dist_claim>=0,
-  3*benef_size* ann_factor_q,
-  0
-)]
-
-# Calculating remaining PV of benefits under old and new schedules in each person-quarter
-panel[, benefits_old_pv:= fifelse(
-  dist_claim>=0,
-  3*benefits_old_claim*ann_factor_q,
-  0
-)]
-
-panel[, benefits_new_pv:= fifelse(
-  dist_claim>=0,
-  3*benefits_new_claim*ann_factor_q,
-  0
-)]
-
-# New variables: Normalized Points
-
-panel[, points_d := floor(points_quarter)] %>% 
-  .[, points_norm := ifelse(male == 0, points_d - 85, points_d - 95)]
-
-# New variable: Quarters since reform
-
-panel[, dist_reform := 4*(year_quarter - 2015.25)]
+  panel <- fread(file.path(dir, 'data', 'panel_sampled_anon.csv'))
+  setnames(panel, 'cpf_anon', 'indiv')
+  gc()
+  message("Panel loaded: ", nrow(panel), " obs")
+}
 
 # Total PDV of claimants by quarter after the reform
 
@@ -146,7 +127,7 @@ n_claims <- dt_gab[d_claim_post_reform == 1 & claim_quarter <= 2018.25,.(num_cla
 # Other datasets
 
 #this is the part that changed, I'll substitute results_claiming, the old, density dataset, with the frequencies dataset
-cf_counts <- fread('output/F/new_counterfactual_claim_counts.csv')
+cf_counts <- fread(paste0('output/F/new_counterfactual_claim_counts', SUFFIX, '.csv'))
 setnames(cf_counts, "t", "dist_reform")
 setnames(cf_counts, "p", "points_norm")
 
@@ -297,7 +278,7 @@ sum(out$mech_cost)
 sum(out$fiscal_ext)
 
 
-ggsave(p1, filename = 'output/I/I4_plot_results.pdf', height = 2.8, width = 4.2)
+ggsave(p1, filename = paste0('output/I/I4_plot_results', SUFFIX, '.pdf'), height = 2.8, width = 4.2)
 
 
-fwrite(dt_wmvpf, file = 'output/I/I4_table_wmvpf.csv')
+fwrite(dt_wmvpf, file = paste0('output/I/I4_table_wmvpf', SUFFIX, '.csv'))

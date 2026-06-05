@@ -3,15 +3,37 @@
   "permissions": {
     "defaultMode": "bypassPermissions",
     "allow": [
+      "Bash(Rscript *)",
+      "Bash(R CMD *)",
+      "Bash(stata -b do *)",
+      "Bash(stata-mp -b do *)",
+      "Bash(git *)",
+      "Bash(gh *)",
+      "Bash(python *)",
+      "Bash(python3 *)",
+      "Bash(pip *)",
+      "Bash(pip3 *)",
+      "Bash(ls *)",
+      "Bash(mkdir *)",
+      "Bash(cat *)",
+      "Bash(head *)",
+      "Bash(tail *)",
+      "Bash(wc *)",
+      "Bash(diff *)",
+      "Bash(find *)",
+      "Read(**)",
       "Edit(**)",
       "Write(**)",
       "MultiEdit(**)",
-      "Bash(*)",
       "WebFetch(*)",
-      "WebSearch",
-      "Read(**)"
+      "WebSearch"
     ],
-    "deny": []
+    "deny": [
+      "Bash(rm -rf *)",
+      "Bash(git push --force *)",
+      "Bash(git push -f *)",
+      "Bash(git reset --hard *)"
+    ]
   },
   "hooks": {
     "Notification": [
@@ -30,7 +52,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/pre-compact.py",
+            "command": "python \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/pre-compact.py",
             "timeout": 10
           }
         ]
@@ -42,7 +64,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/post-compact-restore.py",
+            "command": "python \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/post-compact-restore.py",
             "timeout": 5
           }
         ]
@@ -54,7 +76,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/context-monitor.py",
+            "command": "python \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/context-monitor.py",
             "timeout": 5
           }
         ]
@@ -64,7 +86,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/verify-reminder.py",
+            "command": "python \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/verify-reminder.py",
             "timeout": 5
           }
         ]
@@ -75,14 +97,14 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/log-reminder.py",
+            "command": "python \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/log-reminder.py",
             "timeout": 10
           }
         ]
       }
     ]
   },
-  "plansDirectory": "quality_reports/plans",
+  "plansDirectory": "_docs/plans",
   "statusLine": {
     "type": "command",
     "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/scripts/statusline.sh"

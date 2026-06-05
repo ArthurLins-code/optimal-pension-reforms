@@ -386,8 +386,8 @@ Todos em `versões do artigo/`.
 - Contém deliverables Q1–Q3 2026 sobre Pure L/S + Surrogate Indexes.
 
 ### Presentations
-- **`Retirement_Presentations (8).pdf`** — **mais recente (20/abr/2026)**. É a referência canônica para números-âncora atuais.
-- Versões anteriores: `Retirement_Presentations (1).pdf` até `(7).pdf` — presas para comparação histórica.
+- **`Retirement_Presentations (10).pdf`** — **mais recente (15/mai/2026)**. É a referência canônica para números-âncora atuais.
+- Versões anteriores: `Retirement_Presentations (1).pdf` até `(8).pdf` — presas para comparação histórica.
 - `paper_presentation_late_october.pdf` — versão de outubro/2025.
 
 ### Notas de reunião
@@ -577,7 +577,7 @@ RA- Prev- JR-GG-GL/
 │   │   ├── NBER_Application_arthur_footnotes.pdf
 │   │   └── grant_proposal_late_october.pdf
 │   └── Presentations/                       ← movido: PDFs de apresentação
-│       ├── Retirement_Presentations (8).pdf
+│       ├── Retirement_Presentations (10).pdf
 │       └── paper_presentation_late_october.pdf
 └── videos/
     ├── audio1795069851.m4a
@@ -592,7 +592,7 @@ RA- Prev- JR-GG-GL/
 1. **Criada pasta `_docs/`** com `CLAUDE.md` (entry point) e subpasta `memory/` com 8 arquivos de contexto.
 2. **Movidos PDFs** em `versões do artigo/` para as subpastas vazias já existentes (`Paper versions/`, `Presentations/`):
    - `Paper versions/`: Early_Retirement_Benefits_*, NBER_Application_*, grant_proposal_*.
-   - `Presentations/`: Retirement_Presentations (8), paper_presentation_*.
+   - `Presentations/`: Retirement_Presentations (10), paper_presentation_*.
 
 Essas duas subpastas **já existiam** vazias; só foram populadas.
 

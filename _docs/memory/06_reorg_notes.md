@@ -37,7 +37,7 @@ RA- Prev- JR-GG-GL/
 │   │   ├── NBER_Application_arthur_footnotes.pdf
 │   │   └── grant_proposal_late_october.pdf
 │   └── Presentations/                       ← movido: PDFs de apresentação
-│       ├── Retirement_Presentations (8).pdf
+│       ├── Retirement_Presentations (10).pdf
 │       └── paper_presentation_late_october.pdf
 └── videos/
     ├── audio1795069851.m4a
@@ -52,7 +52,7 @@ RA- Prev- JR-GG-GL/
 1. **Criada pasta `_docs/`** com `CLAUDE.md` (entry point) e subpasta `memory/` com 8 arquivos de contexto.
 2. **Movidos PDFs** em `versões do artigo/` para as subpastas vazias já existentes (`Paper versions/`, `Presentations/`):
    - `Paper versions/`: Early_Retirement_Benefits_*, NBER_Application_*, grant_proposal_*.
-   - `Presentations/`: Retirement_Presentations (8), paper_presentation_*.
+   - `Presentations/`: Retirement_Presentations (10), paper_presentation_*.
 
 Essas duas subpastas **já existiam** vazias; só foram populadas.
 
@@ -102,3 +102,20 @@ Para cada sugestão:
 ## Regra geral
 
 **Não renomear / não mover** sem grep prévio em `.R`/`.do`/`.tex` por referências ao nome. Prefire criar copy + deprecate old do que rename in-place.
+
+## `_docs/reference/` — apêndice da apresentação extraído em PNG (gitignored)
+
+**Data:** 2026-06-05
+
+`_docs/reference/appendix_pure_reform/` contém 30 PNGs (frames 18–47/47) + `INDEX.md`,
+extraídos página a página do PDF da apresentação canônica (`Retirement_Presentations (10).pdf`,
+apêndice das reformas puras).
+
+**Por quê:** o Claude Code não conseguia abrir/ler o PDF da apresentação diretamente.
+Extrair os slides do apêndice como imagens foi o contorno para dar ao agente acesso à
+referência canônica (notação e fórmulas das reformas puras) durante o rebuild de I6/G5.
+
+**Por que NÃO commitamos:** são imagens binárias de referência, regeneráveis a partir do
+PDF-fonte, e não fazem parte do deliverable. Estão no `.gitignore` (`_docs/reference/`).
+Quem precisar das imagens regenera do PDF; o conhecimento que elas carregam já está
+destilado em `03_pure_reforms_math.md` e `09_notation_registry.md`.

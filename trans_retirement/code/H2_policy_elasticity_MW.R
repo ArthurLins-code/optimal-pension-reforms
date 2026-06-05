@@ -11,13 +11,27 @@ pkgs <- c('scales','zoo','binsreg','ggpubr','readstata13','purrr','readxl','did'
           'stargazer','fixest','MatchIt','tidyr','stringr','data.table','dplyr',
           'lubridate','stringi','foreign','haven','ggplot2','knitr','grid','broom',
           'RColorBrewer')
-.libPaths('F:/docs/R-library')
+
+# --- Environment detection ---------------------------------------------------
+if (dir.exists("F:/Users/tucalins/Documents/transf_11_11/directory_2025")) {
+  dir <- "F:/Users/tucalins/Documents/transf_11_11/directory_2025"
+  DATA_MODE <- "full"
+  .libPaths('F:/docs/R-library')
+} else if (dir.exists("U:/Documents/Paper/directory_2025")) {
+  dir <- "U:/Documents/Paper/directory_2025"
+  DATA_MODE <- "full"
+  .libPaths('F:/docs/R-library')
+} else if (dir.exists("C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement")) {
+  dir <- "C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement"
+  DATA_MODE <- "sample"
+} else {
+  stop("No recognized data directory found. Set 'dir' manually.")
+}
+setwd(dir)
+message("H2 running in ", DATA_MODE, " mode from: ", dir)
+SUFFIX <- if (DATA_MODE == "sample") "_sample" else ""
+
 for (pkg in pkgs) library(pkg, character.only = TRUE)
-
-# Directory
-
-dir <- 'U:/Documents/Paper/directory_2025'
-setwd(paste(dir))
 
 set.seed(123)
 
@@ -25,21 +39,33 @@ set.seed(123)
 # DATA ---------------------------------------------------------
 # ******************************************************************************
 
-dt <- fread('working/D1_cross_section.csv.gz')
+if (DATA_MODE == "full") {
+  dt <- fread('working/D1_cross_section.csv.gz')
 
-panel <- fread('working/D2_panel.csv.gz')
+  panel <- fread('working/D2_panel.csv.gz')
 
-# New variables: Normalized Points
+  # New variables: Normalized Points
+  dt[, points_d := floor(points_claim)] %>%
+    .[, points_norm := ifelse(male == 0, points_d - 85, points_d - 95)]
 
-dt[, points_d := floor(points_claim)] %>% 
-  .[, points_norm := ifelse(male == 0, points_d - 85, points_d - 95)]
+  panel[, points_d := floor(points_quarter)] %>%
+    .[, points_norm := ifelse(male == 0, points_d - 85, points_d - 95)]
 
-panel[, points_d := floor(points_quarter)] %>% 
-  .[, points_norm := ifelse(male == 0, points_d - 85, points_d - 95)]
+  # New variable: Quarters since reform
+  panel[, dist_reform := 4*(year_quarter - 2015.25)]
 
-# New variable: Quarters since reform
+} else {
+  # Sample mode: dt_sampled_anon.csv and panel_sampled_anon.csv
+  # have points_d, points_norm, dist_reform pre-computed
+  dt <- fread(file.path(dir, 'data', 'dt_sampled_anon.csv'))
+  setnames(dt, 'cpf_anon', 'indiv')
 
-panel[, dist_reform := 4*(year_quarter - 2015.25)]
+  panel <- fread(file.path(dir, 'data', 'panel_sampled_anon.csv'))
+  setnames(panel, 'cpf_anon', 'indiv')
+
+  message("H2 sample loaded: ", nrow(dt), " cross-section obs, ",
+          nrow(panel), " panel obs")
+}
 
 # ******************************************************************************
 # FUNCTIONS ---------------------------------------------------------
@@ -449,14 +475,14 @@ plot_dd
 # SAVING ---------------------------------------------------------
 # ******************************************************************************
 
-fwrite(results, file = 'output/H/H2_table_results.csv')
+fwrite(results, file = paste0('output/H/H2_table_results', SUFFIX, '.csv'))
 
-ggsave(plot1, filename = 'output/H/H2_trends_tax_collection.pdf',
+ggsave(plot1, filename = paste0('output/H/H2_trends_tax_collection', SUFFIX, '.pdf'),
        height = 3, width = 8)
-ggsave(plot_dd, filename = 'output/H/H2_dd_tax_collection.pdf',
+ggsave(plot_dd, filename = paste0('output/H/H2_dd_tax_collection', SUFFIX, '.pdf'),
        height = 3, width = 8)
 
-ggsave(plot_dd_1, filename = 'output/H/H2_dd_tax_collection_1.pdf',
+ggsave(plot_dd_1, filename = paste0('output/H/H2_dd_tax_collection_1', SUFFIX, '.pdf'),
        height = 3, width = 4)
-ggsave(plot_dd_2, filename = 'output/H/H2_dd_tax_collection_2.pdf',
+ggsave(plot_dd_2, filename = paste0('output/H/H2_dd_tax_collection_2', SUFFIX, '.pdf'),
        height = 3, width = 4)

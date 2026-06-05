@@ -246,7 +246,7 @@ panel <- left_join(rais[year_month >= 2010],
   arrange(indiv, year_month)
 
 gc()
-)
+
 # Calculating age, distance relative to the reform and to claiming
 
 panel[, dist_reform_months := (year_month - (2015 + 5/12))*12]
