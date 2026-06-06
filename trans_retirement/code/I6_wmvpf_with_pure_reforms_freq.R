@@ -61,6 +61,12 @@ R_Q <- (1 + R_ANNUAL)^(1/4) - 1
 ETA <- 1 - GAMMA_BASELINE * (CONS_INSS - CONS_POP) / CONS_POP
 
 # --- Directory ---------------------------------------------------------------
+# Capture the repo root BEFORE we setwd() into the data dir, so sample-mode runs
+# can write outputs back into the repo's trans_retirement/output tree (where the
+# figures_central_folder collector looks). Assumes this script is launched from the
+# repo root, e.g.  Rscript trans_retirement/code/I6_wmvpf_with_pure_reforms_freq.R
+REPO_TRANS <- file.path(getwd(), "trans_retirement")
+
 if (dir.exists("F:/Users/tucalins/Documents/transf_11_11/directory_2025")) {
   dir <- "F:/Users/tucalins/Documents/transf_11_11/directory_2025"
   DATA_MODE <- "full"
@@ -921,6 +927,15 @@ if (!is.na(wmvpf_bL) && !is.na(wmvpf_bS)) {
 # --- Saving outputs ----------------------------------------------------------
 
 message("\n=== Saving outputs ===")
+
+# Sample workflow: write outputs into the repo's trans_retirement/output tree so
+# figures_central_folder/collector.py can pick them up. Inputs were read above from
+# the (OneDrive) sample dir. Full/server mode is unaffected (stays under `dir`).
+if (DATA_MODE == "sample" && exists("REPO_TRANS") && dir.exists(REPO_TRANS)) {
+  setwd(REPO_TRANS)
+  message("Sample mode: redirecting outputs to ", REPO_TRANS)
+}
+dir.create('output/I', recursive = TRUE, showWarnings = FALSE)
 
 # Actual reform
 fwrite(out_actual, file = paste0('output/I/I6_wmvpf_actual', SUFFIX, '.csv'))
