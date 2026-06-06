@@ -1,0 +1,7 @@
+# Collector output — regenerated from pipeline outputs via:
+#   python figures_central_folder/collector.py
+# Do NOT commit these (they are copies of trans_retirement/output/** figures,
+# and locally they are 5% sample-derived). Tracked: manifest.csv, collector.py,
+# verify_deck.py, static/ (irreproducible manual assets).
+from_code/
+_diffs/
