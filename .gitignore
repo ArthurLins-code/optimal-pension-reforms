@@ -62,6 +62,10 @@ _docs/I7_diagnostic_report.md
 _docs/I7_diagnostic_report.pdf
 _docs/reference/
 
+# --- Working-memory entry point (local-only; the _docs/memory/* it indexes ARE tracked) ---
+# Anchored path so it ignores ONLY this file, never the tracked root CLAUDE.md
+_docs/CLAUDE.md
+
 # --- Tooling local do Codex/agents ---
 # Configuracoes locais podem conter caminhos absolutos deste computador.
 .agents/
