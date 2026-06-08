@@ -53,6 +53,30 @@ def parse_directives(notes: str) -> dict:
     return d
 
 
+def _strip_repo_prefix(relpath: str, label: str) -> str:
+    """The sample working dir mirrors the repo's output tree WITHOUT the leading
+    'trans_retirement/' (it holds output/G/..., data/..., etc.). Strip that prefix for the
+    'sample' root; keep the path unchanged for the repo root."""
+    if label == "sample" and relpath.startswith("trans_retirement/"):
+        return relpath[len("trans_retirement/"):]
+    return relpath
+
+
+def resolve(relpath: str, roots):
+    """Return (Path, root_label) for the NEWEST existing <root>/<relpath> across roots
+    (sample working dir + repo), else (None, None). 'Newest' means a fresh sample run beats
+    a stale repo copy, and a fresh repo file (e.g. I6) beats an older sample copy."""
+    cands = []
+    for label, root in roots:
+        p = root / _strip_repo_prefix(relpath, label)
+        if p.is_file():
+            cands.append((p.stat().st_mtime, label, p))
+    if not cands:
+        return None, None
+    cands.sort(key=lambda t: t[0], reverse=True)
+    return cands[0][2], cands[0][1]
+
+
 def render_first_page(pdf_path: Path, zoom: float = 2.0):
     import fitz  # PyMuPDF
     doc = fitz.open(str(pdf_path))
@@ -99,10 +123,20 @@ def main() -> int:
     ap = argparse.ArgumentParser(description="Route pipeline figures into figures_central_folder/from_code/")
     ap.add_argument("--manifest", default=str(MANIFEST))
     ap.add_argument("--no-diff", action="store_true", help="skip rendering E3->E4 diffs")
+    ap.add_argument("--sample-root", default=None,
+                    help="path to the sample working dir (the OneDrive transfer_may_retirement "
+                         "folder). When set, each figure is read from there OR the repo, whichever "
+                         "is newer -- so a fresh sample run reaches the deck.")
     args = ap.parse_args()
 
     FROM_CODE.mkdir(parents=True, exist_ok=True)
     DIFFS.mkdir(parents=True, exist_ok=True)
+
+    if args.sample_root:
+        search_roots = [("sample", Path(args.sample_root).expanduser()), ("repo", ROOT)]
+        print(f"[sample-root] {Path(args.sample_root)}  (newest of sample-dir vs repo wins)\n")
+    else:
+        search_roots = [("repo", ROOT)]
 
     with open(args.manifest, newline="", encoding="utf-8") as fh:
         rows = list(csv.DictReader(fh))
@@ -110,6 +144,7 @@ def main() -> int:
     copied, missing, static_ok, static_missing = [], [], [], []
     warn_legacy, warn_sample, warn_fallback = [], [], []
     diff_jobs, diffs_made, diffs_skipped = [], [], []
+    src_root_counts = {}
 
     for r in rows:
         deck = r["deck_name"].strip()
@@ -125,20 +160,27 @@ def main() -> int:
                 static_missing.append(deck)
             continue
 
-        # ---- resolve the code source (with pure->gabriel preference) ----
-        primary = ROOT / r["code_output_path"] / r["code_output_name"]
-        src, src_kind = primary, "primary"
+        # ---- resolve the code source across roots (sample working dir + repo) ----
+        primary_rel = f"{r['code_output_path'].strip()}/{r['code_output_name'].strip()}"
+        src, src_label, src_kind = None, None, "primary"
         if status == "UPSTREAM-CANONICAL" and "prefer" in d:
-            pref = ROOT / d["prefer"]
-            if pref.exists():
-                src, src_kind = pref, "pure"
+            p, lab = resolve(d["prefer"], search_roots)   # prefer the (pending) pure output
+            if p:
+                src, src_label, src_kind = p, lab, "pure"
             else:
-                src, src_kind = primary, "fallback"  # gabriel
+                p, lab = resolve(primary_rel, search_roots)  # fall back to gabriel
+                if p:
+                    src, src_label, src_kind = p, lab, "fallback"
+        else:
+            p, lab = resolve(primary_rel, search_roots)
+            if p:
+                src, src_label, src_kind = p, lab, "primary"
 
         # ---- copy (with rename) or record miss ----
-        if src.exists():
+        if src is not None:
             shutil.copy2(src, FROM_CODE / deck)
-            copied.append((deck, src_kind, status, mode))
+            copied.append((deck, src_kind, status, mode, src_label))
+            src_root_counts[src_label] = src_root_counts.get(src_label, 0) + 1
             if status == "LEGACY":
                 warn_legacy.append((deck, r["code_script"].strip()))
             if mode == "sample":
@@ -146,11 +188,12 @@ def main() -> int:
             if src_kind == "fallback":
                 warn_fallback.append(deck)
         else:
-            missing.append((deck, status, mode, str(src.relative_to(ROOT)) if ROOT in src.parents else str(src)))
+            missing.append((deck, status, mode, primary_rel))
 
-        # ---- queue E3->E4 diff ----
+        # ---- queue E3->E4 diff (NEW source = whatever we resolved) ----
         if d.get("diff") == "E3->E4":
-            diff_jobs.append((deck, LATEX_FIGURES / deck, primary, r["code_output_name"].strip()))
+            new_src, _ = resolve(primary_rel, search_roots)
+            diff_jobs.append((deck, LATEX_FIGURES / deck, new_src, r["code_output_name"].strip()))
 
     # ---- diffs ----
     if not args.no_diff:
@@ -158,7 +201,7 @@ def main() -> int:
             import fitz  # noqa: F401
             for deck, old_pdf, new_pdf, new_name in diff_jobs:
                 out = DIFFS / (Path(deck).stem + "__OLD-E3_vs_NEW-E4.pdf")
-                if old_pdf.exists() and new_pdf.exists():
+                if old_pdf.exists() and new_pdf is not None and new_pdf.exists():
                     try:
                         make_side_by_side(
                             old_pdf, new_pdf, out,
@@ -172,7 +215,7 @@ def main() -> int:
                     why = []
                     if not old_pdf.exists():
                         why.append("old E3 copy missing")
-                    if not new_pdf.exists():
+                    if new_pdf is None or not new_pdf.exists():
                         why.append("new E4 output missing")
                     diffs_skipped.append((deck, "; ".join(why)))
         except ImportError:
@@ -194,6 +237,8 @@ def main() -> int:
     print()
 
     print(f"Routed into from_code/ : {len(copied)}")
+    if src_root_counts:
+        print("   by source root      : " + "  ".join(f"{lab}={n}" for lab, n in sorted(src_root_counts.items())))
     print(f"Static assets present  : {len(static_ok)}/{len(static_ok) + len(static_missing)}")
     print(f"Diffs generated        : {len(diffs_made)}")
     print(f"MISSING (routable)     : {len(missing)}")
@@ -234,9 +279,9 @@ def main() -> int:
     print(bar)
     print(f"{'CATEGORY':<34}{'COUNT':>8}")
     print("-" * 42)
-    print(f"{'Routed (canonical OK + OK-RENAME)':<34}{sum(1 for _,k,st,_ in copied if st in ('OK','OK-RENAME')):>8}")
-    print(f"{'Routed (upstream-canonical)':<34}{sum(1 for _,k,st,_ in copied if st=='UPSTREAM-CANONICAL'):>8}")
-    print(f"{'Routed (legacy, flagged)':<34}{sum(1 for _,k,st,_ in copied if st=='LEGACY'):>8}")
+    print(f"{'Routed (canonical OK + OK-RENAME)':<34}{sum(1 for c in copied if c[2] in ('OK','OK-RENAME')):>8}")
+    print(f"{'Routed (upstream-canonical)':<34}{sum(1 for c in copied if c[2]=='UPSTREAM-CANONICAL'):>8}")
+    print(f"{'Routed (legacy, flagged)':<34}{sum(1 for c in copied if c[2]=='LEGACY'):>8}")
     print(f"{'  of which gabriel-fallback':<34}{len(warn_fallback):>8}")
     print(f"{'  of which sample-mode':<34}{len(warn_sample):>8}")
     print(f"{'Static (manual) present':<34}{len(static_ok):>8}")
