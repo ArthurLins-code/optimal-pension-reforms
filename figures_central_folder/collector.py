@@ -158,6 +158,12 @@ def main() -> int:
                 static_ok.append(deck)
             else:
                 static_missing.append(deck)
+            # A figure that is now static must not keep a stale code copy in
+            # from_code/ -- \graphicspath searches from_code/ first and would shadow
+            # the static/ original.
+            stale = FROM_CODE / deck
+            if stale.exists():
+                stale.unlink()
             continue
 
         # ---- resolve the code source across roots (sample working dir + repo) ----

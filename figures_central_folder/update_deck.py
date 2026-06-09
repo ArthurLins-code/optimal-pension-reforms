@@ -98,7 +98,9 @@ def main() -> int:
     # 3. COMPILE --------------------------------------------------------------
     if not args.no_compile:
         banner("COMPILE  ->  latex/presentation/_main.pdf")
-        crc, dt = run(["latexmk", "-pdf", "-interaction=nonstopmode", "_main.tex"], cwd=DECK_DIR)
+        # -g forces a rebuild so a removed/frozen figure is always reflected
+        # (latexmk can otherwise consider _main.pdf up-to-date and keep a stale image).
+        crc, dt = run(["latexmk", "-g", "-pdf", "-interaction=nonstopmode", "_main.tex"], cwd=DECK_DIR)
         results.append(("compile", crc, dt))
         log = DECK_DIR / "_main.log"
         nf = log.read_text(errors="replace").count("not found") if log.is_file() else -1
