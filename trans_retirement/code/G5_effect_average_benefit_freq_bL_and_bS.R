@@ -210,6 +210,10 @@ for (g in c('[-6,-3]','[-2,-1]','[0,1]','[2,6]','[7,15]')) {
 
 results <- rbindlist(results)
 
+ylim_bene <- range(c(0, results$lower_bound, results$upper_bound), na.rm = TRUE)
+ylim_bene <- ylim_bene + c(-0.05, 0.05) * diff(ylim_bene)
+message('ylim_bene = ', paste(round(ylim_bene, 1), collapse = ', '))
+
 # New schedule
 
 list_plots_new <- list()
@@ -224,11 +228,10 @@ for (g in c('[-6,-3]','[-2,-1]','[0,1]','[2,6]','[7,15]')) {
     geom_point(aes(y = point_estimate, color = factor(group)), shape = 17)+
     geom_line(aes(y = point_estimate), color = brewer.pal(8,'Dark2')[aux_n], linetype = 'longdash', linewidth = 0.4)+
     geom_errorbar(aes(ymin = lower_bound, ymax = upper_bound), color = brewer.pal(8,'Dark2')[aux_n], width = 0.6, linewidth = 0.5)+
-    coord_cartesian(ylim = c(-1000,750))+
+    coord_cartesian(ylim = ylim_bene)+
     scale_x_continuous(breaks = seq(-16,16,4), minor_breaks = seq(-16,16,1),
                        guide = guide_axis(minor.ticks = TRUE))+
-    scale_y_continuous(breaks = seq(-1000, 750, 500), minor_breaks = seq(-1000,750,250),
-                       guide = guide_axis(minor.ticks = TRUE))+
+    scale_y_continuous(n.breaks = 6, labels = scales::label_number(scale_cut = scales::cut_short_scale()), guide = guide_axis(minor.ticks = TRUE))+
     scale_color_manual(values = brewer.pal(8,'Dark2')[aux_n], name = 'Points - 85/95',
                        labels = c('[-15,-7]'='[-15,-6)',
                                   '[-6,-3]'='[-6,-2)',
@@ -278,11 +281,10 @@ for (g in c('[-6,-3]','[-2,-1]','[0,1]','[2,6]','[7,15]')) {
     geom_point(aes(y = point_estimate, color = factor(group)), shape = 17)+
     geom_line(aes(y = point_estimate), color = brewer.pal(8,'Dark2')[aux_n], linetype = 'longdash', linewidth = 0.4)+
     geom_errorbar(aes(ymin = lower_bound, ymax = upper_bound), color = brewer.pal(8,'Dark2')[aux_n], width = 0.6, linewidth = 0.5)+
-    coord_cartesian(ylim = c(-1000,750))+
+    coord_cartesian(ylim = ylim_bene)+
     scale_x_continuous(breaks = seq(-16,16,4), minor_breaks = seq(-16,16,1),
                        guide = guide_axis(minor.ticks = TRUE))+
-    scale_y_continuous(breaks = seq(-1000, 750, 500), minor_breaks = seq(-1000,750,250),
-                       guide = guide_axis(minor.ticks = TRUE))+
+    scale_y_continuous(n.breaks = 6, labels = scales::label_number(scale_cut = scales::cut_short_scale()), guide = guide_axis(minor.ticks = TRUE))+
     scale_color_manual(values = brewer.pal(8,'Dark2')[aux_n], name = 'Points - 85/95',
                        labels = c('[-15,-7]'='[-15,-6)',
                                   '[-6,-3]'='[-6,-2)',

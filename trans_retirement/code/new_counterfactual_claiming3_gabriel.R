@@ -126,8 +126,11 @@ sum(dt_final[t >= -1]$claims_c) # 595,968
 
 a <- dt_final[cohort == sample(unique(dt_final$cohort), 1)]
 
-dt_freq <- dt_final[,.(p, t, claims, claims_c)] %>% 
+dt_freq <- dt_final[,.(p, t, claims, claims_c)] %>%
   melt(id.vars = c('p', 't'))
+
+ylim_freq <- c(0, 1.05 * dt_freq[t %in% seq(-13, 13) & is.finite(value), max(value)])
+message('ylim_freq = ', paste(round(ylim_freq, 1), collapse = ', '))
 
 list_plots_count <- list()
 for (y in seq(-13,-2,1)) {
@@ -150,7 +153,7 @@ for (y in seq(-13,-2,1)) {
     scale_x_continuous(breaks = seq(-15,15,5), minor_breaks = seq(-30,30,1),
                        guide = guide_axis(minor.ticks = TRUE))+
     scale_y_continuous(n.breaks = 6)+
-    coord_cartesian(ylim = c(0,8000))+
+    coord_cartesian(ylim = ylim_freq)+
     theme_classic()+
     guides(color = guide_legend(nrow = 2), fill = 'none', linetype = 'none')+
     theme(axis.title.x = element_text(family='serif', size = 10),
@@ -256,7 +259,7 @@ for (y in seq(-1,13,1)) {
     scale_x_continuous(breaks = seq(-15,15,5), minor_breaks = seq(-30,30,1),
                        guide = guide_axis(minor.ticks = TRUE))+
     scale_y_continuous(n.breaks = 6)+
-    coord_cartesian(ylim = c(0,8000))+
+    coord_cartesian(ylim = ylim_freq)+
     theme_classic()+
     guides(color = guide_legend(nrow = 2), fill = 'none', linetype = 'none')+
     theme(axis.title.x = element_text(family='serif', size = 10),
@@ -443,6 +446,7 @@ ggsave(plot_all, filename = 'tmp/claims_distribution_actual_count_agg.pdf',
        height = 4, width = 6)
 
 for (i in -13:13) {
-  ggsave(list_plots_count[[paste0(i)]], filename = paste0('tmp/claims_distribution_actual_count_',i,'.pdf'),
+  ggsave(list_plots_count[[paste0(i)]], filename = paste0('output/new_counter_claiming/actual_reform_gabriel/claims_distribution_actual_count_',i,'.pdf'),
          height = 3, width = 4)
 }
+

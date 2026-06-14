@@ -374,8 +374,14 @@ baseline_dd_taxes <- mean(panel_annual[year == 2014]$taxes, na.rm = T)
 baseline_dd_change <- mean(panel_annual[year == 2014]$change_taxes, na.rm = T)
 baseline_ddipw_taxes <- weighted.mean(panel_annual[year == 2014 & !is.na(ipw)]$taxes, 
                                       w = panel_annual[year == 2014 & !is.na(ipw)]$ipw, na.rm = T)
-baseline_ddipw_change <- weighted.mean(panel_annual[year == 2014 & !is.na(ipw)]$change_taxes, 
+baseline_ddipw_change <- weighted.mean(panel_annual[year == 2014 & !is.na(ipw)]$change_taxes,
                                        w = panel_annual[year == 2014 & !is.na(ipw)]$ipw, na.rm = T)
+
+ylim_dd <- range(c(0, results$lower_bound, results$upper_bound), na.rm = TRUE)
+ylim_dd <- ylim_dd + c(-0.45, 0.15) * diff(ylim_dd)   # extra bottom room for annotations
+ann_y1  <- ylim_dd[1] + 0.16 * diff(ylim_dd)
+ann_y2  <- ylim_dd[1] + 0.07 * diff(ylim_dd)
+message('ylim_dd = ', paste(round(ylim_dd, 1), collapse = ', '))
 
 plot_dd_1 <- ggplot(results[estimator == 'DD'], aes(x = year, na.rm = T))+
   geom_vline(xintercept = -0.5, linetype = 'dashed', linewidth = 0.3)+
@@ -383,20 +389,19 @@ plot_dd_1 <- ggplot(results[estimator == 'DD'], aes(x = year, na.rm = T))+
   geom_point(aes(y = point_estimate, color = factor(estimator)), shape = 17)+
   geom_line(aes(y = point_estimate), color = brewer.pal(8,'Dark2')[1], linetype = 'longdash', linewidth = 0.4)+
   geom_errorbar(aes(ymin = lower_bound, ymax = upper_bound), color = brewer.pal(8,'Dark2')[1], width = 0.2, linewidth = 0.5)+
-  annotate('text', x = -4, y = -1500,
+  annotate('text', x = -4, y = ann_y1,
            label = paste0('Baseline tax collec.: ', round(baseline_dd_taxes,2)),
            hjust = 0, family = 'serif', parse = FALSE)+
-  annotate('text', x = -4, y = -1750,
+  annotate('text', x = -4, y = ann_y2,
            label = paste0('Avg. Effect: ', round(model3$coefficients[[1]],2),' (', round(model3$se[[1]],2),')'),
            hjust = 0, family = 'serif', parse = FALSE)+
-  # annotate('text', x = -4, y = -1750,
+  # annotate('text', x = -4, y = ann_y2,
   #          label = paste0('N = ', model3$nobs,' (', model3$fixef_sizes[[2]],' indivs.)'),
   #          hjust = 0, family = 'serif', parse = FALSE)+
-  coord_cartesian(ylim = c(-2000,1000))+
+  coord_cartesian(ylim = ylim_dd)+
   scale_x_continuous(breaks = seq(-4,3,2), minor_breaks = seq(-4,3,1),
                      guide = guide_axis(minor.ticks = TRUE))+
-  scale_y_continuous(breaks = seq(-3000, 1000, 1000), minor_breaks = seq(-3000,1000,500),
-                     guide = guide_axis(minor.ticks = TRUE))+
+  scale_y_continuous(n.breaks = 6, guide = guide_axis(minor.ticks = TRUE))+
   scale_color_manual(values = brewer.pal(8,'Dark2')[1])+
   theme_classic()+
   guides(color = guide_legend(nrow = 1, order = 1))+
@@ -428,20 +433,19 @@ plot_dd_2 <- ggplot(results[estimator == 'DD-IPW'], aes(x = year, na.rm = T))+
   geom_point(aes(y = point_estimate, color = factor(estimator)), shape = 17)+
   geom_line(aes(y = point_estimate), color = brewer.pal(8,'Dark2')[2], linetype = 'longdash', linewidth = 0.4)+
   geom_errorbar(aes(ymin = lower_bound, ymax = upper_bound), color = brewer.pal(8,'Dark2')[2], width = 0.2, linewidth = 0.5)+
-  coord_cartesian(ylim = c(-2000,1000))+
-  annotate('text', x = -4, y = -1500,
+  coord_cartesian(ylim = ylim_dd)+
+  annotate('text', x = -4, y = ann_y1,
            label = paste0('Baseline tax collec.: ', round(baseline_ddipw_taxes,2)),
            hjust = 0, family = 'serif', parse = FALSE)+
-  annotate('text', x = -4, y = -1750,
+  annotate('text', x = -4, y = ann_y2,
            label = paste0('Avg. Effect: ', round(model4$coefficients[[1]],2),' (', round(model4$se[[1]],2),')'),
            hjust = 0, family = 'serif', parse = FALSE)+
-  # annotate('text', x = -4, y = -1750,
+  # annotate('text', x = -4, y = ann_y2,
   #          label = paste0('N = ', model4$nobs,' (', model4$fixef_sizes[[2]],' indivs.)'),
   #          hjust = 0, family = 'serif', parse = FALSE)+
   scale_x_continuous(breaks = seq(-4,3,2), minor_breaks = seq(-4,3,1),
                      guide = guide_axis(minor.ticks = TRUE))+
-  scale_y_continuous(breaks = seq(-3000, 1000, 1000), minor_breaks = seq(-3000,1000,500),
-                     guide = guide_axis(minor.ticks = TRUE))+
+  scale_y_continuous(n.breaks = 6, guide = guide_axis(minor.ticks = TRUE))+
   scale_color_manual(values = brewer.pal(8,'Dark2')[2])+
   theme_classic()+
   guides(color = guide_legend(nrow = 1, order = 1))+
