@@ -450,3 +450,197 @@ for (i in -13:13) {
          height = 3, width = 4)
 }
 
+# --- Claiming-hazard event studies (deck F4_eventstudy_agg_*) ---------------------------
+# Faithful graft of the validated aggregated claiming-hazard event-study block
+# (workbench dev_es_1_cache.R + dev_es_2_models.R + dev_es_3_plots.R), itself a
+# port of legacy F4 block 2b (~lines 112-117, 231-241, 253-264, 272-319).
+# Coefficient logic and plot style are FINAL — replicated, not redesigned.
+#
+# DATA INPUTS (decided per mode; F4 needs quarterly claim_haz at the
+# year_quarter x points_norm level, which the frequency block above does NOT
+# carry on `panel` — gabriel renames dist_reform -> dist_reform_quarters in
+# sample mode and aggregates D4_panel_reform, so we (re)load fresh, local
+# objects here to keep the F4 spec byte-faithful and avoid the rename collision):
+#   - FULL mode: working/D1_cross_section.csv.gz + working/D2_panel.csv.gz
+#       (H2 precedent: D2_panel ships year_quarter + quarterly claim_haz;
+#        D4_panel_reform does NOT. points_norm is NOT precomputed in D1/D2,
+#        so we recompute it from points_claim/points_quarter + male exactly as
+#        legacy F4 lines 36-44.) Full mode is static-checked only — cannot run
+#        locally.
+#   - SAMPLE mode: reload data/dt_sampled_anon.csv + data/panel_sampled_anon.csv
+#       (the sample panel ships precomputed points_norm; used directly as the
+#        validated cache does). We RELOAD rather than reuse the in-memory `dt`
+#        (already filtered on dist_claim_cutoff) and `panel` (its dist_reform was
+#        renamed to dist_reform_quarters above), into local objects es_dt/es_panel.
+
+if (DATA_MODE == "full") {
+  es_dt <- fread('working/D1_cross_section.csv.gz') %>%
+    .[!is.na(dist_claim_cutoff)]
+  es_panel <- fread('working/D2_panel.csv.gz')
+
+  # points_norm not precomputed in D1/D2 — recompute as legacy F4 lines 36-44.
+  es_dt[, points_d := floor(points_claim)] %>%
+    .[, points_norm := ifelse(male == 0, points_d - 85, points_d - 95)]
+  es_panel[, points_d := floor(points_quarter)] %>%
+    .[, points_norm := ifelse(male == 0, points_d - 85, points_d - 95)]
+  message("ES full: D1 cross-section ", nrow(es_dt), " obs, D2 panel ", nrow(es_panel), " obs")
+} else {
+  es_dt <- fread(file.path(dir, 'data', 'dt_sampled_anon.csv')) %>%
+    .[!is.na(dist_claim_cutoff)]
+  setnames(es_dt, 'cpf_anon', 'indiv')
+  es_panel <- fread(file.path(dir, 'data', 'panel_sampled_anon.csv'))
+  setnames(es_panel, 'cpf_anon', 'indiv')
+  message("ES sample: cross-section ", nrow(es_dt), " obs, panel ", nrow(es_panel), " obs")
+}
+
+# dist_reform: recompute exactly as legacy F4 line 44 (4 * (year_quarter - 2015.25)).
+es_panel[, dist_reform := 4 * (year_quarter - 2015.25)]
+
+# panel_DD build: faithful port of F4 lines 112-117.
+es_panel_DD <- left_join(
+  es_panel[, .(indiv, year_quarter, claim_haz, points_norm, male, dist_reform)],
+  es_dt[, .(indiv, microrregiao, m_schooling, m_race, birth_year)],
+  by = 'indiv'
+) %>%
+  .[!is.na(claim_haz)] %>%
+  .[year_quarter >= 2012 & year_quarter <= 2018.25] %>%
+  .[points_norm >= -15 & points_norm <= 15]
+
+setDT(es_panel_DD)
+message("ES panel_DD after filters: ", nrow(es_panel_DD), " obs | ",
+        uniqueN(es_panel_DD$indiv), " indivs")
+
+gc()
+
+# Aggregated treatment dummies: faithful port of F4 lines 231-241.
+# Common control: points_norm < -6 -> dummy = 0 for ALL groups.
+es_panel_DD[points_norm < -6, `treat_agg_[-6,-3]` := 0]
+es_panel_DD[points_norm < -6, `treat_agg_[-2,-1]` := 0]
+es_panel_DD[points_norm < -6, `treat_agg_[0,1]`   := 0]
+es_panel_DD[points_norm < -6, `treat_agg_[2,6]`   := 0]
+es_panel_DD[points_norm < -6, `treat_agg_[7,15]`  := 0]
+
+es_panel_DD[points_norm %in% -6:-3, `treat_agg_[-6,-3]` := 1]
+es_panel_DD[points_norm %in% -2:-1, `treat_agg_[-2,-1]` := 1]
+es_panel_DD[points_norm %in% 0:1,   `treat_agg_[0,1]`   := 1]
+es_panel_DD[points_norm %in% 2:6,   `treat_agg_[2,6]`   := 1]
+es_panel_DD[points_norm %in% 7:15,  `treat_agg_[7,15]`  := 1]
+
+gc()
+
+es_groups <- c("[-6,-3]", "[-2,-1]", "[0,1]", "[2,6]", "[7,15]")
+
+# Per-group counts sanity (treated vs control).
+for (g in es_groups) {
+  col <- paste0("treat_agg_", g)
+  message("ES group ", g, ": treated=", es_panel_DD[get(col) == 1, .N],
+          " control=", es_panel_DD[get(col) == 0, .N])
+}
+
+# Grouped DD event-study models: faithful port of F4 lines 253-264 + 272-276.
+#   ref qtr 2014.75 (2014 Q4); FE year_quarter + points_norm + male +
+#   microrregiao + m_schooling + m_race + birth_year; cluster indiv.
+es_coefs <- list()
+for (g in es_groups) {
+  col <- paste0("treat_agg_", g)
+
+  es_formula <- as.formula(paste0(
+    "claim_haz ~ i(year_quarter, `treat_agg_", g, "`, ref = 2014.75) | ",
+    "year_quarter + points_norm + male + microrregiao + m_schooling + ",
+    "m_race + birth_year"
+  ))
+
+  es_m <- feols(
+    data    = es_panel_DD[!is.na(get(col))],
+    fml     = es_formula,
+    cluster = "indiv"
+  )
+
+  ip <- iplot(es_m, only.params = TRUE)$prms
+
+  es_coefs[[g]] <- data.table(
+    year_quarter   = ip$estimate_names,
+    group          = g,
+    point_estimate = ip$estimate,
+    lower_bound    = ip$ci_low,
+    upper_bound    = ip$ci_high
+  )[, dist_reform := 4 * (as.numeric(year_quarter) - 2015.25)]
+
+  message("ES group ", g, " done: ", nrow(es_coefs[[g]]), " coefs | est range [",
+          round(min(es_coefs[[g]]$point_estimate), 4), ", ",
+          round(max(es_coefs[[g]]$point_estimate), 4), "]")
+  gc()
+}
+
+# Data-driven, everything-visible y-limits (range of 0 + all CI bounds, +-5% pad),
+# computed ONCE across all 5 groups so panels share a comparable scale.
+es_all_coefs <- rbindlist(es_coefs)
+es_y_raw <- range(c(0, es_all_coefs$lower_bound, es_all_coefs$upper_bound), na.rm = TRUE)
+es_pad   <- 0.05 * diff(es_y_raw)
+es_ylim  <- c(es_y_raw[1] - es_pad, es_y_raw[2] + es_pad)
+message("ES data-driven ylim (range of 0 + all CI bounds, +-5% pad): [",
+        round(es_ylim[1], 4), ", ", round(es_ylim[2], 4), "]")
+
+# Display label per group (mirrors legacy F4 scale_color_manual labels).
+es_group_label <- c("[-6,-3]" = "[-6,-2)",
+                    "[-2,-1]" = "[-2,0)",
+                    "[0,1]"   = "[0,2)",
+                    "[2,6]"   = "[2,7)",
+                    "[7,15]"  = "[7,15]")
+
+es_make_plot <- function(g, idx) {
+  d <- copy(es_coefs[[g]])
+  d[, year_quarter := as.numeric(year_quarter)]
+  d[, dist_reform := 4 * (year_quarter - 2015.25)]
+  col_g <- brewer.pal(8, "Dark2")[idx]
+
+  ggplot(d, aes(x = dist_reform)) +
+    geom_vline(xintercept = -1.5, linetype = "longdash", linewidth = 0.3) +
+    geom_vline(xintercept = -0.5, linetype = "solid", linewidth = 0.3) +
+    geom_hline(yintercept = 0, linewidth = 0.3) +
+    geom_point(aes(y = point_estimate, color = factor(group)), shape = 17) +
+    geom_line(aes(y = point_estimate), color = col_g,
+              linetype = "longdash", linewidth = 0.4) +
+    geom_errorbar(aes(ymin = lower_bound, ymax = upper_bound),
+                  color = col_g, width = 0.6, linewidth = 0.5) +
+    coord_cartesian(ylim = es_ylim) +
+    scale_x_continuous(breaks = seq(-12, 12, 4), minor_breaks = seq(-16, 16, 1),
+                       guide = guide_axis(minor.ticks = TRUE)) +
+    scale_y_continuous(n.breaks = 6,
+                       guide = guide_axis(minor.ticks = TRUE)) +
+    scale_color_manual(values = setNames(col_g, g), name = "Points - 85/95",
+                       labels = es_group_label) +
+    theme_classic() +
+    guides(color = guide_legend(nrow = 1, order = 1)) +
+    theme(axis.title.x = element_text(family = "serif", size = 10),
+          axis.title.y = element_text(family = "serif", size = 10),
+          axis.text.x  = element_text(family = "serif", size = 10),
+          axis.text.y  = element_text(family = "serif", size = 10),
+          axis.line    = element_line(linewidth = 0.3),
+          axis.ticks   = element_line(linewidth = 0.3),
+          plot.title   = element_text(hjust = 0.5, family = "serif", size = 10),
+          panel.grid.minor   = element_blank(),
+          panel.grid.major.x = element_blank(),
+          panel.grid.major.y = element_line(linewidth = 0.3),
+          legend.position    = c(0, 0),
+          legend.justification = c(0, 0),
+          legend.direction   = "horizontal",
+          legend.key.height  = unit(0, units = "mm"),
+          legend.key.width   = unit(0, units = "mm"),
+          legend.spacing     = unit(0, units = "mm"),
+          legend.title       = element_text(family = "serif", size = 9),
+          legend.text        = element_text(family = "serif", size = 9),
+          legend.background  = element_rect(color = "black", fill = "white",
+                                            linewidth = 0.2)) +
+    xlab("Quarters since reform") +
+    ylab("Effect on claiming hazard")
+}
+
+for (i in seq_along(es_groups)) {
+  g  <- es_groups[i]
+  p_es <- es_make_plot(g, i)
+  fn_es <- paste0('output/new_counter_claiming/actual_reform_gabriel/claiming_hazard_eventstudy_',
+                  i, SUFFIX, '.pdf')
+  ggsave(p_es, filename = fn_es, height = 3, width = 4)
+  message("Saved ", fn_es)
+}
