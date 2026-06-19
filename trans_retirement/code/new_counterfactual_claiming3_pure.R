@@ -237,8 +237,10 @@ g_pta_matrix
 #Plotting the Level Reform
 ############
 #first, I'll prepare the dataframe in the best way possible
-dt_freq_L <- dt_final[,.(p, t, claims, claims_c,claims_L)] %>% 
+dt_freq_L <- dt_final[,.(p, t, claims, claims_c,claims_L)] %>%
   melt(id.vars = c('p', 't'))
+ylim_L <- c(0, 1.05 * dt_freq_L[t %in% seq(-1, 13) & is.finite(value), max(value)])
+message('ylim_L = ', paste(round(ylim_L, 1), collapse = ', '))
 # creating a list to store all the plots
 list_plots_freq_L <- list()
 for (y in seq(-1,13,1)) {
@@ -261,7 +263,7 @@ for (y in seq(-1,13,1)) {
     scale_x_continuous(breaks = seq(-15,15,5), minor_breaks = seq(-30,30,1),
                        guide = guide_axis(minor.ticks = TRUE))+
     scale_y_continuous(n.breaks = 6)+
-    coord_cartesian(ylim = c(0,8000))+
+    coord_cartesian(ylim = ylim_L)+
     theme_classic()+
     guides(color = guide_legend(nrow = 2), fill = 'none', linetype = 'none')+
     theme(axis.title.x = element_text(family='serif', size = 10),
@@ -285,8 +287,8 @@ for (y in seq(-1,13,1)) {
           legend.margin = margin(t = 1, b = 1, l = 2),
           legend.background = element_rect(color = 'black', fill = 'white', linewidth = 0.2))+
     xlab('Points - 85/95')+
-    ylab('Frequency of claims')    
-  
+    ylab('Frequency of claims')
+
 }
 list_plots_freq_L["1"]
 ###################################
@@ -294,8 +296,10 @@ list_plots_freq_L["1"]
 ############
 #Plotting the Slope Reform
 ############
-dt_freq_S <- dt_final[,.(p, t, claims, claims_c,claims_S)] %>% 
+dt_freq_S <- dt_final[,.(p, t, claims, claims_c,claims_S)] %>%
   melt(id.vars = c('p', 't'))
+ylim_S <- c(0, 1.05 * dt_freq_S[t %in% seq(-1, 13) & is.finite(value), max(value)])
+message('ylim_S = ', paste(round(ylim_S, 1), collapse = ', '))
 # creating a list to store all the plots
 list_plots_freq_S <- list()
 for (y in seq(-1,13,1)) {
@@ -318,7 +322,7 @@ for (y in seq(-1,13,1)) {
     scale_x_continuous(breaks = seq(-15,15,5), minor_breaks = seq(-30,30,1),
                        guide = guide_axis(minor.ticks = TRUE))+
     scale_y_continuous(n.breaks = 6)+
-    coord_cartesian(ylim = c(0,8000))+
+    coord_cartesian(ylim = ylim_S)+
     theme_classic()+
     guides(color = guide_legend(nrow = 2), fill = 'none', linetype = 'none')+
     theme(axis.title.x = element_text(family='serif', size = 10),

@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How figures flow from code to the presentation</title>
+<style>
+  :root{
+    --code:#2563eb; --codebg:#eff4ff;
+    --out:#16a34a;  --outbg:#ecfdf3;
+    --hub:#ea580c;  --hubbg:#fff3e9;
+    --deck:#7c3aed; --deckbg:#f5effe;
+    --ink:#1f2933; --muted:#667085; --line:#e3e8ef; --bg:#f7f9fc;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  .wrap{max-width:980px;margin:0 auto;padding:32px 22px 80px}
+  header.hero{background:linear-gradient(135deg,#1e293b,#334155);color:#fff;border-radius:18px;
+    padding:34px 34px 28px;box-shadow:0 12px 30px rgba(30,41,59,.18)}
+  header.hero h1{margin:0 0 6px;font-size:30px;letter-spacing:-.3px}
+  header.hero p{margin:0;color:#cbd5e1;font-size:17px}
+  h2{margin:46px 0 14px;font-size:23px;letter-spacing:-.2px;display:flex;align-items:center;gap:10px}
+  h2 .num{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:9px;
+    background:#1e293b;color:#fff;font-size:15px;font-weight:700}
+  h3{margin:26px 0 8px;font-size:18px}
+  p{margin:10px 0}
+  code{font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace;font-size:.92em;
+    background:#eef1f6;border:1px solid var(--line);border-radius:6px;padding:1px 6px}
+  pre{background:#0f172a;color:#e2e8f0;border-radius:12px;padding:16px 18px;overflow:auto;
+    font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace;font-size:14px;line-height:1.5}
+  pre .c{color:#7dd3fc}        /* command */
+  pre .g{color:#86efac}        /* good/comment */
+  pre .m{color:#94a3b8}        /* muted */
+  .tldr{background:#fff;border:2px solid var(--out);border-left-width:9px;border-radius:14px;
+    padding:20px 24px;margin:24px 0;box-shadow:0 6px 18px rgba(22,163,74,.08)}
+  .tldr h2{margin:0 0 10px;font-size:20px}
+  .legend{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 4px}
+  .chip{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;
+    padding:5px 11px;border-radius:999px;border:1px solid var(--line);background:#fff}
+  .dot{width:11px;height:11px;border-radius:50%}
+  /* flow */
+  .flow{margin:18px 0}
+  .step{border-radius:14px;padding:16px 18px;border:1px solid var(--line);background:#fff;
+    box-shadow:0 4px 14px rgba(16,24,40,.05);position:relative}
+  .step .tag{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.6px}
+  .step .path{font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace;font-size:13.5px;
+    margin-top:6px;word-break:break-all}
+  .step .note{color:var(--muted);font-size:13.5px;margin-top:6px}
+  .step.code{border-color:var(--code);background:var(--codebg)} .step.code .tag{color:var(--code)}
+  .step.out{border-color:var(--out);background:var(--outbg)} .step.out .tag{color:var(--out)}
+  .step.hub{border-color:var(--hub);background:var(--hubbg)} .step.hub .tag{color:var(--hub)}
+  .step.deck{border-color:var(--deck);background:var(--deckbg)} .step.deck .tag{color:var(--deck)}
+  .arrow{display:flex;flex-direction:column;align-items:center;color:var(--muted);
+    font-size:13px;margin:4px 0}
+  .arrow .bar{font-size:22px;line-height:1}
+  .arrow .lbl{background:#fff;border:1px solid var(--line);border-radius:999px;padding:2px 10px;
+    font-weight:600;color:#334155;margin-top:2px}
+  /* repo map */
+  .map{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 20px;
+    font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace;font-size:14px;line-height:1.85}
+  .map .f{font-weight:700}
+  .map .b{padding:1px 6px;border-radius:5px;font-weight:700}
+  .b.code{background:var(--codebg);color:var(--code)}
+  .b.out{background:var(--outbg);color:var(--out)}
+  .b.hub{background:var(--hubbg);color:var(--hub)}
+  .b.deck{background:var(--deckbg);color:var(--deck)}
+  .map .cm{color:var(--muted)}
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px;background:#fff;
+    border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  th,td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+  th{background:#f1f5f9;font-size:12.5px;text-transform:uppercase;letter-spacing:.4px;color:#475569}
+  td code{font-size:12.5px}
+  tr:last-child td{border-bottom:none}
+  .callout{border-radius:12px;padding:14px 18px;margin:16px 0;border:1px solid;display:flex;gap:12px}
+  .callout .i{font-size:20px;line-height:1.2}
+  .tip{background:#eff6ff;border-color:#bfdbfe}
+  .warn{background:#fff7ed;border-color:#fed7aa}
+  .ok{background:#ecfdf3;border-color:#bbf7d0}
+  .key{display:inline-block;background:#1e293b;color:#fff;border-radius:6px;padding:1px 8px;
+    font-family:"SF Mono",ui-monospace,monospace;font-size:13px}
+  .small{font-size:13.5px;color:var(--muted)}
+  footer{margin-top:50px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <h1>From code to slide: updating the presentation's figures</h1>
+  <p>A visual guide for someone who has R, Python and LaTeX installed, but is new to this repository.</p>
+</header>
+
+<div class="tldr">
+  <h2>✅ Short answer: yes, it is automatic</h2>
+  <p>If you change a script that makes a figure, you update that figure in the slides with <b>one command</b>:</p>
+  <pre><span class="c">python figures_central_folder/update_deck.py G5</span>
+<span class="m"># reruns the G5 script → collects its figures → rebuilds the slides PDF</span></pre>
+  <p class="small">Replace <code>G5</code> with the stage you changed (<code>E4</code>, <code>G5</code>, <code>H2</code>, <code>F</code>, <code>Fg</code>, <code>I6</code>).
+  The rest of this page explains <i>what that command does</i> and how the pieces connect — so you can trust it and fix it if something looks off.</p>
+</div>
+
+<div class="legend">
+  <span class="chip"><span class="dot" style="background:var(--code)"></span>analysis code</span>
+  <span class="chip"><span class="dot" style="background:var(--out)"></span>figure files the code writes</span>
+  <span class="chip"><span class="dot" style="background:var(--hub)"></span>central hub (the connector)</span>
+  <span class="chip"><span class="dot" style="background:var(--deck)"></span>the presentation</span>
+</div>
+
+<!-- ============================================================ -->
+<h2><span class="num">1</span> The four places that matter</h2>
+<p>You only need to know four locations. Everything in this guide lives in one of them.</p>
+
+<div class="map">
+<span class="cm"># the repository root: optimal-pension-reforms/</span><br>
+├─ <span class="b code">trans_retirement/code/</span> <span class="cm">&larr; the R scripts that DO the analysis &amp; draw the plots</span><br>
+│&nbsp;&nbsp;&nbsp;&nbsp; └─ <span class="f">G5_effect_average_benefit_freq_bL_and_bS.R</span> <span class="cm">(makes the benefit plots)</span><br>
+├─ <span class="b out">trans_retirement/output/</span> <span class="cm">&larr; figures land here when run on the SERVER (full data)</span><br>
+├─ <span class="b hub">figures_central_folder/</span> <span class="cm">&larr; THE CONNECTOR (this folder)</span><br>
+│&nbsp;&nbsp;&nbsp;&nbsp; ├─ <span class="f">manifest.csv</span> <span class="cm">— the switchboard: which plot feeds which slide</span><br>
+│&nbsp;&nbsp;&nbsp;&nbsp; ├─ <span class="f">collector.py</span> <span class="cm">— copies plots in, renames them for the slides</span><br>
+│&nbsp;&nbsp;&nbsp;&nbsp; ├─ <span class="f">update_deck.py</span> <span class="cm">— the one-command workflow</span><br>
+│&nbsp;&nbsp;&nbsp;&nbsp; └─ <span class="f">from_code/</span> <span class="cm">— the plots, ready for the slides (auto-filled)</span><br>
+└─ <span class="b deck">latex/presentation/</span> <span class="cm">&larr; the Beamer slides</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; └─ <span class="f">_main.tex</span> → <span class="f">_main.pdf</span><br>
+<br>
+<span class="cm"># + one place OUTSIDE the repo:</span><br>
+<span class="b out">…/OneDrive/…/transfer_may_retirement/</span> <span class="cm">&larr; the 5% SAMPLE data + where figures land when run LOCALLY</span>
+</div>
+
+<div class="callout tip"><span class="i">💡</span><div>
+  <b>Why two output places?</b> The analysis can run on the real <b>full data</b> (only on the secure server → writes to <code>trans_retirement/output/</code>) or on a small <b>5% sample</b> on your laptop (→ writes into the OneDrive <code>transfer_may_retirement</code> folder). The connector knows how to read from <b>either</b>.
+</div></div>
+
+<!-- ============================================================ -->
+<h2><span class="num">2</span> How one figure travels from code to a slide</h2>
+<p>Follow a real example — the slide <i>“Effect on Avg Actual Benefits at p∈[0,2)”</i>. Its picture is called <code>new0.pdf</code> in the slides.</p>
+
+<div class="flow">
+  <div class="step code">
+    <div class="tag">① you edit / run the script</div>
+    <div class="path">trans_retirement/code/<b>G5_effect_average_benefit_freq_bL_and_bS.R</b></div>
+    <div class="note">This R script runs the regression and draws the plot.</div>
+  </div>
+  <div class="arrow"><span class="bar">▼</span><span class="lbl">run it (R)</span></div>
+
+  <div class="step out">
+    <div class="tag">② the script writes a PDF</div>
+    <div class="path">…/transfer_may_retirement/output/G/<b>G4_eventstudy_benegits_new_3.pdf</b>
+      <span class="note">(sample run · on the server it would be <code>trans_retirement/output/G/…</code>)</span></div>
+    <div class="note">Note the code's name is long and technical — not what the slide asks for.</div>
+  </div>
+  <div class="arrow"><span class="bar">▼</span><span class="lbl">collector.py — copy &amp; rename</span></div>
+
+  <div class="step hub">
+    <div class="tag">③ the collector renames it for the slides</div>
+    <div class="path">figures_central_folder/from_code/<b>new0.pdf</b></div>
+    <div class="note">The collector looks up the rename in <code>manifest.csv</code> (see §3) and copies the
+      newest version of the plot here under the exact name the slides use.</div>
+  </div>
+  <div class="arrow"><span class="bar">▼</span><span class="lbl">\graphicspath points here</span></div>
+
+  <div class="step deck">
+    <div class="tag">④ the slide shows it</div>
+    <div class="path">latex/presentation/_main.tex &nbsp;→&nbsp; <b>\includegraphics{new0.pdf}</b></div>
+    <div class="note">Recompile <code>_main.tex</code> and the slide now shows the fresh plot.</div>
+  </div>
+</div>
+
+<div class="callout ok"><span class="i">🔑</span><div>
+  The slide file <b>never changed</b> — it always asked for <code>new0.pdf</code>. We just made sure
+  the <i>right, current</i> <code>new0.pdf</code> shows up in <code>from_code/</code>. That is the whole trick.
+</div></div>
+
+<!-- ============================================================ -->
+<h2><span class="num">3</span> The switchboard: <code>manifest.csv</code></h2>
+<p>Every figure in the slides has exactly <b>one row</b> in <code>manifest.csv</code>. That row says which script
+  makes it, where the file is, and what the slide calls it. This is the link between code and presentation.</p>
+
+<table>
+  <tr><th>column</th><th>for our example (<code>new0.pdf</code>)</th><th>meaning</th></tr>
+  <tr><td><code>deck_name</code></td><td><code>new0.pdf</code></td><td>the name the slide uses</td></tr>
+  <tr><td><code>code_script</code></td><td><code>G5_…bL_and_bS.R</code></td><td>which script produces it</td></tr>
+  <tr><td><code>code_output_path</code></td><td><code>trans_retirement/output/G</code></td><td>the folder the code writes to</td></tr>
+  <tr><td><code>code_output_name</code></td><td><code>G4_eventstudy_benegits_new_3.pdf</code></td><td>the code's own filename</td></tr>
+  <tr><td><code>status</code></td><td><code>OK-RENAME</code></td><td>OK / OK-RENAME / LEGACY / NONE …</td></tr>
+  <tr><td><code>mode</code></td><td><code>any</code></td><td>sample-only? full-only? either?</td></tr>
+</table>
+
+<p>So to find out where any slide's picture comes from, open <code>manifest.csv</code> and search for its name.
+  To re-point a slide to a different plot, change that one row — <b>no LaTeX editing needed</b>.</p>
+
+<!-- ============================================================ -->
+<h2><span class="num">4</span> Update a figure — the one-command way</h2>
+<p>You edited <code>G5</code> and want the slides to reflect it. Run:</p>
+<pre><span class="c">python figures_central_folder/update_deck.py G5</span></pre>
+<p>That command does the three steps of §2 for you:</p>
+<table>
+  <tr><th>step</th><th>what it runs</th><th>result</th></tr>
+  <tr><td><b>1 · run</b></td><td><code>Rscript …/G5_…R</code></td><td>regenerates the plot file</td></tr>
+  <tr><td><b>2 · collect</b></td><td><code>collector.py --sample-root …</code></td><td>copies+renames it into <code>from_code/</code></td></tr>
+  <tr><td><b>3 · compile</b></td><td><code>latexmk -pdf _main.tex</code></td><td>rebuilds <code>_main.pdf</code></td></tr>
+</table>
+<p class="small">Known stage shortcuts: <code>E4</code> (claiming plots), <code>G5</code> (benefit plots),
+  <code>H2</code> (tax plots), <code>F</code> &amp; <code>Fg</code> (frequency plots), <code>I6</code> (WMVPF plot).
+  You can also pass several at once: <code>update_deck.py G5 H2</code>.</p>
+
+<div class="callout tip"><span class="i">💡</span><div>
+  Just changed the slides or a manifest row, but didn't touch any R code? Skip the slow R step:
+  <pre><span class="c">python figures_central_folder/update_deck.py --collect-only</span></pre>
+</div></div>
+
+<!-- ============================================================ -->
+<h2><span class="num">5</span> The same thing, step by step (no wrapper)</h2>
+<p>If you prefer to see each piece, run them yourself from the repo root:</p>
+<pre><span class="m"># 1 · regenerate the figure (writes into the sample folder)</span>
+<span class="c">Rscript trans_retirement/code/G5_effect_average_benefit_freq_bL_and_bS.R</span>
+
+<span class="m"># 2 · pull the fresh figures into the central folder</span>
+<span class="c">python figures_central_folder/collector.py \
+       --sample-root "C:/Users/&lt;you&gt;/OneDrive/Documentos/Pesquisa/transfer_may_retirement"</span>
+
+<span class="m"># 3 · rebuild the slides</span>
+<span class="c">cd latex/presentation &amp;&amp; latexmk -pdf -interaction=nonstopmode _main.tex</span></pre>
+<p class="small">Check the figure landed: <code>python figures_central_folder/verify_deck.py</code> should say
+  <span class="g">unresolved: 0</span>.</p>
+
+<!-- ============================================================ -->
+<h2><span class="num">6</span> Add a NEW figure to the presentation</h2>
+<p>Adding a brand-new picture is three small moves: <b>tell the switchboard</b> where it comes from
+  (one row in <code>manifest.csv</code>), <b>put it on a slide</b> (<code>\includegraphics</code>), then
+  <b>run the workflow</b>. First, which kind of figure is it?</p>
+
+<div class="legend">
+  <span class="chip"><span class="dot" style="background:var(--out)"></span>made by a script (a plot)</span>
+  <span class="chip"><span class="dot" style="background:var(--hub)"></span>made by hand (diagram, screenshot, one-off)</span>
+</div>
+
+<h3>① Choose the name the slide will use</h3>
+<p>Pick a short <b>deck name</b>, e.g. <code>my_new_plot.pdf</code>. That is the name you write in the slide
+  and the name the file gets inside the central folder. It does <b>not</b> have to match the code's own
+  filename — the switchboard handles the rename.</p>
+
+<h3>② Add one row to <code>manifest.csv</code></h3>
+<p>The columns are always
+  <code>deck_name, code_script, code_output_path, code_output_name, status, mode, notes</code>.</p>
+
+<p><b>A · the figure is produced by a script</b> — say you added a new
+  <code>ggsave('output/G/G5_my_panel.pdf', ...)</code> to the G5 script:</p>
+<pre><span class="m"># deck_name, code_script, code_output_path, code_output_name, status, mode, notes</span>
+my_new_plot.pdf,G5_effect_average_benefit_freq_bL_and_bS.R,trans_retirement/output/G,<span class="g">G5_my_panel.pdf</span>,OK-RENAME,any,My new benefit panel</pre>
+
+<p><b>B · the figure is hand-made / external</b> — a diagram or screenshot with no code behind it.
+  Drop the file into <code>figures_central_folder/static/</code>, then add:</p>
+<pre><span class="m"># deck_name, code_script, code_output_path, code_output_name, status, mode, notes</span>
+reform_sketch.pdf,<span class="g">(manual/external)</span>,figures_central_folder/static,reform_sketch.pdf,<span class="g">NONE</span>,n/a,Hand-made sketch</pre>
+
+<table>
+  <tr><th>status</th><th>use it when…</th></tr>
+  <tr><td><code>OK-RENAME</code></td><td>a script makes it under a different filename (the usual case for plots)</td></tr>
+  <tr><td><code>OK</code></td><td>a script makes it and you keep the code's exact filename as the deck name</td></tr>
+  <tr><td><code>NONE</code></td><td>no code makes it — the file lives in <code>static/</code></td></tr>
+</table>
+<p class="small"><code>mode</code>: <code>any</code> for a normal plot, <code>sample</code> if it only exists from a
+  5% run, <code>full</code> if only from the server, <code>n/a</code> for a hand-made file.</p>
+
+<h3>③ Put it on a slide in <code>latex/presentation/_main.tex</code></h3>
+<pre><span class="c">\begin{frame}{My new slide}
+  \centering
+  \includegraphics[width=0.8\linewidth]{my_new_plot.pdf}
+\end{frame}</span></pre>
+<p class="small">Write the <b>deck name</b> only — no folder path. The <code>\graphicspath</code> already points at
+  the central folder, so LaTeX finds it.</p>
+
+<h3>④ Run the workflow</h3>
+<pre><span class="m"># A · a script makes it — rerun that stage so the file exists, then collect + compile:</span>
+<span class="c">python figures_central_folder/update_deck.py G5</span>
+
+<span class="m"># B · hand-made (already in static/), or the file already exists — just collect + compile:</span>
+<span class="c">python figures_central_folder/update_deck.py --collect-only</span></pre>
+<p class="small">Using a script that isn't one of the shortcuts? Pass its path:
+  <code>update_deck.py trans_retirement/code/MyScript.R</code>. Then confirm it landed:
+  <code>verify_deck.py</code> → <span class="g">unresolved: 0</span>.</p>
+
+<div class="callout warn"><span class="i">⚠️</span><div>
+  <b>No manifest row = the figure is invisible.</b> The collector only moves figures that are listed in
+  <code>manifest.csv</code>. If a new slide shows blank or “file not found”, the usual cause is a missing
+  (or mistyped) row. That one row is the entire connection between your figure and the slides.
+</div></div>
+
+<div class="callout ok"><span class="i">✅</span><div>
+  <b>Worked example.</b> Add <code>ggsave('output/G/G5_my_panel.pdf')</code> to G5 → add the row from
+  <b>A</b> → put <code>\includegraphics{my_new_plot.pdf}</code> on a slide → run
+  <code>update_deck.py G5</code>. The new slide now shows your plot, straight from the code.
+</div></div>
+
+<!-- ============================================================ -->
+<h2><span class="num">7</span> The sample-vs-server detail (this was the “broken” part)</h2>
+<p>Each analysis script auto-detects where it is running and writes its figures accordingly:</p>
+<table>
+  <tr><th>running…</th><th>data</th><th>figures land in…</th><th>collector reads them via…</th></tr>
+  <tr><td>on your laptop</td><td>5% sample</td><td>the OneDrive <code>transfer_may_retirement/output/</code></td><td><code>--sample-root &lt;that folder&gt;</code></td></tr>
+  <tr><td>on the secure server</td><td>full data</td><td><code>trans_retirement/output/</code></td><td>nothing extra (the default)</td></tr>
+</table>
+<p>The connector reads from <b>both places and keeps the newest copy</b>. That is why a stale figure
+  in the repo no longer overrides a fresh one you just produced on the sample. <b>This was the bug</b>:
+  before, the slides were pulling old/hand-copied pictures that had drifted away from the code.</p>
+
+<div class="callout warn"><span class="i">⚠️</span><div>
+  <b>5% sample plots are noisy.</b> They are perfect for checking the <i>pipeline</i> works, but they are not
+  publication quality. The polished versions come from a <b>full-data run on the server</b> — same command,
+  just no <code>--sample-root</code>. The collector tags sample figures with <span class="key">[SAMPLE]</span>
+  so you never ship one by accident.
+</div></div>
+
+<!-- ============================================================ -->
+<h2><span class="num">8</span> When a figure won't update — checklist</h2>
+<table>
+  <tr><th>symptom</th><th>what to check</th></tr>
+  <tr><td>slide still shows the old plot</td><td>Did step 3 (compile) run? Try <code>--collect-only</code> then recompile. PDFs cache — make sure you reopened the new <code>_main.pdf</code>.</td></tr>
+  <tr><td>collector says <span class="key">MISSING</span></td><td>The script didn't actually write that file. Re-run the stage; confirm the file exists at <code>code_output_path</code> (or in the sample folder).</td></tr>
+  <tr><td>collector picked an old copy</td><td>Pass <code>--sample-root</code> so it sees your fresh sample run. It keeps the <i>newest</i> of sample-vs-repo.</td></tr>
+  <tr><td>plot looks wrong / degenerate</td><td>That's the <i>code's</i> output, not a routing problem. Open the file named in <code>manifest.csv</code> and check the script. (A tiny PDF often means a near-empty sample cell.)</td></tr>
+  <tr><td><span class="key">[LEGACY]</span> warning</td><td>That figure comes from an old script with no current generator — treat it as possibly outdated.</td></tr>
+  <tr><td>it's a hand-made picture</td><td><code>status = NONE</code> figures (diagrams, screenshots) live in <code>figures_central_folder/static/</code> and are not produced by code.</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<h2><span class="num">9</span> Cheat sheet</h2>
+<pre><span class="m"># one-command update after editing a stage</span>
+<span class="c">python figures_central_folder/update_deck.py G5</span>
+
+<span class="m"># just re-route + recompile (no R)</span>
+<span class="c">python figures_central_folder/update_deck.py --collect-only</span>
+
+<span class="m"># check every slide figure resolves</span>
+<span class="c">python figures_central_folder/verify_deck.py</span>
+
+<span class="m"># see what changed between the old and new slides (page-by-page)</span>
+<span class="c">python figures_central_folder/deck_compare.py OLD.pdf NEW.pdf figures_central_folder/_diffs</span>
+
+<span class="m"># find where a slide's picture comes from</span>
+<span class="m">→ open figures_central_folder/manifest.csv and search the figure name</span></pre>
+
+<div class="callout tip"><span class="i">🧭</span><div>
+  <b>Not yet automatic</b> (by design): a few slides use hand-made pictures
+  (<code>status = NONE</code> in the manifest), and the “actual vs counterfactual frequency”
+  slides currently use a fallback plot until the main script is extended. Everything else
+  flows straight from the code through the steps above.
+</div></div>
+
+<footer>
+  Generated for the Optimal Pension Reforms project · figures_central_folder workflow ·
+  the connector lives in <code>figures_central_folder/</code>.
+</footer>
+
+</div>
+</body>
+</html>
