@@ -313,23 +313,37 @@ Rscript presentation/build_deck.R</pre>
   <!-- CHEAT -->
   <section id="cheat">
     <h2><span class="n">9</span> Cheat sheet</h2>
-    <pre><span class="cm"># ---------- 5% SAMPLE (laptop) ----------</span>
-Rscript analysis/analysis_all.R          <span class="cm"># E4→gabriel→pure→G5→I4→I6</span>
-Rscript presentation/build_deck.R        <span class="cm"># figures → _main.pdf</span>
-
-<span class="cm"># ---------- FULL DATA (server) ----------</span>
-export PENSION_DATA_MODE=full            <span class="cm"># (PowerShell: $env:PENSION_DATA_MODE="full")</span>
-Rscript build/build_all.R                <span class="cm"># raw → panel  (needs the A1–D3 lineage first)</span>
-Rscript analysis/analysis_all.R
-Rscript presentation/build_deck.R
-
-<span class="cm"># ---------- FROM R INSTEAD OF THE TERMINAL ----------</span>
-source("RUN.R")                                   <span class="cm"># signpost</span>
+    <p>Each environment, two ways — pick whichever you prefer.</p>
+    <div class="grid2">
+      <div class="card" style="border-left:4px solid var(--sample)">
+        <h3 style="margin-top:0;color:var(--sample)">🟢 Sample (laptop) — no env var needed</h3>
+        <p style="margin:.5em 0 .2em"><b>R / RStudio</b> — source the script:</p>
+        <pre>source(here::here("analysis","analysis_all.R"))
+source(here::here("presentation","build_deck.R"))</pre>
+        <p style="margin:.5em 0 .2em"><b>Command line / PowerShell</b> — Rscript:</p>
+        <pre>Rscript analysis/analysis_all.R
+Rscript presentation/build_deck.R</pre>
+        <p class="muted" style="margin-bottom:0">Mode auto-detects as <code>sample</code>; build is skipped.</p>
+      </div>
+      <div class="card" style="border-left:4px solid var(--server)">
+        <h3 style="margin-top:0;color:var(--server)">🔵 Server (full data) — set the mode first</h3>
+        <p style="margin:.5em 0 .2em"><b>R / RStudio</b> — source the script:</p>
+        <pre>Sys.setenv(PENSION_DATA_MODE = "full")
+source(here::here("build","build_all.R"))
 source(here::here("analysis","analysis_all.R"))
-
-<span class="cm"># ---------- HEADLINE NUMBERS ----------</span>
-<span class="cm"># &lt;data-root&gt;/output/I/I6_summary&lt;SUFFIX&gt;.csv  → WMVPF_actual, WMVPF_bL/bS, eta</span></pre>
-    <p class="muted" style="margin-top:18px;font-size:12.5px">optimal-pension-reforms · run guide · paths resolve through <code>config/paths.R</code> (no setwd). Why the repo is shaped this way: <code>guides/RESTRUCTURE_EXPLAINER.html</code>.</p>
+source(here::here("presentation","build_deck.R"))</pre>
+        <p style="margin:.5em 0 .2em"><b>Command line / PowerShell</b> — Rscript:</p>
+        <pre><span class="cm"># bash:</span>        export PENSION_DATA_MODE=full
+<span class="cm"># PowerShell:</span>  $env:PENSION_DATA_MODE="full"
+Rscript build/build_all.R
+Rscript analysis/analysis_all.R
+Rscript presentation/build_deck.R</pre>
+        <p class="muted" style="margin-bottom:0">A raw rebuild needs the A1–D3 lineage first (see <code>build/code/README.md</code>).</p>
+      </div>
+    </div>
+    <div class="callout"><b>Headline numbers</b> land in <code>&lt;data-root&gt;/output/I/I6_summary&lt;SUFFIX&gt;.csv</code> —
+    WMVPF_actual, WMVPF_bL/bS, η. <code>RUN.R</code> is a signpost listing the three masters.</div>
+    <p class="muted" style="margin-top:14px;font-size:12.5px">optimal-pension-reforms · run guide · paths resolve through <code>config/paths.R</code> (no setwd). Why the repo is shaped this way: <code>guides/RESTRUCTURE_EXPLAINER.html</code>.</p>
   </section>
   </main>
 </div>
