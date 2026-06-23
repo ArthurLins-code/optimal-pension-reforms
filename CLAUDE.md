@@ -17,7 +17,7 @@ Restructured 2026-06-23 into a functional layout (Gentzkow–Shapiro). Full map:
 - `data_local/` — 5% anonymized sample (NEVER committed).
 - `_docs/memory/` — Knowledge base (01-10). `_docs/restructure/` — restructure spec + MAP_before/after.
 - `quality_reports/` — plans, session logs, `restructure_findings.md`, `restructure_parity.md`.
-- `versoes do artigo/` — Paper drafts and presentations (gitignored).
+- `paper/` — Paper drafts + presentations incl. the canonical deck (gitignored). (Was `versões do artigo/`.)
 
 ## Data
 
@@ -33,7 +33,7 @@ The "Expenditures path" is ABANDONED.
 - **I5 and G6 are LEGACY.** Never rerun. Never review as current.
 - Now quarantined in `legacy/` (each guarded with a `stop()`; never run).
 - **Canonical deck:** `Retirement_Presentations (old strat reverted).pdf`
-  in `versoes do artigo/Presentations/`. This is the ONLY source of truth.
+  in `paper/Presentations/`. This is the ONLY source of truth.
   Other decks in that folder are HISTORICAL — do not consult.
 
 ### 2. Stage Letter + Number Convention

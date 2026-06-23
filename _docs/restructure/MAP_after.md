@@ -56,7 +56,7 @@ optimal-pension-reforms/
 ├── quality_reports/                # specs, reviews, parity reports, restructure_findings + legacy_bugs
 ├── scripts/                        # quality tooling (quality_score.py)
 ├── Surrogate Indices/              # future tax-externality work
-├── versões do artigo/              # paper drafts + canonical reference decks (gitignored)
+├── paper/                          # paper drafts + presentations incl. the canonical deck (gitignored)
 └── trans_retirement/               # legacy project namespace (pre-move; superseded by build/analysis)
 ```
 

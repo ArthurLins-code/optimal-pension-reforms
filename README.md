@@ -28,7 +28,7 @@ presentation/        # RESULTS -> DECK
   build_deck.R             # master:  collect figures -> compile latex/presentation/_main.tex -> PDF
 legacy/              # quarantined: F1-F7, G6, I5, old/B1-B2 — each guarded by stop()
 RUN.R                # root front door: dispatches to the three masters
-_docs/  quality_reports/  Surrogate Indices/  versoes do artigo/
+_docs/  quality_reports/  Surrogate Indices/  paper/
 ```
 
 ## How to run
