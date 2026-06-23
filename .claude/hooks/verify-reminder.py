@@ -47,7 +47,7 @@ SKIP_EXTENSIONS = [
 # Directories to skip
 SKIP_DIRS = [
     "/docs/",
-    "/templates/",
+    "/_docs/pedro_hc_santanna_templates_for_projects/",
     "/quality_reports/",
     "/.claude/",
     "/node_modules/",

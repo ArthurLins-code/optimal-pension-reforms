@@ -29,7 +29,7 @@ Produce a state snapshot that the next session (yours, or a collaborator's, or a
 
 - For the narrative *what happened* — that lives in `quality_reports/session_logs/` (see `.claude/rules/session-logging.md`).
 - For commit messages — those go through `/commit`, which writes its own structured commit body.
-- For decisions about alternatives — those go to `templates/decision-record.md` via `quality_reports/decisions/`.
+- For decisions about alternatives — those go to `_docs/pedro_hc_santanna_templates_for_projects/decision-record.md` via `quality_reports/decisions/`.
 
 The three artifact types are complementary: **session-log = narrative**, **decision-record = trade-off captured**, **checkpoint = state to resume from**.
 
@@ -126,7 +126,7 @@ If memory candidates were proposed, summarise which (if any) the user accepted.
 
 - `.claude/rules/session-logging.md` — narrative companion. **Do not duplicate** — the checkpoint references the latest session log by path; it does not re-tell the session story.
 - `.claude/rules/plan-first-workflow.md` — checkpoint reads the active plan; if no plan exists, recommend the user enter plan mode before invoking `/checkpoint`.
-- `templates/decision-record.md` — for *why we chose A over B*, not for *where we are*.
+- `_docs/pedro_hc_santanna_templates_for_projects/decision-record.md` — for *why we chose A over B*, not for *where we are*.
 - `.claude/hooks/pre-compact.py` — when `CLAUDE_PRECOMPACT_BLOCK_ON_DRAFT=1` is set, the PreCompact hook will block compaction once per DRAFT plan. `/checkpoint` is the right thing to run when that block fires.
 
 ## Examples

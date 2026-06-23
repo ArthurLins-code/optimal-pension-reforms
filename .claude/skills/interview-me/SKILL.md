@@ -124,7 +124,7 @@ The research spec's **Motivation** and **Contribution** sections typically refer
 
 ## Decision records (when tradeoffs surface)
 
-If during the interview the researcher explicitly chose among alternatives — identification strategy (DiD vs IV vs RDD), data source (admin vs survey), outcome measure, sample scope, etc. — also write an ADR-style **decision record** for each choice. Use [`templates/decision-record.md`](../../../templates/decision-record.md) and save to `quality_reports/decisions/YYYY-MM-DD_[short-topic].md`. Required fields: Status / Problem / Options considered / Decision + rationale / Consequences / Rejected alternatives.
+If during the interview the researcher explicitly chose among alternatives — identification strategy (DiD vs IV vs RDD), data source (admin vs survey), outcome measure, sample scope, etc. — also write an ADR-style **decision record** for each choice. Use [`_docs/pedro_hc_santanna_templates_for_projects/decision-record.md`](../../../_docs/pedro_hc_santanna_templates_for_projects/decision-record.md) and save to `quality_reports/decisions/YYYY-MM-DD_[short-topic].md`. Required fields: Status / Problem / Options considered / Decision + rationale / Consequences / Rejected alternatives.
 
 Skip the ADR if the interview produced a single uncontested direction — ADRs are for *decisions with live alternatives*, not for announcing the default path.
 

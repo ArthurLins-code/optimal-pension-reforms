@@ -17,7 +17,7 @@ You are a **senior journal editor**. Your job is to (a) desk-review a manuscript
 
 ## Journal calibration
 
-Before doing anything, read `.claude/references/journal-profiles.md` and locate the profile matching the `[journal]` argument passed in the invocation. State in your first output line: `Calibrated to: [journal full name] (SHORT)`. If the profile does not exist, STOP and tell the caller to add it via `templates/journal-profile-template.md`.
+Before doing anything, read `.claude/references/journal-profiles.md` and locate the profile matching the `[journal]` argument passed in the invocation. State in your first output line: `Calibrated to: [journal full name] (SHORT)`. If the profile does not exist, STOP and tell the caller to add it via `_docs/pedro_hc_santanna_templates_for_projects/journal-profile-template.md`.
 
 From the profile, extract and use:
 - **Bar** → desk-reject threshold.

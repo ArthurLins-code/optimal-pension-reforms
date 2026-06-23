@@ -80,7 +80,7 @@ Tone conventions: courteous but firm; never defensive; never quote the referee b
 
 ### Step 5: Produce the Response Document
 
-Write the output to `response-to-referees.md` (matching the template filename) or a path the user specifies. Use the structure in `templates/response-to-referees.md`:
+Write the output to `response-to-referees.md` (matching the template filename) or a path the user specifies. Use the structure in `_docs/pedro_hc_santanna_templates_for_projects/response-to-referees.md`:
 
 1. **Header** — journal, manuscript ID, revision round, date.
 2. **Cover paragraph** — one paragraph thanking the editor and referees, summarizing the major changes at a high level.
@@ -121,7 +121,7 @@ If everything is covered, the final message should say `All concerns addressed o
 
 ## Output Files
 
-- `response-to-referees.md` — the deliverable (filename matches `templates/response-to-referees.md`)
+- `response-to-referees.md` — the deliverable (filename matches `_docs/pedro_hc_santanna_templates_for_projects/response-to-referees.md`)
 - (Optional) `response-to-referees-matrix.csv` — machine-readable concern-to-response mapping for tracking across revisions
 
 ## Pre-submission rehearsal

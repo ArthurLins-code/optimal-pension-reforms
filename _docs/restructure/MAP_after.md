@@ -49,10 +49,12 @@ optimal-pension-reforms/
 ├── .here                           # rprojroot sentinel (existence only; no code reads contents)
 ├── .gitattributes                  # `* text=auto` + binary rules (kills CRLF/LF phantom diff)
 ├── config/ build/ analysis/ presentation/ legacy/   (above)
-├── _docs/                          # knowledge base, plans, session logs, memory, restructure/
+├── _docs/                          # knowledge base, plans, logs, memory, restructure/, doc templates, references/
+│     ├── pedro_hc_santanna_templates_for_projects/   # doc templates used by the .claude skills/rules
+│     └── references/               # CodeAndData.pdf, transition instructions, meeting-notes PDF
 ├── baseline/                       # pre-restructure golden baseline + Stage-3 parity artifacts
-├── quality_reports/                # specs, reviews, parity reports
-├── scripts/ templates/             # quality tooling, doc templates
+├── quality_reports/                # specs, reviews, parity reports, restructure_findings + legacy_bugs
+├── scripts/                        # quality tooling (quality_score.py)
 ├── Surrogate Indices/              # future tax-externality work
 ├── versões do artigo/              # paper drafts + canonical reference decks (gitignored)
 └── trans_retirement/               # legacy project namespace (pre-move; superseded by build/analysis)
