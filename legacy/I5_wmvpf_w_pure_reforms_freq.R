@@ -1,3 +1,5 @@
+stop("LEGACY — do not run. Canonical replacement: I4_wmvpf_no_pure_reforms_freq.R / I6_wmvpf_with_pure_reforms_freq.R. See _docs/memory.")
+# ----- original file below (quarantined; never run) -----
 # ******************************************************************************
 # This code
 #

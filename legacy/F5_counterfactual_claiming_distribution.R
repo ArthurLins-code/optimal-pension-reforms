@@ -1,3 +1,5 @@
+stop("LEGACY — do not run. Canonical replacement: new_counterfactual_claiming3_pure.R. See _docs/memory.")
+# ----- original file below (quarantined; never run) -----
 # ******************************************************************************
 # This code
 #
@@ -51,7 +53,7 @@ rel_freq <- function(data, variable, bandwidth, i) {
   bins <- seq(floor(min(data[[variable]])), ceiling(max(data[[variable]])) + bandwidth, by = bandwidth)
   data$interval <- cut(data[[variable]], breaks = bins, right = FALSE)
   freq_table <- table(data$interval)
-  rel_freq <- freq_table
+  rel_freq <- freq_table / sum(freq_table)
   interval_bounds <- as.character(levels(data$interval))
   interval_bounds <- gsub('\\[|\\)', '', interval_bounds)
   interval_bounds <- matrix(unlist(strsplit(interval_bounds, ',')), ncol = 2, byrow = TRUE)
@@ -78,10 +80,9 @@ fn_distribution <- function(df) {
   freq[is.na(freq), freq := 0]
   distribution <- arrange(freq, dist)
   distribution[, cumulative := cumsum(freq)]
-  distribution[, cum_lag := shift(cumulative,fill=0)]
-  #hazard with counts and not densities: count/remaining count
-  total<- distribution[,sum(freq)]
-  distribution[, hazard :=fifelse((total-cum_lag)>0,freq/(total-cum_lag),NA_real_)] #to work with frequencies, change 1 for the total number of counts
+  distribution[, cum_lag := lag(cumulative)]
+  distribution[is.na(cum_lag), cum_lag := 0]
+  distribution[, hazard := freq/(1-cum_lag)]
   distribution[, 'cum_lag' := NULL]
   
   return(distribution)
@@ -150,6 +151,7 @@ for (d in -6:15) {
 }
 
 # List of estimated effects
+
 list_models <- list()
 for (d in -6:15) {
   list_models[[paste0(d)]] <- data.table(dist_reform_quarters = iplot(models[[paste0('treat_',d)]])$prms$estimate_names,
@@ -158,6 +160,7 @@ for (d in -6:15) {
                                          lower_bound = iplot(models[[paste0('treat_',d)]])$prms$ci_low,
                                          upper_bound = iplot(models[[paste0('treat_',d)]])$prms$ci_high)
 }
+
 dt_effects <- rbindlist(list_models) %>% 
   arrange(dist_reform_quarters, points_norm)
 
@@ -256,8 +259,8 @@ for (g in c('[-6,-3]','[-2,-1]','[0,1]','[2,6]','[7,15]')) {
   formula <- as.formula(paste0('claim_haz ~ i(dist_reform_quarters, `treat_agg_', g, '`, ref = -2) | dist_reform_quarters + points_norm + male + microrregiao + m_schooling + m_race + birth_year'))
   
   models_agg[[paste0('treat_agg_',g)]] <- feols(data = panel_DD[!is.na(get(paste0('treat_agg_',g)))],
-                                                fml = formula,
-                                                cluster = 'indiv')
+                                        fml = formula,
+                                        cluster = 'indiv')
   
   gc()
 }
@@ -269,10 +272,10 @@ aux_n <- 0
 for (g in c('[-6,-3]','[-2,-1]','[0,1]','[2,6]','[7,15]')) {
   aux_n <- aux_n + 1
   plots_eventstudy_agg[[paste0(g)]] <- data.table(dist_reform_quarters = iplot(models_agg[[paste0('treat_agg_',g)]])$prms$estimate_names,
-                                                  group = paste0(g),
-                                                  point_estimate = iplot(models_agg[[paste0('treat_agg_',g)]])$prms$estimate,
-                                                  lower_bound = iplot(models_agg[[paste0('treat_agg_',g)]])$prms$ci_low,
-                                                  upper_bound = iplot(models_agg[[paste0('treat_agg_',g)]])$prms$ci_high) %>% 
+                                              group = paste0(g),
+                                              point_estimate = iplot(models_agg[[paste0('treat_agg_',g)]])$prms$estimate,
+                                              lower_bound = iplot(models_agg[[paste0('treat_agg_',g)]])$prms$ci_low,
+                                              upper_bound = iplot(models_agg[[paste0('treat_agg_',g)]])$prms$ci_high) %>% 
     # .[, dist_reform := 4*(dist_reform_quarters - 2015.25)] %>% 
     ggplot(aes(x = dist_reform_quarters, na.rm = T))+
     geom_vline(xintercept = -1.5, linetype = 'longdash', linewidth = 0.3)+
@@ -324,16 +327,6 @@ plot_es_agg <- ggarrange(plots_eventstudy_agg[['[-6,-3]']],plots_eventstudy_agg[
 
 ggsave(plot_es_agg, filename = 'tmp/teste_plot.pdf', height = 6, width = 6)
 
-# 2c- Calculate the number of people in each quarter
-dt_Nq<- dt[
-  dist_quarters>=-13& dist_quarters<=13& points_norm>=-15& points_norm<=15, .(N_q=.N),by=dist_quarters]
-setnames(dt_Nq, "dist_quarters","dist_reform_quarters")
-dt_distribution<- merge(dt_distribution,dt_Nq,by="dist_reform_quarters",all.x=TRUE)
-#calculating observed counts (frequency)
-dt_distribution[,count:=freq*N_q]
-#calculating cumulative counts 
-dt_distribution[,cum_count:= cumsum(count),by=dist_reform_quarters]
-dt_distribution[, cum_count_lag:= shift(cum_count,fill=0),by=dist_reform_quarters]
 # 3 - Create the counterfactual claiming hazard and density ------------
 
 dt_counterfactual <- left_join(dt_distribution, 
@@ -344,7 +337,7 @@ dt_counterfactual[is.na(change_ch_pp), change_ch_pp := 0]
 
 # Calculating percentage change in claiming hazard
 
-dt_counterfactual[ch_empirical > 0 & dist_reform_quarters >= 0, change_ch_perc := change_ch_pp/ch_empirical] 
+dt_counterfactual[ch_empirical > 0 & dist_reform_quarters >= 0, change_ch_perc := change_ch_pp/ch_empirical]
 
 dt_counterfactual[is.na(change_ch_perc), change_ch_perc := 0]
 
@@ -360,21 +353,21 @@ ggplot(dt_counterfactual[dist_reform_quarters == 10 & points_norm >= -10 & point
 
 # Calculating the counterfactual density
 
-dt_counterfactual[, cum_count_lag_obs := shift(cum_count,fill=0), by = dist_reform_quarters]
+dt_counterfactual[, cumulative_lag := lag(cumulative), by = dist_reform_quarters]
 
-dt_counterfactual[points_norm == -15, delta_count := 0]
+dt_counterfactual[points_norm == -15, delta_freq := 0]
 
-dt_counterfactual[points_norm == -15, cf_cum_count := count - delta_count, by = dist_reform_quarters]
+dt_counterfactual[points_norm == -15, cumulative_count := freq - delta_freq, by = dist_reform_quarters]
 
-dt_counterfactual[, cumulative_count_lag := shift(cf_cum_count,fill=0), by = dist_reform_quarters]
+dt_counterfactual[, cumulative_count_lag := lag(cumulative_count), by = dist_reform_quarters]
 
 for (i in -14:15) {
-  dt_counterfactual[points_norm == i, delta_count := (hazard*(N_q-cum_count_lag_obs) - ch_counterfactual*(N_q-cumulative_count_lag)), by = dist_reform_quarters]
-  dt_counterfactual[points_norm == i, cumulative_count := (cumulative_count_lag + count - delta_count), by = dist_reform_quarters]
-  dt_counterfactual[, cf_cum_count_lag := shift(cf_cum_count,fill=0), by = dist_reform_quarters]
+  dt_counterfactual[points_norm == i, delta_freq := (hazard*(1-cumulative_lag) - ch_counterfactual*(1-cumulative_count_lag)), by = dist_reform_quarters]
+  dt_counterfactual[points_norm == i, cumulative_count := (cumulative_count_lag + freq - delta_freq), by = dist_reform_quarters]
+  dt_counterfactual[, cumulative_count_lag := lag(cumulative_count), by = dist_reform_quarters]
 }
 
-dt_counterfactual[, freq_count := cumulative_count - cf_cum_count_lag]
+dt_counterfactual[, freq_count := cumulative_count - cumulative_count_lag]
 
 dt_counterfactual[points_norm == -15, freq_count := freq]
 
@@ -387,7 +380,7 @@ ggplot(dt_counterfactual[dist_reform_quarters == 4 & points_norm >= -15 & points
 fwrite(dt_counterfactual, file = 'output/F/F5_table_results.csv')
 
 dt_counterfactual[,c('change_ch_pp','change_ch_perc','ch_counterfactual',
-                     'cumulative_lag','delta_count','cumulative_count',
+                     'cumulative_lag','delta_freq','cumulative_count',
                      'cumulative_count_lag') := NULL]
 
 # Creating a unique dataframe
@@ -399,44 +392,44 @@ dt_counterfactual <- copy(dt_counterfactual)
 list_plots_count <- list()
 for (y in seq(-13,13,1)) {
   cat = paste0(y,' qtrs post-ref.')
-  list_plots_count[[paste0(y)]] <- dt_counterfactual[dist_reform_quarters == y] %>% 
-    .[,.(points_norm, freq, freq_count)] %>% 
-    ggplot(aes(x = points_norm))+
-    geom_vline(xintercept = 0, linetype = 'dashed', linewidth = 0.3)+
-    geom_line(aes(y = freq, color = factor(1)))+
-    geom_line(aes(y = freq_count, color = factor(2)))+
-    geom_point(aes(y = freq, color = factor(1)), shape = 17, size = 0.8)+
-    geom_point(aes(y = freq_count, color = factor(2)), shape = 17, size = 0.8)+
-    scale_color_manual(values = c('1'='dodgerblue3','2'='orangered3'), 
-                       labels = c('1'=paste0(cat),'2'='Count. (DD)'))+
-    scale_fill_manual(values = c('1'='dodgerblue3','2'='orangered3'), 
-                      labels = c('1'='Actual','2'='Counterfactual'))+
-    scale_x_continuous(breaks = seq(-24,24,8), minor_breaks = seq(-30,30,2),
-                       guide = guide_axis(minor.ticks = TRUE))+
-    scale_y_continuous(n.breaks = 6)+
-    coord_cartesian(ylim = c(0,0.2))+
-    theme_classic()+
-    guides(color = guide_legend(nrow = 2), fill = 'none')+
-    theme(axis.title.x = element_text(family='serif'),
-          axis.title.y = element_text(family='serif'),
-          axis.text.x = element_text(family='serif'),
-          axis.text.y = element_text(family='serif'),
-          axis.line = element_line(linewidth = 0.3),
-          axis.ticks = element_line(linewidth = 0.3),
-          plot.title = element_text(hjust = 0.5, family = 'serif', size = 12),
-          panel.grid.minor = element_blank(),
-          panel.grid.major.x = element_blank(),
-          panel.grid.major.y = element_line(linewidth = 0.3),
-          legend.position = c(0,1),
-          legend.justification = c(0,1),
-          legend.direction = 'horizontal',
-          legend.key.height = unit(2, units = 'mm'),
-          legend.key.width = unit(2, units = 'mm'),
-          legend.title = element_blank(),
-          legend.text = element_text(family = 'serif', size = 10),
-          legend.background = element_rect(color = 'black', fill = 'white', linewidth = 0.2))+
-    xlab('Points - 85/95')+
-    ylab('Rel. frequency of claims')    
+    list_plots_count[[paste0(y)]] <- dt_counterfactual[dist_reform_quarters == y] %>% 
+      .[,.(points_norm, freq, freq_count)] %>% 
+      ggplot(aes(x = points_norm))+
+      geom_vline(xintercept = 0, linetype = 'dashed', linewidth = 0.3)+
+      geom_line(aes(y = freq, color = factor(1)))+
+      geom_line(aes(y = freq_count, color = factor(2)))+
+      geom_point(aes(y = freq, color = factor(1)), shape = 17, size = 0.8)+
+      geom_point(aes(y = freq_count, color = factor(2)), shape = 17, size = 0.8)+
+      scale_color_manual(values = c('1'='dodgerblue3','2'='orangered3'), 
+                         labels = c('1'=paste0(cat),'2'='Count. (DD)'))+
+      scale_fill_manual(values = c('1'='dodgerblue3','2'='orangered3'), 
+                        labels = c('1'='Actual','2'='Counterfactual'))+
+      scale_x_continuous(breaks = seq(-24,24,8), minor_breaks = seq(-30,30,2),
+                         guide = guide_axis(minor.ticks = TRUE))+
+      scale_y_continuous(n.breaks = 6)+
+      coord_cartesian(ylim = c(0,0.2))+
+      theme_classic()+
+      guides(color = guide_legend(nrow = 2), fill = 'none')+
+      theme(axis.title.x = element_text(family='serif'),
+            axis.title.y = element_text(family='serif'),
+            axis.text.x = element_text(family='serif'),
+            axis.text.y = element_text(family='serif'),
+            axis.line = element_line(linewidth = 0.3),
+            axis.ticks = element_line(linewidth = 0.3),
+            plot.title = element_text(hjust = 0.5, family = 'serif', size = 12),
+            panel.grid.minor = element_blank(),
+            panel.grid.major.x = element_blank(),
+            panel.grid.major.y = element_line(linewidth = 0.3),
+            legend.position = c(0,1),
+            legend.justification = c(0,1),
+            legend.direction = 'horizontal',
+            legend.key.height = unit(2, units = 'mm'),
+            legend.key.width = unit(2, units = 'mm'),
+            legend.title = element_blank(),
+            legend.text = element_text(family = 'serif', size = 10),
+            legend.background = element_rect(color = 'black', fill = 'white', linewidth = 0.2))+
+      xlab('Points - 85/95')+
+      ylab('Rel. frequency of claims')    
   
 }
 
@@ -491,15 +484,15 @@ ggplot(dt_agg_counter[dist >= -12 & dist <= 14 & d_claim_post_reform == 1],
 
 dt_agg_counter[, cumulative_lag := lag(cumulative)]
 
-dt_agg_counter[dist == -15, delta_count := 0]
+dt_agg_counter[dist == -15, delta_freq := 0]
 
-dt_agg_counter[dist == -15, cumulative_count := freq - delta_count]
+dt_agg_counter[dist == -15, cumulative_count := freq - delta_freq]
 
 dt_agg_counter[, cumulative_count_lag := lag(cumulative_count)]
 
 for (i in -14:15) {
-  dt_agg_counter[dist == i, delta_count := (hazard*(1-cumulative_lag) - ch_agg_counter*(1-cumulative_count_lag))]
-  dt_agg_counter[dist == i, cumulative_count := (cumulative_count_lag + freq - delta_count)]
+  dt_agg_counter[dist == i, delta_freq := (hazard*(1-cumulative_lag) - ch_agg_counter*(1-cumulative_count_lag))]
+  dt_agg_counter[dist == i, cumulative_count := (cumulative_count_lag + freq - delta_freq)]
   dt_agg_counter[, cumulative_count_lag := lag(cumulative_count)]
 }
 
@@ -515,298 +508,65 @@ dt_agg <- dt_agg_counter[,.(dist, freq_post = freq, freq_count)]
 
 dt_agg[, diff_count_post := freq_count - freq_post]
 
-###################### Creating the pure-level-reform plots ############
-#Step 1: Defining x (bunching window limit)
+dt_agg[, diff_post_count := freq_post - freq_count]
 
-# x= max(mechanichal limit, empirical limit (crossing point))
-t_max<- 13L
-x_mech<- (t_max+1)/2 
+b1 <- sum(dt_agg[freq_count > freq_post & dist < 0]$diff_count_post)
+b2 <- sum(dt_agg[freq_count < freq_post]$diff_post_count)
+b3 <- sum(dt_agg[freq_count > freq_post & dist >= 0]$diff_count_post)
 
-#defining x
-x<- x_mech
-
-#Step 2: Computing the PMM and AMM
-#computing the raw differences
-dt_agg[, diff:= freq_post-freq_count]
-
-#calculating missing and excess mass
-dt_agg[, miss:= pmax(freq_count-freq_post,0)]
-dt_agg[, excess:= pmax(freq_post-freq_count,0)]
-
-#Calculating PMM= Missing mass to the left of the threshold
-PMM= dt_agg[dist<0, sum(miss,na.rm = TRUE)]
-#Calculating AMM= Missing mass to the right of the threshold
-AMM= dt_agg[dist>0, sum(miss,na.rm = TRUE)]
-
-
-# Step 3: Weighting the bunching individuals within the bunching window [0,x]
-
-#calculating the positive excess in the bunching window
-dt_agg[dist>=0 & dist<=x, excess:= pmax(freq_post-freq_count,0)]
-denom<- dt_agg[dist>=0 & dist<=x,sum(excess)]
-dt_agg[dist>=0 & dist<=x,w:= ifelse(denom>0,excess/denom,0)]
-dt_agg[dist<0|dist>x, w:=0]
-
-#Step 4: Build the pure level-reform density
-dt_agg[, dL:= fifelse(
-  dist<0,
-  freq_post,
-  fifelse(
-    dist>x,
-    freq_count,
-    freq_count+ (PMM*w)
-  )
-)]
-
-#Step 5: Build the pure slope-reform density
-dt_agg[, dS:= fifelse(
-  dist<0,
-  freq_count,
-  fifelse(
-    dist>x,
-    freq_post,
-    freq_count+ (AMM*w)
-  )
-)]
-
-# Step 6: Plotting both reforms
-#Step 6.1- Plotting pure-level reform x counterfactual
-plot_level<- melt(
-  dt_agg[,.(dist,dL,freq_count)],
-  id.vars= "dist",
-  variable.name= "series",
-  value.name = "value"
-)
-plot_level[, series:= factor(series,
-                             levels= c("dL","freq_count"),
-                             labels= c("Pure Level Reform", "Counterfactual(DD)"))]
-plot_level_reform<- ggplot(plot_level, aes(x=dist, y=value,color=series))+
-  geom_vline(xintercept = 0, linetype= "dashed", linedwidth= 0.3)+
-  geom_line()+
-  geom_point(shape=17, size=0.8)+
-  scale_x_continuous(breaks = seq(-16,16,4))+
-  scale_y_continuous(breaks = seq(0,0.14,0.02),
-                     minor_breaks = seq(0,0.14,0.01),
-                     guide= guide_axis(minor.ticks = TRUE))+
+plot_count_agg <- dt_agg[,.(dist, freq_post, freq_count)] %>% 
+  melt(id.vars = 'dist') %>% 
+  ggplot()+
+  geom_vline(xintercept = 0, linetype = 'dashed', linewidth = 0.3)+
+  geom_line(aes(x = dist, y = value, color = factor(variable)))+
+  geom_point(aes(x = dist, y = value, color = factor(variable)), shape = 17, size = 0.8)+
+  geom_ribbon(data = dt_agg, aes(x = dist, ymin = freq_post, ymax = freq_count), fill = 'goldenrod', alpha = 0.1)+
+  scale_color_manual(values = c('freq_post' = brewer.pal(8,'Dark2')[2], 'freq_count' = brewer.pal(8,'Dark2')[3]),
+                     labels = c('freq_pre'='2012 - May 2015', 'freq_post' = 'Jun 2015 - 2018 Q2',
+                                'freq_count' = 'Counterfactual (DD)'),
+                     breaks = c('freq_pre','freq_post','freq_count'))+
+  annotate('text', x = -8, y = 0.108, label = 'Postponement', hjust = 0.5, family = 'serif', parse = FALSE, size = 10/.pt)+
+  annotate('text', x = -8, y = 0.10, label = paste0('mass = ',round(b1,4)), hjust = 0.5, family = 'serif', parse = FALSE, size = 10/.pt)+
+  annotate('segment', x = -6, y = 0.094, xend = -4, yend = 0.08, arrow = arrow(length = unit(0.2, 'cm')), linewidth = 0.2)+
+  annotate('text', x = 6, y = 0.108, label = 'Bunching', hjust = 0.5, family = 'serif', parse = FALSE, size = 10/.pt)+
+  annotate('text', x = 6, y = 0.10, label = paste0('mass = ',round(b2,4)), hjust = 0.5, family = 'serif', parse = FALSE, size = 10/.pt)+
+  annotate('segment', x = 4, y = 0.094, xend = 2, yend = 0.08, arrow = arrow(length = unit(0.2, 'cm')), linewidth = 0.2)+
+  annotate('text', x = 10, y = 0.04, label = 'Anticipation', hjust = 0.5, family = 'serif', parse = FALSE, size = 10/.pt)+
+  annotate('text', x = 10, y = 0.032, label = paste0('mass = ',round(b3,4)), hjust = 0.5, family = 'serif', parse = FALSE, size = 10/.pt)+
+  annotate('segment', x = 10, y = 0.028, xend = 10, yend = 0.01, arrow = arrow(length = unit(0.2, 'cm')), linewidth = 0.2)+
+  scale_x_continuous(breaks = seq(-12,12,4), minor_breaks = seq(-16,16,1),
+                     guide = guide_axis(minor.ticks = TRUE))+
+  scale_y_continuous(breaks = seq(0, 1, 0.02), minor_breaks = seq(0,1,0.01),
+                     guide = guide_axis(minor.ticks = TRUE))+
+  coord_cartesian(ylim = c(0,0.14))+
   theme_classic()+
-  theme(
-    axis.title.x = element_text(family= "serif", size=10),
-    axis.title.y = element_text(family= "serif", size=10),
-    axis.text.x = element_text(family= "serif", size=10),
-    axis.text.y = element_text(family= "serif", size=10),
-    legend.position = c(0.1,1),
-    legend.direction = "horizontal",
-    legend.title = element_blank()
-  )+
-  xlab("Points- 85/95")+
-  ylab( "Rel. frequency of claims")
-plot_level_reform
+  guides(color = guide_legend(nrow = 2), fill = 'none')+
+  theme(axis.title.x = element_text(family='serif', size = 10),
+        axis.title.y = element_text(family='serif', size = 10),
+        axis.text.x = element_text(family='serif', size = 10),
+        axis.text.y = element_text(family='serif', size = 10),
+        axis.line = element_line(linewidth = 0.3),
+        axis.ticks = element_line(linewidth = 0.3),
+        plot.title = element_text(hjust = 0.5, family = 'serif', size = 10),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_line(linewidth = 0.3),
+        legend.position = c(0,1),
+        legend.justification = c(0,1),
+        legend.direction = 'horizontal',
+        legend.key.height = unit(2, units = 'mm'),
+        legend.key.width = unit(2, units = 'mm'),
+        legend.title = element_blank(),
+        legend.text = element_text(family = 'serif', size = 10),
+        legend.background = element_rect(color = 'black', fill = 'white', linewidth = 0.2))+
+  xlab('Points - 85/95')+
+  ylab('Rel. frequency of claims')    
 
-#Step 6.2- Plotting pure-slope reform x counterfactual
-plot_slope<- melt(
-  dt_agg[,.(dist,dS,freq_count)],
-  id.vars= "dist",
-  variable.name= "series",
-  value.name = "value"
-)
-plot_slope[, series:= factor(series,
-                             levels= c("dL","freq_count"),
-                             labels= c("Pure slope Reform", "Counterfactual(DD)"))]
-plot_slope_reform<- ggplot(plot_slope, aes(x=dist, y=value,color=series))+
-  geom_vline(xintercept = 0, linetype= "dashed", linedwidth= 0.3)+
-  geom_line()+
-  geom_point(shape=17, size=0.8)+
-  scale_x_continuous(breaks = seq(-16,16,4))+
-  scale_y_continuous(breaks = seq(0,0.14,0.02),
-                     minor_breaks = seq(0,0.14,0.01),
-                     guide= guide_axis(minor.ticks = TRUE))+
-  theme_classic()+
-  theme(
-    axis.title.x = element_text(family= "serif", size=10),
-    axis.title.y = element_text(family= "serif", size=10),
-    axis.text.x = element_text(family= "serif", size=10),
-    axis.text.y = element_text(family= "serif", size=10),
-    legend.position = c(0.1,1),
-    legend.direction = "horizontal",
-    legend.title = element_blank()
-  )+
-  xlab("Points- 85/95")+
-  ylab( "Rel. frequency of claims")
-plot_slope_reform
+plot_count_agg
 
-# Step 7: Building the pure-slope and pure-level reforms x contrafactual x actual distribution for all quarters (over all normalized points)
+ggsave(plot_count_agg, filename=  'tmp/teste_plot.pdf', height = 3, width = 5)
 
-dt_pure_reforms<- dt_counterfactual
-dt_pure_reforms[, freq_post := freq]
-dt_pure_reforms[, freq_cf := freq_count]
-dt_pure_reforms[, dist := points_norm]
-
-# restricting for only post_reform quarters until Q3-2018 (Juan's orientation)
-dt_pure<- dt_pure_reforms[dist_reform_quarters>=0 & dist_reform_quarters<=13]
-dt_pure[, dist_reform := dist_reform_quarters]
-
-# Now I'll create a function that, given a quarter "t", returns AMM, PMM, dL and dS for all normalized points (dist variable) in that "t"
-
-build_pure_reform_in_t<- function(data){
-  t<- unique(data$dist_reform_quarters)
-  # calculating the mechanical (x_mech) limits
-  x_mech<- (t+1)/2
-  #defining the bunching limit per the paper
-  x<- x_mech
-  #renormalizing densities since they are not summing to 1 exactly
-  data[,freq_cf_renorm:= freq_cf/sum(freq_cf,na.rm = TRUE)]
-  data[,freq_post_renorm:= freq_post/sum(freq_post,na.rm = TRUE)]
-  #calculating the AMM and PMM
-  data[, diff := freq_post_renorm- freq_cf]
-  data[, miss:= freq_cf-freq_post_renorm]
-  data[, excess:= freq_post_renorm-freq_cf]
-  PMM<- data[dist<0, sum(miss, na.rm=TRUE)]
-  AMM<- data[dist>=x, sum(miss, na.rm=TRUE)]
-  data[,PMM:=PMM]
-  data[,AMM:=AMM]
-  data[,X:=x]
-  
-  # weights in the interval [0,x]
-  data[dist>=0 & dist<x, excess:= freq_post_renorm-freq_cf]
-  denom<- data[dist>=0 & dist<x,sum(excess,na.rm = TRUE)]
-  data[dist>=0 & dist<x,w:= excess/denom]
-  data[dist<0|dist>=x, w:=0]
-  #calculating dL for all points, following the slides
-  data[, dL:= fifelse(
-    dist<0,
-    freq_post_renorm,
-    fifelse(
-      test=dist>=x, yes=freq_cf,no=freq_cf+PMM*w
-    )
-  )]
-  #calculating dS for all points following the slides
-  data[, dS:= fifelse(
-    dist<0,
-    freq_cf,
-    fifelse(
-      dist>=x, freq_post_renorm,freq_cf+AMM*w
-    )
-  )]
-  data[]
-}
-
-#applyting this function fpr each quarter (t)
-dt_all_pure_reforms<- dt_pure[, build_pure_reform_in_t(copy(.SD)), by= dist_reform]
-# Now we'll produce plots for all quarters asked until Q3-2018, for each pure-slope and pure-level reforms
-list_plots_level_reform <- list()
-for (y in seq(-13,13,1)) {
-  cat = paste0(y,' qtrs post-ref-level')
-  plot_df<- dt_all_pure_reforms[dist_reform_quarters == y ,
-                                .(points_norm, freq_post_renorm, freq_cf_renorm,dL,dS,PMM,AMM,X)]
-  pmm_val<- unique(plot_df$PMM)[1]
-  amm_val<- unique(plot_df$AMM)[1]
-  x_val<- unique(plot_df$X)[1]
-  list_plots_level_reform[[paste0(y)]]<- ggplot(plot_df,aes(x = points_norm))+
-    geom_vline(xintercept = 0, linetype = 'dashed', linewidth = 0.3)+
-    geom_line(aes(y = freq_post_renorm, color = "Actual",linetype="Actual"))+
-    geom_line(aes(y = freq_cf_renorm, color = "Count. (DD)",linetype="Count. (DD)"))+
-    geom_line(aes(y = dL, color = "Pure Level Reform",linetype="Pure Level Reform"))+
-    geom_point(aes(y = freq_post_renorm, color = factor(1)), shape = 17, size = 0.8)+
-    geom_point(aes(y = freq_cf_renorm, color = factor(2)), shape = 17, size = 0.8)+
-    geom_point(aes(y = dL, color = factor(3)), shape = 17, size = 0.8)+
-    scale_color_manual(values = c('Actual'='dodgerblue3','Count. (DD)'='orangered3','Pure Level Reform'='purple'), 
-                       labels = c('1'=paste0(cat),'2'='Count. (DD)','3'='Pure Level Reform'))+
-    scale_linetype_manual(values=c("Actual"="solid", "Count. (DD)"="solid","Pure Level Reform"="dashed"),
-                          breaks= c("Actual","Count. (DD)", "Pure Level"))+
-    scale_x_continuous(breaks = seq(-24,24,8), minor_breaks = seq(-30,30,2),
-                       guide = guide_axis(minor.ticks = TRUE))+
-    scale_y_continuous(n.breaks = 6)+
-    coord_cartesian(ylim = c(0,0.2))+
-    theme_classic()+
-    guides(color = guide_legend(nrow = 3), fill = 'none',linetype="none")+
-    theme(axis.title.x = element_text(family='serif'),
-          axis.title.y = element_text(family='serif'),
-          axis.text.x = element_text(family='serif'),
-          axis.text.y = element_text(family='serif'),
-          axis.line = element_line(linewidth = 0.3),
-          axis.ticks = element_line(linewidth = 0.3),
-          plot.title = element_text(hjust = 0.5, family = 'serif', size = 12),
-          panel.grid.minor = element_blank(),
-          panel.grid.major.x = element_blank(),
-          panel.grid.major.y = element_line(linewidth = 0.3),
-          legend.position = c(0,1),
-          legend.justification = c(0,1),
-          legend.direction = 'horizontal',
-          legend.key.height = unit(1.5, units = 'mm'),
-          legend.key.width = unit(1.5, units = 'mm'),
-          legend.title = element_blank(),
-          legend.text = element_text(family = 'serif', size = 10),
-          legend.background = element_rect(color = 'black', fill = 'white', linewidth = 0.2))+
-    xlab('Points - 85/95')+
-    ylab('Rel. frequency of claims')+
-    labs(caption=sprintf("PMM=%.4f | AMM=%.4f,X=%.0f",pmm_val,amm_val,x_val ))
-  
-}
-list_plots_level_reform["1"]
-list_plots_level_reform["9"]
-
-## Now we'll go to the slope reform
-list_plots_slope_reform <- list()
-for (y in seq(-13,13,1)) {
-  cat = paste0(y,' qtrs post-ref-level')
-  plot_df<- dt_all_pure_reforms[dist_reform_quarters == y ,
-                                .(points_norm, freq_post_renorm, freq_cf_renorm,dL,dS,PMM,AMM,X)]
-  pmm_val<- unique(plot_df$PMM)[1]
-  amm_val<- unique(plot_df$AMM)[1]
-  x_val<- unique(plot_df$X)[1]
-  list_plots_slope_reform[[paste0(y)]]<- ggplot(plot_df,aes(x = points_norm))+
-    geom_vline(xintercept = 0, linetype = 'dashed', linewidth = 0.3)+
-    geom_line(aes(y = freq_post_renorm, color = "Actual",linetype="Actual"))+
-    geom_line(aes(y = freq_cf_renorm, color = "Count. (DD)",linetype="Count. (DD)"))+
-    geom_line(aes(y = dS, color = "Pure Slope Reform",linetype="Pure Slope Reform"))+
-    geom_point(aes(y = freq_post_renorm, color = factor(1)), shape = 17, size = 0.8)+
-    geom_point(aes(y = freq_cf_renorm, color = factor(2)), shape = 17, size = 0.8)+
-    geom_point(aes(y = dS, color = factor(3)), shape = 17, size = 0.8)+
-    scale_color_manual(values = c('Actual'='dodgerblue3','Count. (DD)'='orangered3','Pure Slope Reform'='purple'), 
-                       labels = c('1'=paste0(cat),'2'='Count. (DD)','3'='Pure Slope Reform'))+
-    scale_linetype_manual(values=c("Actual"="solid", "Count. (DD)"="solid","Pure Slope Reform"="dashed"),
-                          breaks= c("Actual","Count. (DD)", "Pure Slope"))+
-    scale_x_continuous(breaks = seq(-24,24,8), minor_breaks = seq(-30,30,2),
-                       guide = guide_axis(minor.ticks = TRUE))+
-    scale_y_continuous(n.breaks = 6)+
-    coord_cartesian(ylim = c(0,0.2))+
-    theme_classic()+
-    guides(color = guide_legend(nrow = 3), fill = 'none',linetype="none")+
-    theme(axis.title.x = element_text(family='serif'),
-          axis.title.y = element_text(family='serif'),
-          axis.text.x = element_text(family='serif'),
-          axis.text.y = element_text(family='serif'),
-          axis.line = element_line(linewidth = 0.3),
-          axis.ticks = element_line(linewidth = 0.3),
-          plot.title = element_text(hjust = 0.5, family = 'serif', size = 12),
-          panel.grid.minor = element_blank(),
-          panel.grid.major.x = element_blank(),
-          panel.grid.major.y = element_line(linewidth = 0.3),
-          legend.position = c(0,1),
-          legend.justification = c(0,1),
-          legend.direction = 'horizontal',
-          legend.key.height = unit(1.5, units = 'mm'),
-          legend.key.width = unit(1.5, units = 'mm'),
-          legend.title = element_blank(),
-          legend.text = element_text(family = 'serif', size = 10),
-          legend.background = element_rect(color = 'black', fill = 'white', linewidth = 0.2))+
-    xlab('Points - 85/95')+
-    ylab('Rel. frequency of claims')+
-    labs(caption=sprintf("PMM=%.4f | AMM=%.4f,X=%.0f",pmm_val,amm_val,x_val ))
-  
-}
-list_plots_slope_reform["1"]
-list_plots_slope_reform["9"]
-
-#checking if all the densities (actual, contrafactual, dL and dS) we estimated are accumulating to 1, as it should be
-sum_all_densities<-dt_all_pure_reforms[,.(
-  sum_actual= sum(freq_post_renorm,na.rm=T),
-  sum_cf= sum(freq_cf_renorm,na.rm=T),
-  sum_dL= sum(dL,na.rm=T),
-  sum_dS= sum(dS,na.rm=T)
-), by=dist_reform_quarters]
 # ******************************************************************************
-
 # SAVING ---------------------------------------------------------
 # ******************************************************************************
 
@@ -873,39 +633,3 @@ ggsave(list_plots_count[['13']], filename = 'output/F/F5_counterfactual_claiming
 
 ggsave(plot_count_agg, filename = 'output/F/F5_counterfactual_claiming_density_agg.pdf',
        height = 3, width = 5)
-
-# Saving contrafactual reforms databases and figures
-fwrite(dt_all_pure_reforms, file = 'output/F/F6_table_densities_all_pure_reforms.csv')
-
-#Saving all contrafactual level reforms densities plots
-ggsave(list_plots_level_reform[['0']], filename  = 'output/F/F6_pure_level_reform_claiming_density_quarterly_2015_Q1.pdf',height = 2.8, width = 4.2)
-ggsave(list_plots_level_reform[['1']], filename  = 'output/F/F6_pure_level_reform_claiming_density_quarterly_2015_Q2.pdf',height = 2.8, width = 4.2)
-ggsave(list_plots_level_reform[['2']], filename  = 'output/F/F6_pure_level_reform_claiming_density_quarterly_2015_Q3.pdf',height = 2.8, width = 4.2)
-ggsave(list_plots_level_reform[['3']], filename  = 'output/F/F6_pure_level_reform_claiming_density_quarterly_2015_Q4.pdf',height = 2.8, width = 4.2)
-ggsave(list_plots_level_reform[['4']], filename  = 'output/F/F6_pure_level_reform_claiming_density_quarterly_2016_Q1.pdf',height = 2.8, width = 4.2)
-ggsave(list_plots_level_reform[['5']], filename  = 'output/F/F6_pure_level_reform_claiming_density_quarterly_2016_Q2.pdf',height = 2.8, width = 4.2)
-ggsave(list_plots_level_reform[['6']], filename  = 'output/F/F6_pure_level_reform_claiming_density_quarterly_2016_Q3.pdf',height = 2.8, width = 4.2)
-ggsave(list_plots_level_reform[['7']], filename  = 'output/F/F6_pure_level_reform_claiming_density_quarterly_2016_Q4.pdf',height = 2.8, width = 4.2)
-ggsave(list_plots_level_reform[['8']], filename  = 'output/F/F6_pure_level_reform_claiming_density_quarterly_2017_Q1.pdf',height = 2.8, width = 4.2)
-ggsave(list_plots_level_reform[['9']], filename  = 'output/F/F6_pure_level_reform_claiming_density_quarterly_2017_Q2.pdf',height = 2.8, width = 4.2)
-ggsave(list_plots_level_reform[['10']], filename = 'output/F/F6_pure_level_reform_claiming_density_quarterly_2017_Q3.pdf',height = 2.8, width = 4.2)
-ggsave(list_plots_level_reform[['11']], filename = 'output/F/F6_pure_level_reform_claiming_density_quarterly_2017_Q4.pdf',height = 2.8, width = 4.2)
-ggsave(list_plots_level_reform[['12']], filename = 'output/F/F6_pure_level_reform_claiming_density_quarterly_2018_Q1.pdf',height = 2.8, width = 4.2)
-ggsave(list_plots_level_reform[['13']], filename = 'output/F/F6_pure_level_reform_claiming_density_quarterly_2018_Q2.pdf',height = 2.8, width = 4.2)
-
-
-#Saving all contrafactual Slope reforms densities plots
-ggsave(list_plots_slope_reform[['0']],  filename = 'output/F/F6_pure_slope_reform_claiming_density_quarterly_2015_Q1.pdf',height = 2.8, width = 4.2)
-ggsave(list_plots_slope_reform[['1']],  filename = 'output/F/F6_pure_slope_reform_claiming_density_quarterly_2015_Q2.pdf',height = 2.8, width = 4.2)
-ggsave(list_plots_slope_reform[['2']],  filename = 'output/F/F6_pure_slope_reform_claiming_density_quarterly_2015_Q3.pdf',height = 2.8, width = 4.2)
-ggsave(list_plots_slope_reform[['3']],  filename = 'output/F/F6_pure_slope_reform_claiming_density_quarterly_2015_Q4.pdf',height = 2.8, width = 4.2)
-ggsave(list_plots_slope_reform[['4']],  filename = 'output/F/F6_pure_slope_reform_claiming_density_quarterly_2016_Q1.pdf',height = 2.8, width = 4.2)
-ggsave(list_plots_slope_reform[['5']],  filename = 'output/F/F6_pure_slope_reform_claiming_density_quarterly_2016_Q2.pdf',height = 2.8, width = 4.2)
-ggsave(list_plots_slope_reform[['6']],  filename = 'output/F/F6_pure_slope_reform_claiming_density_quarterly_2016_Q3.pdf',height = 2.8, width = 4.2)
-ggsave(list_plots_slope_reform[['7']],  filename = 'output/F/F6_pure_slope_reform_claiming_density_quarterly_2016_Q4.pdf',height = 2.8, width = 4.2)
-ggsave(list_plots_slope_reform[['8']],  filename = 'output/F/F6_pure_slope_reform_claiming_density_quarterly_2017_Q1.pdf',height = 2.8, width = 4.2)
-ggsave(list_plots_slope_reform[['9']],  filename = 'output/F/F6_pure_slope_reform_claiming_density_quarterly_2017_Q2.pdf',height = 2.8, width = 4.2)
-ggsave(list_plots_slope_reform[['10']], filename = 'output/F/F6_pure_slope_reform_claiming_density_quarterly_2017_Q3.pdf',height = 2.8, width = 4.2)
-ggsave(list_plots_slope_reform[['11']], filename = 'output/F/F6_pure_slope_reform_claiming_density_quarterly_2017_Q4.pdf',height = 2.8, width = 4.2)
-ggsave(list_plots_slope_reform[['12']], filename = 'output/F/F6_pure_slope_reform_claiming_density_quarterly_2018_Q1.pdf',height = 2.8, width = 4.2)
-ggsave(list_plots_slope_reform[['13']], filename = 'output/F/F6_pure_slope_reform_claiming_density_quarterly_2018_Q2.pdf',height = 2.8, width = 4.2)

@@ -1,3 +1,7 @@
+* LEGACY — do not run. Canonical replacement: B4_create_clean_candidates_cross.R. See _docs/memory.
+di as error "LEGACY file — execution blocked. Use B4_create_clean_candidates_cross.R."
+error 198
+* ----- original file below (quarantined; never run) -----
 /* This code
 	Filters Rais to create a panel all yearly observations of individuals present 
 	in Rais who were born before 1974

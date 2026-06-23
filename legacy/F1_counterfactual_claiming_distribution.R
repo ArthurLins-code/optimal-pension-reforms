@@ -1,3 +1,5 @@
+stop("LEGACY — do not run. Canonical replacement: new_counterfactual_claiming3_pure.R. See _docs/memory.")
+# ----- original file below (quarantined; never run) -----
 # ******************************************************************************
 # This code
 #

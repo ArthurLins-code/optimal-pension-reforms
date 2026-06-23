@@ -1,3 +1,5 @@
+stop("LEGACY — do not run. Canonical replacement: G5_effect_average_benefit_freq_bL_and_bS.R. See _docs/memory.")
+# ----- original file below (quarantined; never run) -----
 # ******************************************************************************
 # This code
 #

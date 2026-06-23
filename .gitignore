@@ -14,6 +14,25 @@ videos/
 # (podem ser regenerados rodando o código no PC remoto)
 trans_retirement/output/
 
+# --- Functional-layout I/O (restructure; regeneratable / confidential — keep only .gitkeep) ---
+build/output/*
+!build/output/.gitkeep
+build/temp/*
+!build/temp/.gitkeep
+build/input/*
+!build/input/.gitkeep
+analysis/output/*
+!analysis/output/.gitkeep
+analysis/temp/*
+!analysis/temp/.gitkeep
+analysis/input/*
+!analysis/input/.gitkeep
+
+# --- Golden-baseline heavy artifacts (keep the .md/.csv provenance, ignore the bulk) ---
+baseline/figures_before/
+baseline/figures_asis/
+baseline/logs/
+
 # --- Versões do paper e apresentações (PDFs binários) ---
 versões do artigo/
 

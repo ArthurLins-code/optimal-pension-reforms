@@ -1,0 +1,2 @@
+# rprojroot / here sentinel — marks the project root for config/paths.R.
+# Do not delete. No code reads its contents; only its existence matters.

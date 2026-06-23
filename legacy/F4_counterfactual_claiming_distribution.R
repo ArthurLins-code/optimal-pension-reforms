@@ -1,3 +1,5 @@
+stop("LEGACY — do not run. Canonical replacement: new_counterfactual_claiming3_pure.R. See _docs/memory.")
+# ----- original file below (quarantined; never run) -----
 # ******************************************************************************
 # This code
 #
@@ -26,22 +28,22 @@ set.seed(123)
 # DATA ---------------------------------------------------------
 # ******************************************************************************
 
-dt <- fread('working/D3_cross_section.csv.gz') %>% 
+dt <- fread('working/D1_cross_section.csv.gz') %>% 
   .[!is.na(dist_claim_cutoff)]
 
-dt[, claim_month := as.numeric(as.yearmon(claim_date))]
+panel <- fread('working/D2_panel.csv.gz')
 
-aux_normalization <- CJ(year = 2002:2020, month = 1:12) %>% 
-  arrange(year, month) %>% 
-  .[, claim_month := as.numeric(year) + (month-1)/12] %>% 
-  .[(year < 2015)|(year == 2015 & month <= 5), dist_months := -rev(seq_len(.N))] %>% 
-  .[year == 2015 & month == 6, dist_months := 0] %>% 
-  .[(year > 2015)|(year == 2015 & month >= 7), dist_months := seq_len(.N)] %>% 
-  .[, dist_quarters := floor(dist_months/3)]
+# New variables: Normalized Points
 
-dt <- left_join(dt, aux_normalization[,.(claim_month, dist_quarters)], by = 'claim_month')
+dt[, points_d := floor(points_claim)] %>%
+  .[, points_norm := ifelse(male == 0, points_d - 85, points_d - 95)]
 
-panel <- fread('working/D4_panel_reform.csv.gz')
+panel[, points_d := floor(points_quarter)] %>%
+  .[, points_norm := ifelse(male == 0, points_d - 85, points_d - 95)]
+
+# New variable: Quarters since reform
+
+panel[, dist_reform := 4*(year_quarter - 2015.25)]
 
 # ******************************************************************************
 # FUNCTIONS ---------------------------------------------------------
@@ -92,28 +94,28 @@ fn_distribution <- function(df) {
 
 # 1 - Calculate claiming hazard and density for each (distance, quarter) -----
 
-dt_ch_quarterly <- panel[!is.na(claim_haz) & dist_reform_quarters >= -13 & dist_reform_quarters <= 13 & points_norm >= -15 & points_norm <= 15] %>% 
-  .[, .(ch_empirical = mean(claim_haz, na.rm = T)), by = .(dist_reform_quarters, points_norm)] %>% 
-  arrange(dist_reform_quarters, points_norm)
+dt_ch_quarterly <- panel[!is.na(claim_haz) & year_quarter >= 2012 & year_quarter <= 2018.25 & points_norm >= -15 & points_norm <= 15] %>% 
+  .[, .(ch_empirical = mean(claim_haz, na.rm = T)), by = .(year_quarter, points_norm)] %>% 
+  arrange(year_quarter, points_norm)
 
 list_distribution <- list()
-for (q in seq(-13,13,1)) {
-  list_distribution[[paste0(q)]] <- fn_distribution(dt[dist_quarters == q]) %>% 
-    .[, dist_reform_quarters := q]
+for (q in seq(2012,2018.25,0.25)) {
+  list_distribution[[paste0(q)]] <- fn_distribution(dt[claim_quarter == q]) %>% 
+    .[, year_quarter := q]
 }
 dt_distribution <- rbindlist(list_distribution)
 setnames(dt_distribution, 'dist', 'points_norm')
 
-dt_distribution <- merge(dt_distribution, dt_ch_quarterly, by = c('dist_reform_quarters','points_norm')) %>% 
-  arrange(dist_reform_quarters, points_norm)
+dt_distribution <- merge(dt_distribution, dt_ch_quarterly, by = c('year_quarter','points_norm')) %>% 
+  arrange(year_quarter, points_norm)
 
 # 2 - Estimate the DD models ----------------------
 
-panel_DD <- left_join(panel[,.(indiv, dist_reform_quarters, claim_haz, points_norm, male)], 
+panel_DD <- left_join(panel[,.(indiv, year_quarter, claim_haz, points_norm, male, dist_reform)], 
                       dt[,.(indiv, microrregiao, m_schooling, m_race, birth_year)], 
                       by = 'indiv') %>% 
   .[!is.na(claim_haz)] %>% 
-  .[dist_reform_quarters >= -13 & dist_reform_quarters <= 13] %>% 
+  .[year_quarter >= 2012 & year_quarter <= 2018.25] %>% 
   .[points_norm >= -15 & points_norm <= 15]
 
 gc()
@@ -139,7 +141,7 @@ models <- list()
 
 for (d in -6:15) {
   
-  formula <- as.formula(paste0('claim_haz ~ i(dist_reform_quarters, `treat_', d, '`, ref = -2) | dist_reform_quarters + points_norm + male + microrregiao + m_schooling + m_race + birth_year'))
+  formula <- as.formula(paste0('claim_haz ~ i(year_quarter, `treat_', d, '`, ref = 2014.75) | year_quarter + points_norm + male + microrregiao + m_schooling + m_race + birth_year'))
   
   models[[paste0('treat_',d)]] <- feols(data = panel_DD[!is.na(get(paste0('treat_',d)))],
                                         fml = formula,
@@ -152,7 +154,7 @@ for (d in -6:15) {
 
 list_models <- list()
 for (d in -6:15) {
-  list_models[[paste0(d)]] <- data.table(dist_reform_quarters = iplot(models[[paste0('treat_',d)]])$prms$estimate_names,
+  list_models[[paste0(d)]] <- data.table(year_quarter = iplot(models[[paste0('treat_',d)]])$prms$estimate_names,
                                          points_norm = d,
                                          point_estimate = iplot(models[[paste0('treat_',d)]])$prms$estimate,
                                          lower_bound = iplot(models[[paste0('treat_',d)]])$prms$ci_low,
@@ -160,19 +162,19 @@ for (d in -6:15) {
 }
 
 dt_effects <- rbindlist(list_models) %>% 
-  arrange(dist_reform_quarters, points_norm)
+  arrange(year_quarter, points_norm)
 
 # Event study plots
 
 plots_eventstudy <- list()
 for (d in -6:15) {
-  plots_eventstudy[[paste0(d)]] <- data.table(dist_reform_quarters = iplot(models[[paste0('treat_',d)]])$prms$estimate_names,
+  plots_eventstudy[[paste0(d)]] <- data.table(year_quarter = iplot(models[[paste0('treat_',d)]])$prms$estimate_names,
                                               points_norm = paste0(d),
                                               point_estimate = iplot(models[[paste0('treat_',d)]])$prms$estimate,
                                               lower_bound = iplot(models[[paste0('treat_',d)]])$prms$ci_low,
                                               upper_bound = iplot(models[[paste0('treat_',d)]])$prms$ci_high) %>% 
-    # .[, dist_reform := 4*(dist_reform_quarters - 2015.25)] %>% 
-    ggplot(aes(x = dist_reform_quarters, na.rm = T))+
+    .[, dist_reform := 4*(year_quarter - 2015.25)] %>% 
+    ggplot(aes(x = dist_reform, na.rm = T))+
     geom_vline(xintercept = -1.5, linetype = 'longdash', linewidth = 0.3)+
     geom_vline(xintercept = -0.5, linetype = 'solid', linewidth = 0.3)+
     geom_hline(yintercept = 0, linewidth = 0.3)+
@@ -254,7 +256,7 @@ models_agg <- list()
 
 for (g in c('[-6,-3]','[-2,-1]','[0,1]','[2,6]','[7,15]')) {
   
-  formula <- as.formula(paste0('claim_haz ~ i(dist_reform_quarters, `treat_agg_', g, '`, ref = -2) | dist_reform_quarters + points_norm + male + microrregiao + m_schooling + m_race + birth_year'))
+  formula <- as.formula(paste0('claim_haz ~ i(year_quarter, `treat_agg_', g, '`, ref = 2014.75) | year_quarter + points_norm + male + microrregiao + m_schooling + m_race + birth_year'))
   
   models_agg[[paste0('treat_agg_',g)]] <- feols(data = panel_DD[!is.na(get(paste0('treat_agg_',g)))],
                                         fml = formula,
@@ -269,13 +271,13 @@ plots_eventstudy_agg <- list()
 aux_n <- 0
 for (g in c('[-6,-3]','[-2,-1]','[0,1]','[2,6]','[7,15]')) {
   aux_n <- aux_n + 1
-  plots_eventstudy_agg[[paste0(g)]] <- data.table(dist_reform_quarters = iplot(models_agg[[paste0('treat_agg_',g)]])$prms$estimate_names,
+  plots_eventstudy_agg[[paste0(g)]] <- data.table(year_quarter = iplot(models_agg[[paste0('treat_agg_',g)]])$prms$estimate_names,
                                               group = paste0(g),
                                               point_estimate = iplot(models_agg[[paste0('treat_agg_',g)]])$prms$estimate,
                                               lower_bound = iplot(models_agg[[paste0('treat_agg_',g)]])$prms$ci_low,
                                               upper_bound = iplot(models_agg[[paste0('treat_agg_',g)]])$prms$ci_high) %>% 
-    # .[, dist_reform := 4*(dist_reform_quarters - 2015.25)] %>% 
-    ggplot(aes(x = dist_reform_quarters, na.rm = T))+
+    .[, dist_reform := 4*(year_quarter - 2015.25)] %>% 
+    ggplot(aes(x = dist_reform, na.rm = T))+
     geom_vline(xintercept = -1.5, linetype = 'longdash', linewidth = 0.3)+
     geom_vline(xintercept = -0.5, linetype = 'solid', linewidth = 0.3)+
     geom_hline(yintercept = 0, linewidth = 0.3)+
@@ -328,14 +330,14 @@ ggsave(plot_es_agg, filename = 'tmp/teste_plot.pdf', height = 6, width = 6)
 # 3 - Create the counterfactual claiming hazard and density ------------
 
 dt_counterfactual <- left_join(dt_distribution, 
-                               dt_effects[,.(dist_reform_quarters, points_norm, change_ch_pp = point_estimate)], 
-                               by = c('dist_reform_quarters', 'points_norm'))
+                               dt_effects[,.(year_quarter, points_norm, change_ch_pp = point_estimate)], 
+                               by = c('year_quarter', 'points_norm'))
 
 dt_counterfactual[is.na(change_ch_pp), change_ch_pp := 0]
 
 # Calculating percentage change in claiming hazard
 
-dt_counterfactual[ch_empirical > 0 & dist_reform_quarters >= 0, change_ch_perc := change_ch_pp/ch_empirical]
+dt_counterfactual[ch_empirical > 0 & year_quarter >= 2015, change_ch_perc := change_ch_pp/ch_empirical]
 
 dt_counterfactual[is.na(change_ch_perc), change_ch_perc := 0]
 
@@ -343,7 +345,7 @@ dt_counterfactual[is.na(change_ch_perc), change_ch_perc := 0]
 
 dt_counterfactual[, ch_counterfactual := hazard * (1-change_ch_perc)]
 
-ggplot(dt_counterfactual[dist_reform_quarters == 10 & points_norm >= -10 & points_norm <= 10], 
+ggplot(dt_counterfactual[year_quarter == 2018.25 & points_norm >= -10 & points_norm <= 10], 
        aes(x = points_norm))+
   geom_line(aes(y = hazard), color = 'blue')+
   geom_line(aes(y = ch_counterfactual), color = 'red')+
@@ -351,31 +353,31 @@ ggplot(dt_counterfactual[dist_reform_quarters == 10 & points_norm >= -10 & point
 
 # Calculating the counterfactual density
 
-dt_counterfactual[, cumulative_lag := lag(cumulative), by = dist_reform_quarters]
+dt_counterfactual[, cumulative_lag := lag(cumulative), by = year_quarter]
 
 dt_counterfactual[points_norm == -15, delta_freq := 0]
 
-dt_counterfactual[points_norm == -15, cumulative_count := freq - delta_freq, by = dist_reform_quarters]
+dt_counterfactual[points_norm == -15, cumulative_count := freq - delta_freq, by = year_quarter]
 
-dt_counterfactual[, cumulative_count_lag := lag(cumulative_count), by = dist_reform_quarters]
+dt_counterfactual[, cumulative_count_lag := lag(cumulative_count), by = year_quarter]
 
 for (i in -14:15) {
-  dt_counterfactual[points_norm == i, delta_freq := (hazard*(1-cumulative_lag) - ch_counterfactual*(1-cumulative_count_lag)), by = dist_reform_quarters]
-  dt_counterfactual[points_norm == i, cumulative_count := (cumulative_count_lag + freq - delta_freq), by = dist_reform_quarters]
-  dt_counterfactual[, cumulative_count_lag := lag(cumulative_count), by = dist_reform_quarters]
+  dt_counterfactual[points_norm == i, delta_freq := (hazard*(1-cumulative_lag) - ch_counterfactual*(1-cumulative_count_lag)), by = year_quarter]
+  dt_counterfactual[points_norm == i, cumulative_count := (cumulative_count_lag + freq - delta_freq), by = year_quarter]
+  dt_counterfactual[, cumulative_count_lag := lag(cumulative_count), by = year_quarter]
 }
 
 dt_counterfactual[, freq_count := cumulative_count - cumulative_count_lag]
 
 dt_counterfactual[points_norm == -15, freq_count := freq]
 
-ggplot(dt_counterfactual[dist_reform_quarters == 4 & points_norm >= -15 & points_norm <= 15], 
+ggplot(dt_counterfactual[year_quarter == 2015.75 & points_norm >= -15 & points_norm <= 15], 
        aes(x = points_norm))+
   geom_line(aes(y = freq), color = 'blue')+
   geom_line(aes(y = freq_count), color = 'red')+
   theme_classic()
 
-fwrite(dt_counterfactual, file = 'output/F/F5_table_results.csv')
+fwrite(dt_counterfactual, file = 'output/F/F4_table_results.csv')
 
 dt_counterfactual[,c('change_ch_pp','change_ch_perc','ch_counterfactual',
                      'cumulative_lag','delta_freq','cumulative_count',
@@ -388,9 +390,12 @@ dt_counterfactual <- copy(dt_counterfactual)
 # Density plots
 
 list_plots_count <- list()
-for (y in seq(-13,13,1)) {
-  cat = paste0(y,' qtrs post-ref.')
-    list_plots_count[[paste0(y)]] <- dt_counterfactual[dist_reform_quarters == y] %>% 
+for (y in seq(2015,2018.25,0.25)) {
+  cat = case_when(y - floor(y) == 0 ~ paste0(floor(y),' - Q1'),
+                  y - floor(y) == 0.25 ~ paste0(floor(y), ' - Q2'),
+                  y - floor(y) == 0.5 ~ paste0(floor(y), ' - Q3'),
+                  y - floor(y) == 0.75 ~ paste0(floor(y), ' - Q4'))
+    list_plots_count[[paste0(y)]] <- dt_counterfactual[year_quarter == y] %>% 
       .[,.(points_norm, freq, freq_count)] %>% 
       ggplot(aes(x = points_norm))+
       geom_vline(xintercept = 0, linetype = 'dashed', linewidth = 0.3)+
@@ -404,7 +409,8 @@ for (y in seq(-13,13,1)) {
                         labels = c('1'='Actual','2'='Counterfactual'))+
       scale_x_continuous(breaks = seq(-24,24,8), minor_breaks = seq(-30,30,2),
                          guide = guide_axis(minor.ticks = TRUE))+
-      scale_y_continuous(n.breaks = 6)+
+      scale_y_continuous(breaks = seq(0, 1, 0.02), minor_breaks = seq(0,1,0.01),
+                         guide = guide_axis(minor.ticks = TRUE))+
       coord_cartesian(ylim = c(0,0.2))+
       theme_classic()+
       guides(color = guide_legend(nrow = 2), fill = 'none')+
@@ -431,43 +437,43 @@ for (y in seq(-13,13,1)) {
   
 }
 
-plot_count_2015 <- ggarrange(list_plots_count[['0']],list_plots_count[['1']],
-                             list_plots_count[['2']],list_plots_count[['3']], ncol = 2, nrow = 2)
-plot_count_2016 <- ggarrange(list_plots_count[['4']],list_plots_count[['5']],
-                             list_plots_count[['6']],list_plots_count[['7']], ncol = 2, nrow = 2)
-plot_count_2017 <- ggarrange(list_plots_count[['8']],list_plots_count[['9']],
-                             list_plots_count[['10']],list_plots_count[['11']], ncol = 2, nrow = 2)
-plot_count_2018 <- ggarrange(list_plots_count[['12']],list_plots_count[['13']], ncol = 2, nrow = 1)
+plot_count_2015 <- ggarrange(list_plots_count[['2015']],list_plots_count[['2015.25']],
+                             list_plots_count[['2015.5']],list_plots_count[['2015.75']], ncol = 2, nrow = 2)
+plot_count_2016 <- ggarrange(list_plots_count[['2016']],list_plots_count[['2016.25']],
+                             list_plots_count[['2016.5']],list_plots_count[['2016.75']], ncol = 2, nrow = 2)
+plot_count_2017 <- ggarrange(list_plots_count[['2017']],list_plots_count[['2017.25']],
+                             list_plots_count[['2017.5']],list_plots_count[['2017.75']], ncol = 2, nrow = 2)
+plot_count_2018 <- ggarrange(list_plots_count[['2018']],list_plots_count[['2018.25']], ncol = 2, nrow = 1)
 
 # 4 - Creating a counterfactual for the aggregate claiming distribution ------
 
 dt_agg_effects <- left_join(dt_distribution, 
-                            dt_effects[,.(dist_reform_quarters, points_norm, change_ch_pp = point_estimate)], 
-                            by = c('dist_reform_quarters', 'points_norm'))
+                            dt_effects[,.(year_quarter, points_norm, change_ch_pp = point_estimate)], 
+                            by = c('year_quarter', 'points_norm'))
 
 dt_agg_effects[is.na(change_ch_pp), change_ch_pp := 0]
 
 # Calculating percentage change in claiming hazard
 
-dt_agg_effects[ch_empirical > 0 & dist_reform_quarters >= 0, change_ch_perc := change_ch_pp/ch_empirical]
+dt_agg_effects[ch_empirical > 0 & year_quarter >= 2015, change_ch_perc := change_ch_pp/ch_empirical]
 
 dt_agg_effects[is.na(change_ch_perc), change_ch_perc := 0]
 
 dt_agg_effects[, ch_agg_counter := hazard * (1-change_ch_perc)]
 
 aux_agg_1 <- panel[!is.na(claim_haz)] %>% 
-  .[, .(num_elig = .N), by = .(dist_reform_quarters, points_norm)] %>% 
-  .[dist_reform_quarters >= 0 & dist_reform_quarters < 14]
+  .[, .(num_elig = .N), by = .(year_quarter, points_norm)] %>% 
+  .[year_quarter >= 2015 & year_quarter < 2018.5]
 
-aux_agg_2 <- fn_distribution(dt[dist_quarters < 14 & d_claim_post_reform == 0]) %>%  .[, d_claim_post_reform := 0]
+aux_agg_2 <- fn_distribution(dt[claim_quarter < 2018.5 & d_claim_post_reform == 0]) %>%  .[, d_claim_post_reform := 0]
 
-aux_agg_3 <- fn_distribution(dt[dist_quarters < 14 & d_claim_post_reform == 1]) %>%  .[, d_claim_post_reform := 1]
+aux_agg_3 <- fn_distribution(dt[claim_quarter < 2018.5 & d_claim_post_reform == 1]) %>%  .[, d_claim_post_reform := 1]
 
 # Aggregate Counterfactual
 
-dt_agg_counter <- left_join(dt_agg_effects[dist_reform_quarters >= 0 & dist_reform_quarters < 14], 
+dt_agg_counter <- left_join(dt_agg_effects[year_quarter >= 2015 & year_quarter < 2018.5], 
                             aux_agg_1, 
-                            by = c('points_norm', 'dist_reform_quarters')) %>% 
+                            by = c('points_norm', 'year_quarter')) %>% 
   .[, .(ch_agg_counter = weighted.mean(ch_agg_counter, w = num_elig)), by = points_norm] %>%
   setnames('points_norm','dist') %>% 
   left_join(aux_agg_3, by = 'dist')
@@ -524,13 +530,13 @@ plot_count_agg <- dt_agg[,.(dist, freq_post, freq_count)] %>%
                                 'freq_count' = 'Counterfactual (DD)'),
                      breaks = c('freq_pre','freq_post','freq_count'))+
   annotate('text', x = -8, y = 0.108, label = 'Postponement', hjust = 0.5, family = 'serif', parse = FALSE, size = 10/.pt)+
-  annotate('text', x = -8, y = 0.10, label = paste0('mass = ',round(b1,4)), hjust = 0.5, family = 'serif', parse = FALSE, size = 10/.pt)+
+  annotate('text', x = -8, y = 0.10, label = paste0('mass = ',round(b1,3)), hjust = 0.5, family = 'serif', parse = FALSE, size = 10/.pt)+
   annotate('segment', x = -6, y = 0.094, xend = -4, yend = 0.08, arrow = arrow(length = unit(0.2, 'cm')), linewidth = 0.2)+
   annotate('text', x = 6, y = 0.108, label = 'Bunching', hjust = 0.5, family = 'serif', parse = FALSE, size = 10/.pt)+
-  annotate('text', x = 6, y = 0.10, label = paste0('mass = ',round(b2,4)), hjust = 0.5, family = 'serif', parse = FALSE, size = 10/.pt)+
+  annotate('text', x = 6, y = 0.10, label = paste0('mass = ',round(b2,3)), hjust = 0.5, family = 'serif', parse = FALSE, size = 10/.pt)+
   annotate('segment', x = 4, y = 0.094, xend = 2, yend = 0.08, arrow = arrow(length = unit(0.2, 'cm')), linewidth = 0.2)+
   annotate('text', x = 10, y = 0.04, label = 'Anticipation', hjust = 0.5, family = 'serif', parse = FALSE, size = 10/.pt)+
-  annotate('text', x = 10, y = 0.032, label = paste0('mass = ',round(b3,4)), hjust = 0.5, family = 'serif', parse = FALSE, size = 10/.pt)+
+  annotate('text', x = 10, y = 0.032, label = paste0('mass = ',round(b3,3)), hjust = 0.5, family = 'serif', parse = FALSE, size = 10/.pt)+
   annotate('segment', x = 10, y = 0.028, xend = 10, yend = 0.01, arrow = arrow(length = unit(0.2, 'cm')), linewidth = 0.2)+
   scale_x_continuous(breaks = seq(-12,12,4), minor_breaks = seq(-16,16,1),
                      guide = guide_axis(minor.ticks = TRUE))+
@@ -568,66 +574,66 @@ ggsave(plot_count_agg, filename=  'tmp/teste_plot.pdf', height = 3, width = 5)
 # SAVING ---------------------------------------------------------
 # ******************************************************************************
 
-ggsave(plot_es1, filename = 'output/F/F5_eventstudy_all_1.pdf',
+ggsave(plot_es1, filename = 'output/F/F4_eventstudy_all_1.pdf',
        height = 6, width = 6)
-ggsave(plot_es2, filename = 'output/F/F5_eventstudy_all_2.pdf',
+ggsave(plot_es2, filename = 'output/F/F4_eventstudy_all_2.pdf',
        height = 6, width = 6)
-ggsave(plot_es3, filename = 'output/F/F5_eventstudy_all_3.pdf',
+ggsave(plot_es3, filename = 'output/F/F4_eventstudy_all_3.pdf',
        height = 6, width = 6)
-ggsave(plot_es4, filename = 'output/F/F5_eventstudy_all_4.pdf',
+ggsave(plot_es4, filename = 'output/F/F4_eventstudy_all_4.pdf',
        height = 4, width = 6)
 
-ggsave(plot_es_agg, filename = 'output/F/F5_eventstudy_aggregate.pdf',
+ggsave(plot_es_agg, filename = 'output/F/F4_eventstudy_aggregate.pdf',
        height = 6, width = 6)
 
-ggsave(plots_eventstudy_agg[['[-6,-3]']], filename = 'output/F/F5_eventstudy_agg_1.pdf',
+ggsave(plots_eventstudy_agg[['[-6,-3]']], filename = 'output/F/F4_eventstudy_agg_1.pdf',
        height = 3, width = 4)
-ggsave(plots_eventstudy_agg[['[-2,-1]']], filename = 'output/F/F5_eventstudy_agg_2.pdf',
+ggsave(plots_eventstudy_agg[['[-2,-1]']], filename = 'output/F/F4_eventstudy_agg_2.pdf',
        height = 3, width = 4)
-ggsave(plots_eventstudy_agg[['[0,1]']], filename = 'output/F/F5_eventstudy_agg_3.pdf',
+ggsave(plots_eventstudy_agg[['[0,1]']], filename = 'output/F/F4_eventstudy_agg_3.pdf',
        height = 3, width = 4)
-ggsave(plots_eventstudy_agg[['[2,6]']], filename = 'output/F/F5_eventstudy_agg_4.pdf',
+ggsave(plots_eventstudy_agg[['[2,6]']], filename = 'output/F/F4_eventstudy_agg_4.pdf',
        height = 3, width = 4)
-ggsave(plots_eventstudy_agg[['[7,15]']], filename = 'output/F/F5_eventstudy_agg_5.pdf',
+ggsave(plots_eventstudy_agg[['[7,15]']], filename = 'output/F/F4_eventstudy_agg_5.pdf',
        height = 3, width = 4)
 
-ggsave(plot_count_2015, filename = 'output/F/F5_counterfactual_claiming_density_quarterly_2015.pdf',
+ggsave(plot_count_2015, filename = 'output/F/F4_counterfactual_claiming_density_quarterly_2015.pdf',
        height = 4, width = 6)
-ggsave(plot_count_2016, filename = 'output/F/F5_counterfactual_claiming_density_quarterly_2016.pdf',
+ggsave(plot_count_2016, filename = 'output/F/F4_counterfactual_claiming_density_quarterly_2016.pdf',
        height = 4, width = 6)
-ggsave(plot_count_2017, filename = 'output/F/F5_counterfactual_claiming_density_quarterly_2017.pdf',
+ggsave(plot_count_2017, filename = 'output/F/F4_counterfactual_claiming_density_quarterly_2017.pdf',
        height = 4, width = 6)
-ggsave(plot_count_2018, filename = 'output/F/F5_counterfactual_claiming_density_quarterly_2018.pdf',
+ggsave(plot_count_2018, filename = 'output/F/F4_counterfactual_claiming_density_quarterly_2018.pdf',
        height = 2, width = 6)
 
-ggsave(list_plots_count[['0']], filename = 'output/F/F5_counterfactual_claiming_density_quarterly_2015_Q1.pdf',
+ggsave(list_plots_count[['2015']], filename = 'output/F/F4_counterfactual_claiming_density_quarterly_2015_Q1.pdf',
        height = 2, width = 3)
-ggsave(list_plots_count[['1']], filename = 'output/F/F5_counterfactual_claiming_density_quarterly_2015_Q2.pdf',
+ggsave(list_plots_count[['2015.25']], filename = 'output/F/F4_counterfactual_claiming_density_quarterly_2015_Q2.pdf',
        height = 2, width = 3)
-ggsave(list_plots_count[['2']], filename = 'output/F/F5_counterfactual_claiming_density_quarterly_2015_Q3.pdf',
+ggsave(list_plots_count[['2015.5']], filename = 'output/F/F4_counterfactual_claiming_density_quarterly_2015_Q3.pdf',
        height = 2, width = 3)
-ggsave(list_plots_count[['3']], filename = 'output/F/F5_counterfactual_claiming_density_quarterly_2015_Q4.pdf',
+ggsave(list_plots_count[['2015.75']], filename = 'output/F/F4_counterfactual_claiming_density_quarterly_2015_Q4.pdf',
        height = 2, width = 3)
-ggsave(list_plots_count[['4']], filename = 'output/F/F5_counterfactual_claiming_density_quarterly_2016_Q1.pdf',
+ggsave(list_plots_count[['2016']], filename = 'output/F/F4_counterfactual_claiming_density_quarterly_2016_Q1.pdf',
        height = 2, width = 3)
-ggsave(list_plots_count[['5']], filename = 'output/F/F5_counterfactual_claiming_density_quarterly_2016_Q2.pdf',
+ggsave(list_plots_count[['2016.25']], filename = 'output/F/F4_counterfactual_claiming_density_quarterly_2016_Q2.pdf',
        height = 2, width = 3)
-ggsave(list_plots_count[['6']], filename = 'output/F/F5_counterfactual_claiming_density_quarterly_2016_Q3.pdf',
+ggsave(list_plots_count[['2016.5']], filename = 'output/F/F4_counterfactual_claiming_density_quarterly_2016_Q3.pdf',
        height = 2, width = 3)
-ggsave(list_plots_count[['7']], filename = 'output/F/F5_counterfactual_claiming_density_quarterly_2016_Q4.pdf',
+ggsave(list_plots_count[['2016.75']], filename = 'output/F/F4_counterfactual_claiming_density_quarterly_2016_Q4.pdf',
        height = 2, width = 3)
-ggsave(list_plots_count[['8']], filename = 'output/F/F5_counterfactual_claiming_density_quarterly_2017_Q1.pdf',
+ggsave(list_plots_count[['2017']], filename = 'output/F/F4_counterfactual_claiming_density_quarterly_2017_Q1.pdf',
        height = 2, width = 3)
-ggsave(list_plots_count[['9']], filename = 'output/F/F5_counterfactual_claiming_density_quarterly_2017_Q2.pdf',
+ggsave(list_plots_count[['2017.25']], filename = 'output/F/F4_counterfactual_claiming_density_quarterly_2017_Q2.pdf',
        height = 2, width = 3)
-ggsave(list_plots_count[['10']], filename = 'output/F/F5_counterfactual_claiming_density_quarterly_2017_Q3.pdf',
+ggsave(list_plots_count[['2017.5']], filename = 'output/F/F4_counterfactual_claiming_density_quarterly_2017_Q3.pdf',
        height = 2, width = 3)
-ggsave(list_plots_count[['11']], filename = 'output/F/F5_counterfactual_claiming_density_quarterly_2017_Q4.pdf',
+ggsave(list_plots_count[['2017.75']], filename = 'output/F/F4_counterfactual_claiming_density_quarterly_2017_Q4.pdf',
        height = 2, width = 3)
-ggsave(list_plots_count[['12']], filename = 'output/F/F5_counterfactual_claiming_density_quarterly_2018_Q1.pdf',
+ggsave(list_plots_count[['2018']], filename = 'output/F/F4_counterfactual_claiming_density_quarterly_2018_Q1.pdf',
        height = 2, width = 3)
-ggsave(list_plots_count[['13']], filename = 'output/F/F5_counterfactual_claiming_density_quarterly_2018_Q2.pdf',
+ggsave(list_plots_count[['2018.25']], filename = 'output/F/F4_counterfactual_claiming_density_quarterly_2018_Q2.pdf',
        height = 2, width = 3)
 
-ggsave(plot_count_agg, filename = 'output/F/F5_counterfactual_claiming_density_agg.pdf',
+ggsave(plot_count_agg, filename = 'output/F/F4_counterfactual_claiming_density_agg.pdf',
        height = 3, width = 5)

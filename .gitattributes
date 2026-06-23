@@ -1,0 +1,19 @@
+# Normalize line endings on text files in the repo; keep each OS happy in the
+# working tree. This kills the CRLF/LF phantom diff (Gentzkow–Shapiro §1.2).
+* text=auto
+
+# Treat known binaries as binary (never EOL-normalize or text-diff them).
+*.pdf  binary
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.dta  binary
+*.xlsx binary
+*.xls  binary
+*.rds  binary
+*.RDS  binary
+*.RData binary
+*.gz   binary
+*.zip  binary
+*.mp4  binary
