@@ -31,6 +31,6 @@ tools + the English deck. Each is the professors' call. Line numbers are **curre
 ## Provenance
 
 Verified 2026-06-23. Companions: [`legacy_bugs.md`](legacy_bugs.md) (non-workflow + closed bugs),
-`_docs/restructure/MAP_after.md`, `quality_reports/restructure_parity.md`, `_docs/restructure/RESTRUCTURE_EXPLAINER.html`.
+`_docs/restructure/MAP_after.md`, `quality_reports/restructure_parity.md`, `guides/RESTRUCTURE_EXPLAINER.html`.
 The post-restructure usage audit (archival of 11 superseded `analysis/code` files → `legacy/superseded/`) is recorded in
 `MAP_after.md` + the session log.
