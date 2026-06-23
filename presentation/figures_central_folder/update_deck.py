@@ -5,7 +5,7 @@ update_deck.py — one command to refresh the presentation's figures from the co
 It runs three steps in order:
   1. (optional) RUN one or more pipeline stages on the sample, so they regenerate figures
   2. COLLECT  — route the current figures into figures_central_folder/from_code/
-  3. COMPILE  — rebuild latex/presentation/_main.pdf
+  3. COMPILE  — rebuild presentation/latex/presentation/_main.pdf
 
 Sample runs write their figures into the sample working dir (the OneDrive
 "transfer_may_retirement" folder); the collector reads from there (newest of sample-dir
@@ -20,14 +20,17 @@ Examples:
 from __future__ import annotations
 
 import argparse
+import os
 import subprocess
 import sys
 import time
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent          # repo root
-CODE = ROOT / "trans_retirement" / "code"
-DECK_DIR = ROOT / "latex" / "presentation"
+PRESENTATION = Path(__file__).resolve().parent.parent  # presentation/ (this tool's home)
+REPO_ROOT = PRESENTATION.parent                        # repo root
+ROOT = REPO_ROOT                                       # repo root (used for collector cwd)
+CODE = REPO_ROOT / "analysis" / "code"                 # restructure: stage scripts moved here
+DECK_DIR = PRESENTATION / "latex" / "presentation"     # restructure: presentation/latex/presentation
 
 # short name -> canonical script that PRODUCES deck figures
 STAGES = {
@@ -39,9 +42,12 @@ STAGES = {
     "I6": CODE / "I6_wmvpf_with_pure_reforms_freq.R",
 }
 
-# the sample working dir (figures from a sample run land here)
+# the sample working dir (figures from a sample run land here). The default is the
+# external OneDrive transfer_may_retirement folder; override via PENSION_SAMPLE_ROOT
+# (or --sample-root) without touching the repo.
 SAMPLE_DIR_CANDIDATES = [
-    "C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement",
+    os.environ.get("PENSION_SAMPLE_ROOT",
+                   "C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement"),
 ]
 
 
@@ -87,7 +93,7 @@ def main() -> int:
 
     # 2. COLLECT --------------------------------------------------------------
     banner("COLLECT  ->  figures_central_folder/from_code/")
-    collect_cmd = [sys.executable, str(ROOT / "figures_central_folder" / "collector.py")]
+    collect_cmd = [sys.executable, str(PRESENTATION / "figures_central_folder" / "collector.py")]
     if sample_root:
         collect_cmd += ["--sample-root", sample_root]
     rc, dt = run(collect_cmd, cwd=ROOT)
@@ -97,7 +103,7 @@ def main() -> int:
 
     # 3. COMPILE --------------------------------------------------------------
     if not args.no_compile:
-        banner("COMPILE  ->  latex/presentation/_main.pdf")
+        banner("COMPILE  ->  presentation/latex/presentation/_main.pdf")
         # -g forces a rebuild so a removed/frozen figure is always reflected
         # (latexmk can otherwise consider _main.pdf up-to-date and keep a stale image).
         crc, dt = run(["latexmk", "-g", "-pdf", "-interaction=nonstopmode", "_main.tex"], cwd=DECK_DIR)

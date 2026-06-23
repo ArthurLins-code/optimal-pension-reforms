@@ -2,9 +2,9 @@
 """
 collector.py — route pipeline figure outputs into figures_central_folder/from_code/
 
-Single-source-of-truth bridge between the analysis pipeline (trans_retirement/output/**)
-and the presentation (latex/presentation/_main.tex). Reads manifest.csv and, for each
-live deck figure:
+Single-source-of-truth bridge between the analysis pipeline (analysis/output/**)
+and the presentation (presentation/latex/presentation/_main.tex). Reads manifest.csv and,
+for each live deck figure:
 
   * copies the code output -> from_code/<deck_name>, applying the rename the deck expects
   * for the actual/counterfactual frequency family, prefers the (pending) canonical pure
@@ -13,7 +13,7 @@ live deck figure:
   * verifies NONE (manual/external) rows already exist in static/  (never copies them)
   * prints a summary table and exits nonzero if any routable row is unresolved
 
-Hard rule: this layer touches NO analysis script in trans_retirement/. All routing and
+Hard rule: this layer touches NO analysis script in analysis/code/. All routing and
 renaming logic lives here + in manifest.csv.
 
 Usage:
@@ -30,13 +30,14 @@ import sys
 from pathlib import Path
 
 # ----------------------------------------------------------------------------- paths
-HERE = Path(__file__).resolve().parent          # figures_central_folder/
-ROOT = HERE.parent                               # repo root
+HERE = Path(__file__).resolve().parent          # presentation/figures_central_folder/
+PRESENTATION = HERE.parent                       # presentation/
+ROOT = PRESENTATION.parent                       # repo root
 FROM_CODE = HERE / "from_code"
 STATIC = HERE / "static"
 DIFFS = HERE / "_diffs"
 MANIFEST = HERE / "manifest.csv"
-LATEX_FIGURES = ROOT / "latex" / "figures"       # source of the OLD (E3) copies for diffs
+LATEX_FIGURES = PRESENTATION / "latex" / "figures"   # source of the OLD (E3) copies for diffs
 
 ROUTABLE_STATUSES = {"OK", "OK-RENAME", "UPSTREAM-CANONICAL", "LEGACY"}
 
@@ -54,11 +55,19 @@ def parse_directives(notes: str) -> dict:
 
 
 def _strip_repo_prefix(relpath: str, label: str) -> str:
-    """The sample working dir mirrors the repo's output tree WITHOUT the leading
-    'trans_retirement/' (it holds output/G/..., data/..., etc.). Strip that prefix for the
-    'sample' root; keep the path unchanged for the repo root."""
+    """Translate a manifest relpath (still written against the legacy
+    'trans_retirement/output/<stage>' tree) into the root it is resolved against.
+
+    * sample root: the sample working dir mirrors the output tree WITHOUT the leading
+      'trans_retirement/' (it holds output/G/..., data/..., etc.). Strip that prefix.
+      LOAD-BEARING: a fresh sample run depends on this exact behavior.
+    * repo root: the restructure moved pipeline outputs to 'analysis/output/<stage>'.
+      Rewrite the legacy 'trans_retirement/output' prefix to the new repo location so the
+      manifest (which must stay byte-matched to G5's ggsave names) needs no edit."""
     if label == "sample" and relpath.startswith("trans_retirement/"):
         return relpath[len("trans_retirement/"):]
+    if label == "repo" and relpath.startswith("trans_retirement/output"):
+        return "analysis/output" + relpath[len("trans_retirement/output"):]
     return relpath
 
 

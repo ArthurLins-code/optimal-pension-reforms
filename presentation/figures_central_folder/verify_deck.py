@@ -10,10 +10,11 @@ import re
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
-DECK = ROOT / "latex" / "presentation" / "_main.tex"
-FROM_CODE = ROOT / "figures_central_folder" / "from_code"
-STATIC = ROOT / "figures_central_folder" / "static"
+HERE = Path(__file__).resolve().parent          # presentation/figures_central_folder/
+PRESENTATION = HERE.parent                       # presentation/
+DECK = PRESENTATION / "latex" / "presentation" / "_main.tex"   # restructure: presentation/latex/presentation
+FROM_CODE = HERE / "from_code"
+STATIC = HERE / "static"
 
 COMMENT = re.compile(r"(?<!\\)%.*")
 INCLUDE = re.compile(r"\\includegraphics(?:\[[^\]]*\])?\{([^}]+)\}")
