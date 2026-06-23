@@ -32,6 +32,7 @@ analysis/input/*
 baseline/figures_before/
 baseline/figures_asis/
 baseline/logs/
+baseline/logs_stage3/
 
 # --- Versões do paper e apresentações (PDFs binários) ---
 versões do artigo/
@@ -174,3 +175,6 @@ scripts/R/_outputs/
 # Output artifacts — uncomment lines below based on your preference
 # *.rds
 # output/**/*.rds
+
+# Stray R default plot device output
+Rplots.pdf

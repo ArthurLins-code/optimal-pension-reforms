@@ -1,0 +1,27 @@
+quantity,value,source_file,note
+WMVPF_actual,0.2126,output/I/I6_summary_sample.csv,headline
+WMVPF_bL_cumulative,1.5591,output/I/I6_summary_sample.csv,pure Level cumulative
+WMVPF_bS_cumulative,-2.4306,output/I/I6_summary_sample.csv,pure Slope cumulative
+WMVPF_bL_perqtr_at_T,0.4253,output/I/I6_summary_sample.csv,pure Level per-qtr at T
+WMVPF_bS_perqtr_at_T,0.3778,output/I/I6_summary_sample.csv,pure Slope per-qtr at T
+eta,0.8281,output/I/I6_summary_sample.csv,welfare weight
+gamma_CRRA,4,output/I/I6_summary_sample.csv,baseline CRRA
+cons_beneficiaries,1536.4,output/I/I6_summary_sample.csv,consumption INSS beneficiaries
+cons_population,1473.1,output/I/I6_summary_sample.csv,consumption population
+quarters_analyzed,13,output/I/I6_summary_sample.csv,quarters analyzed
+WMVPF_actual_I4_welfare_lastrow,463064118.453698,output/I/I4_table_wmvpf_sample.csv,I4 welfare dist_reform=12
+WMVPF_actual_I4_netcost_lastrow,1899292380.16178,output/I/I4_table_wmvpf_sample.csv,I4 net_cost dist_reform=12
+F_claim_counts_sample_nrow,465,output/F/new_counterfactual_claim_counts_sample.csv,data rows excl header
+F_claim_counts_sample_sha256,4b452d7f24d24768de223b8d0dd760cdc5b1eaeeccbfd9eb484a511dded6751c,output/F/new_counterfactual_claim_counts_sample.csv,full-file sha256
+F_claim_counts_sample_sum_claims,31575,output/F/new_counterfactual_claim_counts_sample.csv,sum claims
+F_claim_counts_sample_sum_claims_c,31208,output/F/new_counterfactual_claim_counts_sample.csv,sum claims_c
+F_pure_schedules_sample_nrow,465,output/F/new_counterfactual_claim_counts_with_pure_schedules_3_sample.csv,data rows excl header
+F_pure_schedules_sample_sha256,d27c1d111b9708d8a59e3036e67e59293577bb1040dde7a29e6413162b1ce1ac,output/F/new_counterfactual_claim_counts_with_pure_schedules_3_sample.csv,full-file sha256
+F_pure_schedules_sample_sum_claims,31575,output/F/new_counterfactual_claim_counts_with_pure_schedules_3_sample.csv,sum claims
+F_pure_schedules_sample_sum_claims_c,31208,output/F/new_counterfactual_claim_counts_with_pure_schedules_3_sample.csv,sum claims_c
+F_pure_schedules_sample_sum_claims_L,30235.3353,output/F/new_counterfactual_claim_counts_with_pure_schedules_3_sample.csv,sum claims_L
+F_pure_schedules_sample_sum_claims_S,31958.6647,output/F/new_counterfactual_claim_counts_with_pure_schedules_3_sample.csv,sum claims_S
+policy_elasticity_H2_DD_qtr3,-1347.09708940015,output/H/H2_table_results_sample.csv,"DD +3 (INPUT, not regenerated)"
+policy_elasticity_H2_DDIPW_qtr3,-1574.95997769676,output/H/H2_table_results_sample.csv,"DD-IPW +3 (INPUT, not regenerated)"
+policy_elasticity_H2_DD_qtr0,-1234.86913989299,output/H/H2_table_results_sample.csv,"DD event-time 0 (INPUT, not regenerated)"
+deck_main_pdf_pages,142,presentation/latex/presentation/_main.pdf,compiled page count this run

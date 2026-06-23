@@ -5,14 +5,19 @@
 
 ## Repository Structure
 
-- `trans_retirement/code/` — Pipeline stages A-I (.R and .do)
-- `trans_retirement/output/` — Generated tables, figures, RData (gitignored)
-- `data_local/` — 5% anonymized sample (NEVER committed)
-- `_docs/memory/` — Knowledge base (01-10)
-- `_docs/plans/` — Session plans
-- `_docs/session_logs/` — Session logs
-- `_docs/quality_reports/` — Stage reports, reviews
-- `versoes do artigo/` — Paper drafts and presentations (gitignored)
+Restructured 2026-06-23 into a functional layout (Gentzkow–Shapiro). Full map: `_docs/restructure/MAP_after.md`.
+
+- `config/` — Portability layer: `paths.R` (one `PATHS` list + `DATA_MODE`; **no `setwd` anywhere**) and `constants.R` (economic primitives incl. `ETA`).
+- `build/code/` — Data construction, **full-data/server only**: A1-A4, B1-B4, C1-C6, D1-D4, `aux_codes_RAIS/`. Master: `build/build_all.R`.
+- `analysis/code/` — Estimation & results, **sample-runnable**: E1-E4, `new_counterfactual_claiming3_{gabriel,pure}.R`, G1-G5, H1-H3, I1-I4, I6, I7. Master: `analysis/analysis_all.R`.
+- `presentation/` — `figures_central_folder/` (collector/update/verify/deck_compare + `from_code/` + `static/`) and `latex/` (EN `presentation/`, PT `apresentacao/`). Master: `presentation/build_deck.R`.
+- `legacy/` — Quarantined, each guarded by a `stop()`: F1-F7, G6, I5, `old/` B1-B2. Never run.
+- `RUN.R` — root front-door signpost dispatching to the three masters.
+- `build/{output,temp}`, `analysis/{output,temp}` — generated artifacts (gitignored). In **sample mode the stage I/O lives in the external sample root**, not the repo.
+- `data_local/` — 5% anonymized sample (NEVER committed).
+- `_docs/memory/` — Knowledge base (01-10). `_docs/restructure/` — restructure spec + MAP_before/after.
+- `quality_reports/` — plans, session logs, `restructure_findings.md`, `restructure_parity.md`.
+- `versoes do artigo/` — Paper drafts and presentations (gitignored).
 
 ## Data
 
@@ -26,7 +31,7 @@
 REVERTED to AVERAGE BENEFITS for pure-reform computations.
 The "Expenditures path" is ABANDONED.
 - **I5 and G6 are LEGACY.** Never rerun. Never review as current.
-- Move to `trans_retirement/code/legacy/` in Phase 2.
+- Now quarantined in `legacy/` (each guarded with a `stop()`; never run).
 - **Canonical deck:** `Retirement_Presentations (old strat reverted).pdf`
   in `versoes do artigo/Presentations/`. This is the ONLY source of truth.
   Other decks in that folder are HISTORICAL — do not consult.
@@ -72,19 +77,23 @@ User instructions: "Reason given by user: ..." verbatim.
 
 ## Pipeline (canonical files)
 
-| Stage | Canonical File | Lang | Purpose |
+| Stage | Canonical File (new path) | Lang | Purpose |
 |-------|---------------|------|---------|
-| A | A4_balance_check.R | R | SUIBE balance |
-| B | B4_create_clean_candidates_cross.R | R | RAIS features cross-section |
-| C | C6_estimate_continuous_contrib.R | R | Impute contribution time |
-| D | D4_create_panel.R | R | Panel construction |
-| E | E4_plots_claiming_distributions.R | R | Diagnostic plots |
-| F | new_counterfactual_claiming3_pure.R | R | Counterfactual (NEW method) |
-| G | G5_effect_average_benefit_freq_bL_and_bS.R | R | DD on average benefits |
-| H | H3_policy_elasticity.R | R | IPW-DD elasticity |
-| I | I4_wmvpf_no_pure_reforms_freq.R | R | WMVPF estimation |
+| A | `build/code/A4_balance_check.R` | R | SUIBE balance |
+| B | `build/code/B4_create_clean_candidates_cross.R` | R | RAIS features cross-section |
+| C | `build/code/C6_estimate_continuous_contrib.R` | R | Impute contribution time |
+| D | `build/code/D4_create_panel.R` | R | Panel construction |
+| E | `analysis/code/E4_plots_claiming_distributions.R` | R | Diagnostic plots |
+| F | `analysis/code/new_counterfactual_claiming3_pure.R` | R | Counterfactual (NEW method); upstream `…_gabriel.R` |
+| G | `analysis/code/G5_effect_average_benefit_freq_bL_and_bS.R` | R | DD on average benefits |
+| H | `analysis/code/H3_policy_elasticity.R` | R | IPW-DD elasticity (**full-data only — no sample branch**) |
+| I | `analysis/code/I4_wmvpf_no_pure_reforms_freq.R` | R | WMVPF estimation (+ `I6` pure L/S decomposition) |
 
-B1-B3 and C3 are Stata `.do` files (upstream of their R canonical siblings).
+B1-B3 and C3 are Stata `.do` files (upstream of their R canonical siblings), in `build/code/`.
+
+**Sample parity set** (runs via `analysis/analysis_all.R`): E4 → gabriel → pure → G5 → I4 → I6. A4-D4 and H3 are
+full-data only. Stages depend on pre-supplied tables `output/{F/F5,G/G4,H/H2}_table_results*.csv` (non-canonical/legacy
+producers — see `quality_reports/restructure_findings.md`).
 
 ## Key Relationships (exact numbers vary by data/specification)
 
@@ -102,8 +111,12 @@ number differences unless they indicate substantive errors.
 ## Commands
 
 ```bash
-Rscript trans_retirement/code/<script>.R          # Run R script
-stata-mp -b do trans_retirement/code/<script>.do  # Run Stata script
+Rscript analysis/analysis_all.R                   # Sample pipeline end-to-end (panel -> figures, tables, WMVPF)
+Rscript presentation/build_deck.R                 # Collect figures + compile the English deck
+Rscript build/build_all.R                         # Full-data build (server only; DATA_MODE=full)
+Rscript analysis/code/<script>.R                  # A single analysis stage (build/code/ for A-D)
+# Overrides: PENSION_DATA_MODE={full,sample}, PENSION_SAMPLE_ROOT=<path>, PENSION_FULL_ROOT=<path>
+stata-mp -b do build/code/<script>.do             # Run a Stata stage (.do)
 python scripts/quality_score.py <file>            # Quality score
 ```
 

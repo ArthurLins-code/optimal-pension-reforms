@@ -1,0 +1,223 @@
+file,line,literal,area
+A4_balance_check.R,10,F:/docs/R-library,BUILD
+A4_balance_check.R,15,U:/Documents/Paper/directory_2025,BUILD
+A4_balance_check.R,16,setwd(paste(dir)),BUILD
+A4_balance_check.R,24,working/A1_suibe_semi.csv.gz,BUILD
+A4_balance_check.R,26,working/A2_suibe_unid.csv.gz,BUILD
+A4_balance_check.R,28,working/A3_merged_suibe.csv.gz,BUILD
+A4_balance_check.R,278,output/A/A4_balance_check.csv,BUILD
+A4_balance_check.R,280,output/A/A4_balance_check.tex,BUILD
+B4_create_clean_candidates_cross.R,12,F:/docs/R-library,BUILD
+B4_create_clean_candidates_cross.R,17,U:/Documents/Paper/directory_2025,BUILD
+B4_create_clean_candidates_cross.R,18,setwd(paste(dir)),BUILD
+B4_create_clean_candidates_cross.R,26,working/A3_merged_suibe.csv.gz,BUILD
+B4_create_clean_candidates_cross.R,28,working/B2_full_candidates_cross.dta,BUILD
+B4_create_clean_candidates_cross.R,36,extra/inpc/tabela_inpc.csv,BUILD
+B4_create_clean_candidates_cross.R,41,extra/conversao_cnae_cbo/conversao_cnae.csv,BUILD
+B4_create_clean_candidates_cross.R,44,extra/conversao_cnae_cbo/conversao_cbo.csv,BUILD
+B4_create_clean_candidates_cross.R,47,extra/microrregioes.dta,BUILD
+B4_create_clean_candidates_cross.R,87,"working/B3_full_candidates_panel/B3_<y>.csv (paste0, y=1995:2001)",BUILD
+B4_create_clean_candidates_cross.R,121,"working/B3_full_candidates_panel/B3_<y>.csv (paste0, y=2002)",BUILD
+B4_create_clean_candidates_cross.R,159,"working/B3_full_candidates_panel/B3_<y>.csv (paste0, y=2003:09,2011:20)",BUILD
+B4_create_clean_candidates_cross.R,198,"working/B3_full_candidates_panel/B3_<y>.csv (paste0, y=2010)",BUILD
+B4_create_clean_candidates_cross.R,641,"working/B4_clean_candidates_cross/B4_<y>.csv.gz (paste0, y=2010:2019)",BUILD
+C6_estimate_continuous_contrib.R,12,F:/docs/R-library,BUILD
+C6_estimate_continuous_contrib.R,17,U:/Documents/Paper/directory_2025,BUILD
+C6_estimate_continuous_contrib.R,18,setwd(paste(dir)),BUILD
+C6_estimate_continuous_contrib.R,26,working/C5_restricted_sample.csv.gz,BUILD
+C6_estimate_continuous_contrib.R,29,extra/Expectativa_Vida_IBGE.xlsx,BUILD
+C6_estimate_continuous_contrib.R,433,working/C6_estimated_contrib_time.csv.gz,BUILD
+D4_create_panel.R,11,F:/docs/R-library,BUILD
+D4_create_panel.R,16,U:/Documents/Paper/directory_2025,BUILD
+D4_create_panel.R,17,setwd(paste(dir)),BUILD
+D4_create_panel.R,34,working/D3_cross_section.csv.gz,BUILD
+D4_create_panel.R,41,extra/inpc/tabela_inpc.csv,BUILD
+D4_create_panel.R,46,extra/conversao_cnae_cbo/conversao_cnae.csv,BUILD
+D4_create_panel.R,49,extra/conversao_cnae_cbo/conversao_cbo.csv,BUILD
+D4_create_panel.R,52,extra/microrregioes.dta,BUILD
+D4_create_panel.R,87,"working/C3_filtered_rais/C3_<y>.csv (paste0, y=2002:2020)",BUILD
+D4_create_panel.R,411,working/D4_panel_reform.csv.gz,BUILD
+D4_create_panel.R,413,working/D4_panel_claim.csv.gz,BUILD
+D1_create_cross_section.R,11,F:/docs/R-library,BUILD
+D1_create_cross_section.R,16,U:/Documents/Paper/directory_2025,BUILD
+D1_create_cross_section.R,17,setwd(paste(dir)),BUILD
+D1_create_cross_section.R,25,working/C5_restricted_sample.csv.gz,BUILD
+D1_create_cross_section.R,27,working/C6_estimated_contrib_time.csv.gz,BUILD
+D1_create_cross_section.R,29,extra/Expectativa_Vida_IBGE.xlsx,BUILD
+D1_create_cross_section.R,177,working/D1_cross_section.csv.gz,BUILD
+D3_create_cross_section.R,11,F:/docs/R-library,BUILD
+D3_create_cross_section.R,16,U:/Documents/Paper/directory_2025,BUILD
+D3_create_cross_section.R,17,setwd(paste(dir)),BUILD
+D3_create_cross_section.R,34,working/C5_restricted_sample.csv.gz,BUILD
+D3_create_cross_section.R,36,working/C6_estimated_contrib_time.csv.gz,BUILD
+D3_create_cross_section.R,38,extra/Expectativa_Vida_IBGE.xlsx,BUILD
+D3_create_cross_section.R,191,working/D3_cross_section.csv.gz,BUILD
+aux_codes_RAIS/Sample_RAIS_arthur.do,12,U:\Desktop\Dissertação\ID_worker,BUILD
+aux_codes_RAIS/join_rais_few_vars.R,1,F:/docs/R-library,BUILD
+aux_codes_RAIS/join_rais_few_vars.R,9,F:/RAIS/admin/id_data/contract_level/,BUILD
+E4_plots_claiming_distributions.R,24,F:/Users/tucalins/Documents/transf_11_11/directory_2025,ANALYSIS
+E4_plots_claiming_distributions.R,26,F:/docs/R-library,ANALYSIS
+E4_plots_claiming_distributions.R,27,U:/Documents/transf_11_11/directory_2025,ANALYSIS
+E4_plots_claiming_distributions.R,30,F:/docs/R-library,ANALYSIS
+E4_plots_claiming_distributions.R,32,C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement,ANALYSIS
+E4_plots_claiming_distributions.R,37,setwd(dir),ANALYSIS
+E4_plots_claiming_distributions.R,50,working/D3_cross_section.csv.gz,ANALYSIS
+E4_plots_claiming_distributions.R,52,working/D4_panel_reform.csv.gz,ANALYSIS
+E4_plots_claiming_distributions.R,54,data/dt_sampled_anon.csv,ANALYSIS
+E4_plots_claiming_distributions.R,56,data/panel_sampled_anon.csv,ANALYSIS
+E4_plots_claiming_distributions.R,127,tmp/teste_plot.pdf,ANALYSIS
+E4_plots_claiming_distributions.R,577,output/E/E4_claiming_haz_quarters.pdf,ANALYSIS
+E4_plots_claiming_distributions.R,580,output/E/E4_claiming_haz_quarters_group.pdf,ANALYSIS
+E4_plots_claiming_distributions.R,583,output/E/E4_claiming_haz_dist.pdf,ANALYSIS
+E4_plots_claiming_distributions.R,589,output/E/E4_claiming_density.pdf,ANALYSIS
+E4_plots_claiming_distributions.R,592,output/E/E4_claiming_density_women.pdf,ANALYSIS
+E4_plots_claiming_distributions.R,595,output/E/E4_claiming_density_men.pdf,ANALYSIS
+E4_plots_claiming_distributions.R,598,output/E/E4_pension_schedule_women.pdf,ANALYSIS
+E4_plots_claiming_distributions.R,601,output/E/E4_pension_schedule_men.pdf,ANALYSIS
+new_counterfactual_claiming3_gabriel.R,18,U:/Documents/Paper/directory_2025,ANALYSIS
+new_counterfactual_claiming3_gabriel.R,20,F:/docs/R-library,ANALYSIS
+new_counterfactual_claiming3_gabriel.R,22,F:/Users/tucalins/Documents/transf_11_11/directory_2025,ANALYSIS
+new_counterfactual_claiming3_gabriel.R,24,F:/docs/R-library,ANALYSIS
+new_counterfactual_claiming3_gabriel.R,26,C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement,ANALYSIS
+new_counterfactual_claiming3_gabriel.R,31,setwd(dir),ANALYSIS
+new_counterfactual_claiming3_gabriel.R,42,tmp,ANALYSIS
+new_counterfactual_claiming3_gabriel.R,46,working/D3_cross_section.csv.gz,ANALYSIS
+new_counterfactual_claiming3_gabriel.R,48,working/D4_panel_reform.csv.gz,ANALYSIS
+new_counterfactual_claiming3_gabriel.R,51,data/dt_sampled_anon.csv,ANALYSIS
+new_counterfactual_claiming3_gabriel.R,57,data/panel_sampled_anon.csv,ANALYSIS
+new_counterfactual_claiming3_gabriel.R,83,output/F/F5_table_results.csv,ANALYSIS
+new_counterfactual_claiming3_gabriel.R,189,output/F/F5_table_results.csv,ANALYSIS
+new_counterfactual_claiming3_gabriel.R,304,output/F/new_counterfactual_claim_counts<SUFFIX>.csv,ANALYSIS
+new_counterfactual_claiming3_gabriel.R,306,tmp/claims_actual_counterfactual_t_p<SUFFIX>.csv,ANALYSIS
+new_counterfactual_claiming3_gabriel.R,307,output/new_counter_claiming/actual_reform_gabriel/claims_actual_counterfactual_t_p<SUFFIX>.csv,ANALYSIS
+new_counterfactual_claiming3_gabriel.R,445,tmp/claims_distribution_actual_count_agg.pdf,ANALYSIS
+new_counterfactual_claiming3_gabriel.R,449,output/new_counter_claiming/actual_reform_gabriel/claims_distribution_actual_count_<i>.pdf,ANALYSIS
+new_counterfactual_claiming3_gabriel.R,477,working/D1_cross_section.csv.gz,ANALYSIS
+new_counterfactual_claiming3_gabriel.R,479,working/D2_panel.csv.gz,ANALYSIS
+new_counterfactual_claiming3_gabriel.R,488,data/dt_sampled_anon.csv,ANALYSIS
+new_counterfactual_claiming3_gabriel.R,491,data/panel_sampled_anon.csv,ANALYSIS
+new_counterfactual_claiming3_gabriel.R,642,output/new_counter_claiming/actual_reform_gabriel/claiming_hazard_eventstudy_<i><SUFFIX>.pdf,ANALYSIS
+new_counterfactual_claiming3_pure.R,18,F:/Users/tucalins/Documents/transf_11_11/directory_2025,ANALYSIS
+new_counterfactual_claiming3_pure.R,20,F:/docs/R-library,ANALYSIS
+new_counterfactual_claiming3_pure.R,22,U:/Documents/Paper/directory_2025,ANALYSIS
+new_counterfactual_claiming3_pure.R,24,F:/docs/R-library,ANALYSIS
+new_counterfactual_claiming3_pure.R,26,C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement,ANALYSIS
+new_counterfactual_claiming3_pure.R,31,setwd(dir),ANALYSIS
+new_counterfactual_claiming3_pure.R,45,working/D3_cross_section.csv.gz,ANALYSIS
+new_counterfactual_claiming3_pure.R,48,working/D4_panel_reform.csv.gz,ANALYSIS
+new_counterfactual_claiming3_pure.R,67,output/F/F5_table_results.csv,ANALYSIS
+new_counterfactual_claiming3_pure.R,136,output/new_counter_claiming/actual_reform_gabriel/claims_actual_counterfactual_t_p<SUFFIX>.csv,ANALYSIS
+new_counterfactual_claiming3_pure.R,138,tmp/claims_actual_counterfactual_t_p<SUFFIX>.csv,ANALYSIS
+new_counterfactual_claiming3_pure.R,356,output/F/new_counterfactual_claim_counts_with_pure_schedules_3<SUFFIX>.csv,ANALYSIS
+new_counterfactual_claiming3_pure.R,359,output/new_counter_claiming/new_counterfactual_claiming3_pure_level_reform_claiming_frequency_quarterly_2014_Q4.pdf,ANALYSIS
+new_counterfactual_claiming3_pure.R,377,output/new_counter_claiming/new_counterfactual_claiming3_pure_slope_reform_claiming_frequency_quarterly_2014_Q4.pdf,ANALYSIS
+G5_effect_average_benefit_freq_bL_and_bS.R,16,F:/Users/tucalins/Documents/transf_11_11/directory_2025,ANALYSIS
+G5_effect_average_benefit_freq_bL_and_bS.R,18,F:/docs/R-library,ANALYSIS
+G5_effect_average_benefit_freq_bL_and_bS.R,20,C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement,ANALYSIS
+G5_effect_average_benefit_freq_bL_and_bS.R,25,setwd(dir),ANALYSIS
+G5_effect_average_benefit_freq_bL_and_bS.R,41,working/D1_cross_section.csv.gz,ANALYSIS
+G5_effect_average_benefit_freq_bL_and_bS.R,45,extra/Expectativa_Vida_IBGE.xlsx,ANALYSIS
+G5_effect_average_benefit_freq_bL_and_bS.R,82,data/dt_sampled_anon.csv,ANALYSIS
+G5_effect_average_benefit_freq_bL_and_bS.R,610,output/F/new_counterfactual_claim_counts_with_pure_schedules_3<SUFFIX>.csv,ANALYSIS
+G5_effect_average_benefit_freq_bL_and_bS.R,974,output/G/G5_table_results_selection<SUFFIX>.csv,ANALYSIS
+G5_effect_average_benefit_freq_bL_and_bS.R,979,output/G/G5_table_results_contrafactual_reforms_and_benefits_freq<SUFFIX>.csv,ANALYSIS
+G5_effect_average_benefit_freq_bL_and_bS.R,982,output/G/G4_eventstudy_benefits_new<SUFFIX>.pdf,ANALYSIS
+G5_effect_average_benefit_freq_bL_and_bS.R,985,output/G/G4_eventstudy_benefits_old<SUFFIX>.pdf,ANALYSIS
+G5_effect_average_benefit_freq_bL_and_bS.R,988,output/G/G4_eventstudy_benegits_new_1.pdf,ANALYSIS
+G5_effect_average_benefit_freq_bL_and_bS.R,999,output/G/G4_eventstudy_benegits_old_1.pdf,ANALYSIS
+G5_effect_average_benefit_freq_bL_and_bS.R,1011,output/G/G5_pension_schedule_bL_women<SUFFIX>.pdf,ANALYSIS
+G5_effect_average_benefit_freq_bL_and_bS.R,1013,output/G/G5_pension_schedule_bL_men<SUFFIX>.pdf,ANALYSIS
+G5_effect_average_benefit_freq_bL_and_bS.R,1015,output/G/G5_pension_schedule_bS_women<SUFFIX>.pdf,ANALYSIS
+G5_effect_average_benefit_freq_bL_and_bS.R,1017,output/G/G5_pension_schedule_bS_men<SUFFIX>.pdf,ANALYSIS
+H3_policy_elasticity.R,14,F:/docs/R-library,ANALYSIS
+H3_policy_elasticity.R,19,U:/Documents/Paper/directory_2025,ANALYSIS
+H3_policy_elasticity.R,20,setwd(paste(dir)),ANALYSIS
+H3_policy_elasticity.R,28,working/D3_cross_section.csv.gz,ANALYSIS
+H3_policy_elasticity.R,30,working/D4_panel_claim.csv.gz,ANALYSIS
+H3_policy_elasticity.R,301,output/H/H3_trends_empl_claim.pdf,ANALYSIS
+H3_policy_elasticity.R,302,output/H/H3_trends_tax_claim.pdf,ANALYSIS
+H3_policy_elasticity.R,303,output/H/H3_trends_tax_claim_ipw.pdf,ANALYSIS
+H3_policy_elasticity.R,304,output/H/H3_trends_empl_reform.pdf,ANALYSIS
+H3_policy_elasticity.R,305,output/H/H3_trends_tax_reform.pdf,ANALYSIS
+H3_policy_elasticity.R,306,output/H/H3_trends_tax_reform_ipw.pdf,ANALYSIS
+H3_policy_elasticity.R,358,output/H/H3_1_empl_noipw_noyear.pdf,ANALYSIS
+H3_policy_elasticity.R,419,output/H/H3_1_tax_ipw_year.pdf,ANALYSIS
+H3_policy_elasticity.R,444,output/H/H3_1_tax_ipw_year_full.pdf,ANALYSIS
+H3_policy_elasticity.R,452,output/H/H3_1_empl_ipw_year_full.pdf,ANALYSIS
+I4_wmvpf_no_pure_reforms_freq.R,18,F:/Users/tucalins/Documents/transf_11_11/directory_2025,ANALYSIS
+I4_wmvpf_no_pure_reforms_freq.R,20,F:/docs/R-library,ANALYSIS
+I4_wmvpf_no_pure_reforms_freq.R,21,C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement,ANALYSIS
+I4_wmvpf_no_pure_reforms_freq.R,27,setwd(dir),ANALYSIS
+I4_wmvpf_no_pure_reforms_freq.R,40,working/D3_cross_section.csv.gz,ANALYSIS
+I4_wmvpf_no_pure_reforms_freq.R,47,extra/Expectativa_Vida_IBGE.xlsx,ANALYSIS
+I4_wmvpf_no_pure_reforms_freq.R,71,working/D2_panel.csv.gz,ANALYSIS
+I4_wmvpf_no_pure_reforms_freq.R,108,data/dt_sampled_anon.csv,ANALYSIS
+I4_wmvpf_no_pure_reforms_freq.R,113,data/panel_sampled_anon.csv,ANALYSIS
+I4_wmvpf_no_pure_reforms_freq.R,130,output/F/new_counterfactual_claim_counts<SUFFIX>.csv,ANALYSIS
+I4_wmvpf_no_pure_reforms_freq.R,134,output/G/G4_table_results.csv,ANALYSIS
+I4_wmvpf_no_pure_reforms_freq.R,136,output/H/H2_table_results.csv,ANALYSIS
+I4_wmvpf_no_pure_reforms_freq.R,281,output/I/I4_plot_results<SUFFIX>.pdf,ANALYSIS
+I4_wmvpf_no_pure_reforms_freq.R,284,output/I/I4_table_wmvpf<SUFFIX>.csv,ANALYSIS
+I6_wmvpf_with_pure_reforms_freq.R,68,"file.path(getwd(), ""trans_retirement"")",ANALYSIS
+I6_wmvpf_with_pure_reforms_freq.R,70,F:/Users/tucalins/Documents/transf_11_11/directory_2025,ANALYSIS
+I6_wmvpf_with_pure_reforms_freq.R,73,F:/docs/R-library,ANALYSIS
+I6_wmvpf_with_pure_reforms_freq.R,74,C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement,ANALYSIS
+I6_wmvpf_with_pure_reforms_freq.R,83,setwd(dir),ANALYSIS
+I6_wmvpf_with_pure_reforms_freq.R,92,data/dt_sampled_anon.csv,ANALYSIS
+I6_wmvpf_with_pure_reforms_freq.R,94,data/panel_sampled_anon.csv,ANALYSIS
+I6_wmvpf_with_pure_reforms_freq.R,99,working/D3_cross_section.csv.gz,ANALYSIS
+I6_wmvpf_with_pure_reforms_freq.R,105,extra/Expectativa_Vida_IBGE.xlsx,ANALYSIS
+I6_wmvpf_with_pure_reforms_freq.R,130,working/D2_panel.csv.gz,ANALYSIS
+I6_wmvpf_with_pure_reforms_freq.R,209,output/F/new_counterfactual_claim_counts<SUFFIX>.csv,ANALYSIS
+I6_wmvpf_with_pure_reforms_freq.R,213,output/G/G4_table_results<SUFFIX>.csv,ANALYSIS
+I6_wmvpf_with_pure_reforms_freq.R,216,output/H/H2_table_results<SUFFIX>.csv,ANALYSIS
+I6_wmvpf_with_pure_reforms_freq.R,418,output/G/G5_table_results_contrafactual_reforms_and_benefits_freq<SUFFIX>.csv,ANALYSIS
+I6_wmvpf_with_pure_reforms_freq.R,494,output/F/new_counterfactual_claim_counts_with_pure_schedules_3<SUFFIX>.csv,ANALYSIS
+I6_wmvpf_with_pure_reforms_freq.R,935,setwd(REPO_TRANS),ANALYSIS
+I6_wmvpf_with_pure_reforms_freq.R,941,output/I/I6_wmvpf_actual<SUFFIX>.csv,ANALYSIS
+I6_wmvpf_with_pure_reforms_freq.R,945,output/I/I6_table_wmvpf<SUFFIX>.csv,ANALYSIS
+I6_wmvpf_with_pure_reforms_freq.R,950,output/I/I6_wmvpf_pure_L<SUFFIX>.csv,ANALYSIS
+I6_wmvpf_with_pure_reforms_freq.R,955,output/I/I6_wmvpf_pure_S<SUFFIX>.csv,ANALYSIS
+I6_wmvpf_with_pure_reforms_freq.R,960,output/I/I6_summary<SUFFIX>.csv,ANALYSIS
+I6_wmvpf_with_pure_reforms_freq.R,965,output/I/I6_plot_actual_reform<SUFFIX>.pdf,ANALYSIS
+I7_diagnostic_juan_about_I6.R,37,F:/Users/tucalins/Documents/transf_11_11/directory_2025,ANALYSIS
+I7_diagnostic_juan_about_I6.R,39,F:/docs/R-library,ANALYSIS
+I7_diagnostic_juan_about_I6.R,41,C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement,ANALYSIS
+I7_diagnostic_juan_about_I6.R,49,setwd(dir),ANALYSIS
+I7_diagnostic_juan_about_I6.R,59,data/dt_sampled_anon.csv,ANALYSIS
+I7_diagnostic_juan_about_I6.R,63,working/D3_cross_section.csv.gz,ANALYSIS
+I7_diagnostic_juan_about_I6.R,166,output/G/G5_table_results_contrafactual_reforms_and_benefits_freq<SUFFIX>.csv,ANALYSIS
+I7_diagnostic_juan_about_I6.R,320,output/F/new_counterfactual_claim_counts<SUFFIX>.csv,ANALYSIS
+I7_diagnostic_juan_about_I6.R,322,output/G/G4_table_results<SUFFIX>.csv,ANALYSIS
+I7_diagnostic_juan_about_I6.R,340,output/I/I7_diagnostic_cntrf_by_points_norm<SUFFIX>.csv,ANALYSIS
+I7_diagnostic_juan_about_I6.R,348,output/I/I7_diagnostic_by_points_norm<SUFFIX>.csv,ANALYSIS
+I7_diagnostic_juan_about_I6.R,349,output/I/I7_diagnostic_g5_cells<SUFFIX>.csv,ANALYSIS
+figures_central_folder/collector.py,33,HERE = Path(__file__).resolve().parent,PRESENTATION
+figures_central_folder/collector.py,34,ROOT = HERE.parent,PRESENTATION
+figures_central_folder/collector.py,35,"FROM_CODE = HERE / ""from_code""",PRESENTATION
+figures_central_folder/collector.py,36,"STATIC = HERE / ""static""",PRESENTATION
+figures_central_folder/collector.py,37,"DIFFS = HERE / ""_diffs""",PRESENTATION
+figures_central_folder/collector.py,38,"MANIFEST = HERE / ""manifest.csv""",PRESENTATION
+figures_central_folder/collector.py,39,"LATEX_FIGURES = ROOT / ""latex"" / ""figures""",PRESENTATION
+figures_central_folder/collector.py,82,import fitz  # PyMuPDF (lazy),PRESENTATION
+figures_central_folder/collector.py,187,"shutil.copy2(src, FROM_CODE / deck)",PRESENTATION
+figures_central_folder/collector.py,207,import fitz  # noqa (lazy),PRESENTATION
+figures_central_folder/update_deck.py,28,ROOT = Path(__file__).resolve().parent.parent,PRESENTATION
+figures_central_folder/update_deck.py,29,"CODE = ROOT / ""trans_retirement"" / ""code""",PRESENTATION
+figures_central_folder/update_deck.py,30,"DECK_DIR = ROOT / ""latex"" / ""presentation""",PRESENTATION
+figures_central_folder/update_deck.py,44,C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement,PRESENTATION
+figures_central_folder/update_deck.py,83,"run([""Rscript"", str(script)], cwd=ROOT)",PRESENTATION
+figures_central_folder/update_deck.py,103,"run([""latexmk"", ""-g"", ""-pdf"", ""-interaction=nonstopmode"", ""_main.tex""], cwd=DECK_DIR)",PRESENTATION
+figures_central_folder/update_deck.py,105,log = DECK_DIR / "_main.log",PRESENTATION
+figures_central_folder/verify_deck.py,13,ROOT = Path(__file__).resolve().parent.parent,PRESENTATION
+figures_central_folder/verify_deck.py,14,"DECK = ROOT / ""latex"" / ""presentation"" / ""_main.tex""",PRESENTATION
+figures_central_folder/verify_deck.py,15,"FROM_CODE = ROOT / ""figures_central_folder"" / ""from_code""",PRESENTATION
+figures_central_folder/verify_deck.py,16,"STATIC = ROOT / ""figures_central_folder"" / ""static""",PRESENTATION
+figures_central_folder/deck_compare.py,19,import fitz  # PyMuPDF (hard import at module top),PRESENTATION
+figures_central_folder/deck_compare.py,56,"pg.insert_text label ""OLD (latex/figures)""",PRESENTATION
+figures_central_folder/deck_compare.py,57,"pg.insert_text label ""NEW (figures_central_folder)""",PRESENTATION
+figures_central_folder/deck_compare.py,67,"old_pdf, new_pdf, outdir = Path(sys.argv[1]), Path(sys.argv[2]), Path(sys.argv[3])",PRESENTATION
+latex/presentation/_main.tex,1,\input{_preamble.tex},PRESENTATION
+latex/presentation/_main.tex,3,\graphicspath{{../../figures_central_folder/from_code/}{../../figures_central_folder/static/}},PRESENTATION
+latex/apresentacao/_main.tex,1,\input{_preamble.tex},PRESENTATION
+latex/apresentacao/_main.tex,3,\graphicspath{{../figures/}},PRESENTATION
