@@ -7,13 +7,15 @@
 pkgs <- c('scales','zoo','binsreg','ggpubr','readstata13','purrr','readxl','did',
           'stargazer','fixest','MatchIt','tidyr','stringr','data.table','dplyr',
           'lubridate','stringi','foreign','haven','ggplot2','knitr','grid','broom')
-.libPaths('F:/docs/R-library')
 for (pkg in pkgs) library(pkg, character.only = TRUE)
 
-# Directory
-
-dir <- 'U:/Documents/Paper/directory_2025'
-setwd(paste(dir))
+# --- restructure: config layer (full-data only) ---
+source(here::here("config", "paths.R"))
+source(here::here("config", "constants.R"))
+if (DATA_MODE != "full") stop("A4_balance_check.R is full-data only — no sample branch. Run on the server with DATA_MODE=full.")
+dir <- PATHS$full_build_root
+.libPaths(Sys.getenv("PENSION_R_LIBPATH", unset = "F:/docs/R-library"))
+SUFFIX <- if (DATA_MODE == "sample") "_sample" else ""
 
 set.seed(123)
 
@@ -21,11 +23,11 @@ set.seed(123)
 # DATA ---------------------------------------------------------
 # ******************************************************************************
 
-suibe_semi <- fread('working/A1_suibe_semi.csv.gz')
+suibe_semi <- fread(file.path(PATHS$build_working, 'A1_suibe_semi.csv.gz'))
 
-suibe_unid <- fread('working/A2_suibe_unid.csv.gz')
+suibe_unid <- fread(file.path(PATHS$build_working, 'A2_suibe_unid.csv.gz'))
 
-suibe <- fread('working/A3_merged_suibe.csv.gz')
+suibe <- fread(file.path(PATHS$build_working, 'A3_merged_suibe.csv.gz'))
 
 # ******************************************************************************
 # PREPARING DATA FOR MERGE -----------------------------------------------------
@@ -275,6 +277,8 @@ summstat_tex <- kable(summstat_table,
                       align = paste(rep('c',ncol(summstat_table)), collapse = ''), 
                       caption = 'Merging Suibe: Balance check')
 
-fwrite(summstat_table, file = 'output/A/A4_balance_check.csv')
+dir.create(file.path(PATHS$build_output, "A"), recursive = TRUE, showWarnings = FALSE)
 
-writeLines(summstat_tex, paste0(dir,'/output/A/A4_balance_check.tex'))
+fwrite(summstat_table, file = file.path(PATHS$build_output, "A", "A4_balance_check.csv"))
+
+writeLines(summstat_tex, file.path(PATHS$build_output, "A", "A4_balance_check.tex"))

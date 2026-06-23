@@ -1,5 +1,3 @@
-.libPaths("F:/docs/R-library")
-
 library(tidyverse)
 library(magrittr)
 library(haven)
@@ -7,16 +5,25 @@ library(purrr)
 library(stringr)
 library(arrow)
 
+# --- restructure: config layer (Stage 2 plumbing) ---------------------------
+source(here::here("config", "paths.R"))
+source(here::here("config", "constants.R"))
+if (DATA_MODE != "full")
+  stop("join_rais_few_vars.R is full-data only — no sample branch. Run on the server with DATA_MODE=full.")
+.libPaths(Sys.getenv("PENSION_R_LIBPATH", unset = "F:/docs/R-library"))
+dir <- PATHS$full_build_root
+# ----------------------------------------------------------------------------
+
 # setup
 years <- 2009:2011
-base_path <- "F:/RAIS/admin/id_data/contract_level/"
-temp_dir <- "temp_merge_results"
-dir.create(temp_dir, showWarnings = FALSE)
+base_path <- "F:/RAIS/admin/id_data/contract_level/"   # FLAG needs_paths_key: raw RAIS root, no PATHS key
+temp_dir <- file.path(dir, "temp_merge_results")
+dir.create(temp_dir, recursive = TRUE, showWarnings = FALSE)
 
 # all keys are already standardize
 # 11 digits, leading zeros, as.character()
 
-initial_identifiers <- open_dataset("get_outcomes/identificadores_transbrasil.parquet") %>% # replace "." with path to file
+initial_identifiers <- open_dataset(file.path(dir, "get_outcomes", "identificadores_transbrasil.parquet")) %>% # replace "." with path to file
   select(num_nis_pessoa_atual, num_cpf_pessoa) %>%
   collect()
 

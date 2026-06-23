@@ -13,20 +13,13 @@ pkgs <- c('scales','zoo','binsreg','ggpubr','readstata13','purrr','readxl','did'
           'lubridate','stringi','foreign','haven','ggplot2','grid','broom',
           'RColorBrewer')
 
-# --- Environment detection ---------------------------------------------------
-if (dir.exists("F:/Users/tucalins/Documents/transf_11_11/directory_2025")) {
-  dir <- "F:/Users/tucalins/Documents/transf_11_11/directory_2025"
-  DATA_MODE <- "full"
-  .libPaths('F:/docs/R-library')
-} else if (dir.exists("C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement")) {
-  dir <- "C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement"
-  DATA_MODE <- "sample"
-} else {
-  stop("No recognized data directory found. Set 'dir' manually.")
-}
-setwd(dir)
-message("I4: Data mode = ", DATA_MODE, " | dir = ", dir)
+# --- Config layer (paths + constants) ---------------------------------------  # restructure: config wiring
+source(here::here("config", "paths.R"))
+source(here::here("config", "constants.R"))
+dir <- PATHS$data_root
+if (DATA_MODE == "full") .libPaths(Sys.getenv("PENSION_R_LIBPATH", unset = "F:/docs/R-library"))
 SUFFIX <- if (DATA_MODE == "sample") "_sample" else ""
+message("I4: Data mode = ", DATA_MODE, " | dir = ", dir)
 
 for (pkg in pkgs) library(pkg, character.only = TRUE)
 
@@ -37,14 +30,14 @@ set.seed(123)
 # ******************************************************************************
 
 if (DATA_MODE == "full") {
-  dt_gab <- fread('working/D3_cross_section.csv.gz')
+  dt_gab <- fread(file.path(PATHS$build_working, 'D3_cross_section.csv.gz'))
   gc()
   dt_gab[, points_d := floor(points_claim)] %>%
-    .[, points_norm := ifelse(male == 0, points_d - 85, points_d - 95)]
+    .[, points_norm := ifelse(male == 0, points_d - P_BAR_WOMEN, points_d - P_BAR_MEN)]
   dt_gab[, dist_reform := 4*(claim_quarter - 2015.25)]
 
   # New variables: Life Expectancy merged into cross_section
-  expectativa <- read_excel(paste0(dir,'/extra/Expectativa_Vida_IBGE.xlsx')) %>%
+  expectativa <- read_excel(file.path(PATHS$extra, 'Expectativa_Vida_IBGE.xlsx')) %>%
     setDT() %>%
     setnames(c('Ano','Idade','Expectativa'), c('table_year', 'age_disc', 'expec_ibge'))
 
@@ -68,7 +61,7 @@ if (DATA_MODE == "full") {
   gc()
 
   # Panel
-  panel <- fread('working/D2_panel.csv.gz')
+  panel <- fread(file.path(PATHS$build_working, 'D2_panel.csv.gz'))
   gc()
   panel[, 'benefits' := NULL]
   panel <- left_join(panel, dt_gab[,.(indiv, benef_size,expec_ibge,fp_est,points_norm)], by = 'indiv')
@@ -100,7 +93,7 @@ if (DATA_MODE == "full") {
   panel[, benefits_new_pv:= fifelse(dist_claim>=0, 3*benefits_new_claim*ann_factor_q, 0)]
 
   panel[, points_d := floor(points_quarter)] %>%
-    .[, points_norm := ifelse(male == 0, points_d - 85, points_d - 95)]
+    .[, points_norm := ifelse(male == 0, points_d - P_BAR_WOMEN, points_d - P_BAR_MEN)]
   panel[, dist_reform := 4*(year_quarter - 2015.25)]
 
 } else {
@@ -127,13 +120,13 @@ n_claims <- dt_gab[d_claim_post_reform == 1 & claim_quarter <= 2018.25,.(num_cla
 # Other datasets
 
 #this is the part that changed, I'll substitute results_claiming, the old, density dataset, with the frequencies dataset
-cf_counts <- fread(paste0('output/F/new_counterfactual_claim_counts', SUFFIX, '.csv'))
+cf_counts <- fread(file.path(PATHS$output_F, paste0('new_counterfactual_claim_counts', SUFFIX, '.csv')))
 setnames(cf_counts, "t", "dist_reform")
 setnames(cf_counts, "p", "points_norm")
 
-results_selection <- fread('output/G/G4_table_results.csv')
+results_selection <- fread(file.path(PATHS$output_G, 'G4_table_results.csv'))
 
-results_taxes <- fread('output/H/H2_table_results.csv')
+results_taxes <- fread(file.path(PATHS$output_H, 'H2_table_results.csv'))
 
 # Benefit changes
 # change: dt_gab for panel
@@ -189,9 +182,9 @@ aux7 <- full_join(aux5, aux6, by = c('dist_reform','points_norm')) %>%
 
 dt_welfare <- full_join(aux7,
                         data.table(dist_reform = seq(0,12,1),
-                                   gamma = 4,
-                                   cons_inss = 1536.4,
-                                   cons_pop = 1473.1),
+                                   gamma = GAMMA_BASELINE,
+                                   cons_inss = CONS_INSS,
+                                   cons_pop = CONS_POP),
                         by = 'dist_reform')
 
 # WMVPF
@@ -278,7 +271,8 @@ sum(out$mech_cost)
 sum(out$fiscal_ext)
 
 
-ggsave(p1, filename = paste0('output/I/I4_plot_results', SUFFIX, '.pdf'), height = 2.8, width = 4.2)
+dir.create(PATHS$output_I, recursive = TRUE, showWarnings = FALSE)  # restructure: ensure output dir
+ggsave(p1, filename = file.path(PATHS$output_I, paste0('I4_plot_results', SUFFIX, '.pdf')), height = 2.8, width = 4.2)
 
 
-fwrite(dt_wmvpf, file = paste0('output/I/I4_table_wmvpf', SUFFIX, '.csv'))
+fwrite(dt_wmvpf, file = file.path(PATHS$output_I, paste0('I4_table_wmvpf', SUFFIX, '.csv')))

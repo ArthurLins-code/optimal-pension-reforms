@@ -11,13 +11,16 @@ pkgs <- c('scales','zoo','binsreg','ggpubr','readstata13','purrr','readxl','did'
           'stargazer','fixest','MatchIt','tidyr','stringr','data.table','dplyr',
           'lubridate','stringi','foreign','haven','ggplot2','knitr','grid','broom',
           'RColorBrewer','R.utils')
-.libPaths('F:/docs/R-library')
 for (pkg in pkgs) library(pkg, character.only = TRUE)
 
 # Directory
 
-dir <- 'U:/Documents/Paper/directory_2025'
-setwd(paste(dir))
+source(here::here("config", "paths.R"))      # restructure: config layer
+source(here::here("config", "constants.R"))  # restructure: config layer
+if (DATA_MODE != "full") stop("H3_policy_elasticity.R is full-data only — no sample branch. Run on the server with DATA_MODE=full.")
+dir <- PATHS$full_build_root                  # full-data BUILD root (working/D3, working/D4_panel_claim)
+if (DATA_MODE == "full") .libPaths(Sys.getenv("PENSION_R_LIBPATH", unset = "F:/docs/R-library"))
+SUFFIX <- if (DATA_MODE == "sample") "_sample" else ""
 
 set.seed(123)
 
@@ -25,9 +28,9 @@ set.seed(123)
 # DATA ---------------------------------------------------------
 # ******************************************************************************
 
-dt <- fread('working/D3_cross_section.csv.gz')
+dt <- fread(file.path(PATHS$build_working, "D3_cross_section.csv.gz"))
 
-panel <- fread('working/D4_panel_claim.csv.gz')
+panel <- fread(file.path(PATHS$build_working, "D4_panel_claim.csv.gz"))
 
 # ******************************************************************************
 # SAMPLE ---------------------------------------------------------
@@ -298,12 +301,13 @@ aux6 <- panel_did2[year != 2019 & !is.na(ipw)][, .(avg = weighted.mean(taxes_lab
 
 plot6 <- ggarrange(aux5, aux6, ncol = 2)
 
-ggsave(plot1, filename = 'output/H/H3_trends_empl_claim.pdf', height = 3, width = 6)
-ggsave(plot2, filename = 'output/H/H3_trends_tax_claim.pdf', height = 3, width = 6)
-ggsave(plot3, filename = 'output/H/H3_trends_tax_claim_ipw.pdf', height = 3, width = 6)
-ggsave(plot4, filename = 'output/H/H3_trends_empl_reform.pdf', height = 3, width = 6)
-ggsave(plot5, filename = 'output/H/H3_trends_tax_reform.pdf', height = 3, width = 6)
-ggsave(plot6, filename = 'output/H/H3_trends_tax_reform_ipw.pdf', height = 3, width = 6)
+dir.create(PATHS$output_H, recursive = TRUE, showWarnings = FALSE)  # restructure
+ggsave(plot1, filename = file.path(PATHS$output_H, "H3_trends_empl_claim.pdf"), height = 3, width = 6)
+ggsave(plot2, filename = file.path(PATHS$output_H, "H3_trends_tax_claim.pdf"), height = 3, width = 6)
+ggsave(plot3, filename = file.path(PATHS$output_H, "H3_trends_tax_claim_ipw.pdf"), height = 3, width = 6)
+ggsave(plot4, filename = file.path(PATHS$output_H, "H3_trends_empl_reform.pdf"), height = 3, width = 6)
+ggsave(plot5, filename = file.path(PATHS$output_H, "H3_trends_tax_reform.pdf"), height = 3, width = 6)
+ggsave(plot6, filename = file.path(PATHS$output_H, "H3_trends_tax_reform_ipw.pdf"), height = 3, width = 6)
 
 
 # ******************************************************************************
@@ -355,14 +359,14 @@ list_did[['1_empl_noipw_noyear']] <- feols(data = panel_did1[year != 2019 ],
                                            fml = d_empl ~ i(factor_var = dist_claim_quarters, var = treat, ref = -1) | indiv + dist_claim_quarters ,
                                            cluster = 'indiv')
 ggsave(fn_estudy1('1_empl_noipw_noyear', 'Employment - Small sample, no Year FE'),
-       filename = 'output/H/H3_1_empl_noipw_noyear.pdf', height = 3, width = 5)
+       filename = file.path(PATHS$output_H, "H3_1_empl_noipw_noyear.pdf"), height = 3, width = 5)
 
 # Empl, Large, Year FE no, IPW no
 list_did[['2_empl_noipw_noyear']] <- feols(data = panel_did2[year != 2019 ],
                                            fml = d_empl ~ i(factor_var = dist_claim_quarters, var = treat, ref = -1) | indiv + dist_claim_quarters ,
                                            cluster = 'indiv')
 ggsave(fn_estudy1('2_empl_noipw_noyear', 'Employment - Large sample, no Year FE'),
-       filename = 'output/H/H3_2_empl_noipw_noyear.pdf', height = 3, width = 5)
+       filename = file.path(PATHS$output_H, "H3_2_empl_noipw_noyear.pdf"), height = 3, width = 5)
 
 # Empl, Small, Year FE no, IPW yes
 list_did[['1_empl_ipw_noyear']] <- feols(data = panel_did1[year != 2019 ],
@@ -370,7 +374,7 @@ list_did[['1_empl_ipw_noyear']] <- feols(data = panel_did1[year != 2019 ],
                                          cluster = 'indiv',
                                          weights = ~ipw)
 ggsave(fn_estudy1('1_empl_ipw_noyear', 'Employment - Small sample (IPW), no Year FE'),
-       filename = 'output/H/H3_1_empl_ipw_noyear.pdf', height = 3, width = 5)
+       filename = file.path(PATHS$output_H, "H3_1_empl_ipw_noyear.pdf"), height = 3, width = 5)
 
 # Empl, Large, Year FE no, IPW yes
 list_did[['2_empl_ipw_noyear']] <- feols(data = panel_did2[year != 2019 ],
@@ -378,21 +382,21 @@ list_did[['2_empl_ipw_noyear']] <- feols(data = panel_did2[year != 2019 ],
                                          cluster = 'indiv',
                                          weights = ~ipw)
 ggsave(fn_estudy1('2_empl_ipw_noyear', 'Employment - Large sample (IPW), no Year FE'),
-       filename = 'output/H/H3_2_empl_ipw_noyear.pdf', height = 3, width = 5)
+       filename = file.path(PATHS$output_H, "H3_2_empl_ipw_noyear.pdf"), height = 3, width = 5)
 
 # Taxes, Small, Year FE no, IPW no
 list_did[['1_tax_noipw_noyear']] <- feols(data = panel_did1[year != 2019 ],
                                            fml = taxes_labor ~ i(factor_var = dist_claim_quarters, var = treat, ref = -1) | indiv + dist_claim_quarters ,
                                            cluster = 'indiv')
 ggsave(fn_estudy1('1_tax_noipw_noyear', 'Tax collection - Small sample, no Year FE'),
-       filename = 'output/H/H3_1_tax_noipw_noyear.pdf', height = 3, width = 5)
+       filename = file.path(PATHS$output_H, "H3_1_tax_noipw_noyear.pdf"), height = 3, width = 5)
 
 # Taxes, Large, Year FE no, IPW no
 list_did[['2_tax_noipw_noyear']] <- feols(data = panel_did2[year != 2019 ],
                                            fml = taxes_labor ~ i(factor_var = dist_claim_quarters, var = treat, ref = -1) | indiv + dist_claim_quarters ,
                                            cluster = 'indiv')
 ggsave(fn_estudy1('2_tax_noipw_noyear', 'Tax collection - Large sample, no Year FE'),
-       filename = 'output/H/H3_2_tax_noipw_noyear.pdf', height = 3, width = 5)
+       filename = file.path(PATHS$output_H, "H3_2_tax_noipw_noyear.pdf"), height = 3, width = 5)
 
 # Taxes, Small, Year FE no, IPW yes
 list_did[['1_tax_ipw_noyear']] <- feols(data = panel_did1[year != 2019 ],
@@ -400,7 +404,7 @@ list_did[['1_tax_ipw_noyear']] <- feols(data = panel_did1[year != 2019 ],
                                          cluster = 'indiv',
                                          weights = ~ipw)
 ggsave(fn_estudy1('1_tax_ipw_noyear', 'Tax collection - Small sample (IPW), no Year FE'),
-       filename = 'output/H/H3_1_tax_ipw_noyear.pdf', height = 3, width = 5)
+       filename = file.path(PATHS$output_H, "H3_1_tax_ipw_noyear.pdf"), height = 3, width = 5)
 
 # Taxes, Large, Year FE no, IPW yes
 list_did[['2_tax_ipw_noyear']] <- feols(data = panel_did2[year != 2019 ],
@@ -408,7 +412,7 @@ list_did[['2_tax_ipw_noyear']] <- feols(data = panel_did2[year != 2019 ],
                                          cluster = 'indiv',
                                          weights = ~ipw)
 ggsave(fn_estudy1('2_tax_ipw_noyear', 'Tax collection - Large sample (IPW), no Year FE'),
-       filename = 'output/H/H3_2_tax_ipw_noyear.pdf', height = 3, width = 5)
+       filename = file.path(PATHS$output_H, "H3_2_tax_ipw_noyear.pdf"), height = 3, width = 5)
 
 # Taxes, Small, Year FE yes, IPW yes
 list_did[['1_tax_ipw_year']] <- feols(data = panel_did1[year != 2019 & dist_claim_quarters >= -10 & dist_claim_quarters <= 10],
@@ -416,7 +420,7 @@ list_did[['1_tax_ipw_year']] <- feols(data = panel_did1[year != 2019 & dist_clai
                                         cluster = 'indiv',
                                         weights = ~ipw)
 ggsave(fn_estudy1('1_tax_ipw_year', 'Tax collection - Small sample (IPW), Year FE'),
-       filename = 'output/H/H3_1_tax_ipw_year.pdf', height = 3, width = 5)
+       filename = file.path(PATHS$output_H, "H3_1_tax_ipw_year.pdf"), height = 3, width = 5)
 
 # Taxes, Large, Year FE yes, IPW yes
 list_did[['2_tax_ipw_year']] <- feols(data = panel_did2[year != 2019 & dist_claim_quarters >= -10 & dist_claim_quarters <= 10],
@@ -424,7 +428,7 @@ list_did[['2_tax_ipw_year']] <- feols(data = panel_did2[year != 2019 & dist_clai
                                       cluster = 'indiv',
                                       weights = ~ipw)
 ggsave(fn_estudy1('2_tax_ipw_year', 'Tax collection - Large sample (IPW), Year FE'),
-       filename = 'output/H/H3_2_tax_ipw_year.pdf', height = 3, width = 5)
+       filename = file.path(PATHS$output_H, "H3_2_tax_ipw_year.pdf"), height = 3, width = 5)
 
 # Empl, Small, Year FE yes, IPW yes
 list_did[['1_empl_ipw_year']] <- feols(data = panel_did1[year != 2019 & dist_claim_quarters >= -10 & dist_claim_quarters <= 10],
@@ -432,7 +436,7 @@ list_did[['1_empl_ipw_year']] <- feols(data = panel_did1[year != 2019 & dist_cla
                                       cluster = 'indiv',
                                       weights = ~ipw)
 ggsave(fn_estudy1('1_empl_ipw_year', 'Employment - Small sample (IPW), Year FE'),
-       filename = 'output/H/H3_1_empl_ipw_year.pdf', height = 3, width = 5)
+       filename = file.path(PATHS$output_H, "H3_1_empl_ipw_year.pdf"), height = 3, width = 5)
 
 
 # Taxes, Small, Year FE yes, IPW yes - full
@@ -441,7 +445,7 @@ list_did[['1_tax_ipw_year_full']] <- feols(data = panel_did2[year != 2019],
                                       cluster = 'indiv',
                                       weights = ~ipw)
 ggsave(fn_estudy1('1_tax_ipw_year_full', 'Tax collection - Large sample (IPW), Year FE'),
-       filename = 'output/H/H3_1_tax_ipw_year_full.pdf', height = 3, width = 5)
+       filename = file.path(PATHS$output_H, "H3_1_tax_ipw_year_full.pdf"), height = 3, width = 5)
 
 # Empl, Small, Year FE yes, IPW yes - full
 list_did[['1_empl_ipw_year_full']] <- feols(data = panel_did1[year != 2019],
@@ -449,7 +453,7 @@ list_did[['1_empl_ipw_year_full']] <- feols(data = panel_did1[year != 2019],
                                        cluster = 'indiv',
                                        weights = ~ipw)
 ggsave(fn_estudy1('1_empl_ipw_year_full', 'Employment - Small sample (IPW), Year FE'),
-       filename = 'output/H/H3_1_empl_ipw_year_full.pdf', height = 3, width = 5)
+       filename = file.path(PATHS$output_H, "H3_1_empl_ipw_year_full.pdf"), height = 3, width = 5)
 
 gc()
 

@@ -9,13 +9,15 @@
 pkgs <- c('scales','zoo','binsreg','ggpubr','readstata13','purrr','readxl','did',
           'stargazer','fixest','MatchIt','tidyr','stringr','data.table','dplyr','bit64',
           'lubridate','stringi','foreign','haven','ggplot2','knitr','grid','broom')
-.libPaths('F:/docs/R-library')
 for (pkg in pkgs) library(pkg, character.only = TRUE)
 
-# Directory
-
-dir <- 'U:/Documents/Paper/directory_2025'
-setwd(paste(dir))
+# Directory  [restructure: config layer]
+source(here::here("config", "paths.R"))
+source(here::here("config", "constants.R"))
+if (DATA_MODE != "full") stop("B4_create_clean_candidates_cross.R is full-data only — no sample branch. Run on the server with DATA_MODE=full.")
+dir <- PATHS$full_build_root                  # full-data build root
+if (DATA_MODE == "full") .libPaths(Sys.getenv("PENSION_R_LIBPATH", unset = "F:/docs/R-library"))
+SUFFIX <- if (DATA_MODE == "sample") "_sample" else ""
 
 set.seed(123)
 
@@ -23,9 +25,9 @@ set.seed(123)
 # DATA ---------------------------------------------------------
 # ******************************************************************************
 
-suibe <- fread('working/A3_merged_suibe.csv.gz')
+suibe <- fread(file.path(PATHS$build_working, 'A3_merged_suibe.csv.gz'))
 
-candidates <- read_dta('working/B2_full_candidates_cross.dta') %>% 
+candidates <- read_dta(file.path(PATHS$build_working, 'B2_full_candidates_cross.dta')) %>%
   setDT() %>% 
   .[, lapply(.SD, as.vector)]
 candidates[, CPF_mode := as.integer64(CPF_mode)]
@@ -44,7 +46,7 @@ conv_cnae <- fread(paste0(dir,'/extra/conversao_cnae_cbo/conversao_cnae.csv'))
 conv_cbo <- fread(paste0(dir,'/extra/conversao_cnae_cbo/conversao_cbo.csv')) 
 
 # Municipality codes
-ibge_munic <- read_dta('extra/microrregioes.dta') %>% 
+ibge_munic <- read_dta(file.path(PATHS$full_build_root, 'extra', 'microrregioes.dta')) %>%
   setDT() %>% 
   .[, lapply(.SD, as.vector)] %>% 
   setnames(old = c('microrregiao','cod_municipio'), new = c('microregion_code','municipality_code'))
@@ -84,7 +86,7 @@ fn_open_rais_i <- function(y) {
   
   # Rais 1995-01
   
-  rais_y <- fread(paste0('working/B3_full_candidates_panel/B3_',y,'.csv'))
+  rais_y <- fread(file.path(PATHS$build_working, 'B3_full_candidates_panel', paste0('B3_',y,'.csv')))
   
   # (1)  Calculate remmedr in 2019 using INPC and treat 0s as NAs
   rais_y <- left_join(rais_y, inpc, by = 'ano')
@@ -118,7 +120,7 @@ fn_open_rais_ii <- function(y) {
   
   # Rais 2002
   
-  rais_y <- fread(paste0('working/B3_full_candidates_panel/B3_',y,'.csv'))
+  rais_y <- fread(file.path(PATHS$build_working, 'B3_full_candidates_panel', paste0('B3_',y,'.csv')))
   
   # (1)  Calculate remmedr in 2019 using INPC and treat 0s as NAs
   rais_y <- left_join(rais_y, inpc, by = 'ano')
@@ -156,7 +158,7 @@ fn_open_rais_iii <- function(y) {
   
   # Rais 2003-09, 2011-20
   
-  rais_y <- fread(paste0('working/B3_full_candidates_panel/B3_',y,'.csv'))
+  rais_y <- fread(file.path(PATHS$build_working, 'B3_full_candidates_panel', paste0('B3_',y,'.csv')))
   
   # (1)  Calculate remmedr in 2019 using INPC and treat 0s as NAs
   rais_y <- left_join(rais_y, inpc, by = 'ano')
@@ -195,7 +197,7 @@ fn_open_rais_iv <- function(y) {
   
   # Rais 2010
   
-  rais_y <- fread(paste0('working/B3_full_candidates_panel/B3_',y,'.csv'))
+  rais_y <- fread(file.path(PATHS$build_working, 'B3_full_candidates_panel', paste0('B3_',y,'.csv')))
   
   # (1)  Calculate remmedr in 2019 using INPC and treat 0s as NAs
   rais_y <- left_join(rais_y, inpc, by = 'ano')
@@ -638,7 +640,8 @@ cross <- full_join(candidates, cross1, by = 'CPF_mode') %>%
 # SAVING -----------------------------------------------------------------------
 # ******************************************************************************
 
-fwrite(cross, file = paste0('working/B4_clean_candidates_cross/B4_',y,'.csv.gz'))
+dir.create(file.path(PATHS$build_working, 'B4_clean_candidates_cross'), recursive = TRUE, showWarnings = FALSE)
+fwrite(cross, file = file.path(PATHS$build_working, 'B4_clean_candidates_cross', paste0('B4_',y,'.csv.gz')))
 
 rm(cross1, cross2, cross3, cross4, cross5, cross6, cross7, cross8,
    cross9, cross10, cross11, cross12, cross13, cross14, cross15, cross16, cross)

@@ -11,22 +11,15 @@ pkgs <- c('scales','zoo','binsreg','ggpubr','readstata13','purrr','readxl','did'
           'lubridate','stringi','foreign','haven','ggplot2','grid','broom',
           'RColorBrewer')
 
-# --- Environment detection ---------------------------------------------------
-if (dir.exists("F:/Users/tucalins/Documents/transf_11_11/directory_2025")) {
-  dir <- "F:/Users/tucalins/Documents/transf_11_11/directory_2025"
-  DATA_MODE <- "full"
-  .libPaths('F:/docs/R-library')
-} else if (dir.exists("C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement")) {
-  dir <- "C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement"
-  DATA_MODE <- "sample"
-} else {
-  stop("No recognized data directory found. Set 'dir' manually.")
-}
-setwd(dir)
-message("G5 running in ", DATA_MODE, " mode from: ", dir)
-SUFFIX <- if (DATA_MODE == "sample") "_sample" else ""
-
 for (pkg in pkgs) library(pkg, character.only = TRUE)
+
+# --- Config layer (restructure Stage 2) --------------------------------------
+source(here::here("config", "paths.R"))
+source(here::here("config", "constants.R"))
+dir <- PATHS$data_root
+if (DATA_MODE == "full") .libPaths(Sys.getenv("PENSION_R_LIBPATH", unset = "F:/docs/R-library"))
+SUFFIX <- if (DATA_MODE == "sample") "_sample" else ""
+message("G5 running in ", DATA_MODE, " mode from: ", dir)
 
 set.seed(123)
 
@@ -38,11 +31,11 @@ if (DATA_MODE == "full") {
   # [TODO:FUTURE] G5 uses D1 cross-section while most canonical files (I4, E4, H3)
   # use D3. Keeping D1 for now since this has been working, but should be updated to
   # D3 in a future revision and results re-verified.
-  dt <- fread('working/D1_cross_section.csv.gz') %>%
+  dt <- fread(file.path(PATHS$build_working, "D1_cross_section.csv.gz")) %>%
     .[!is.na(dist_claim_cutoff)]
   gc()
   # New variables: Life Expectancy merged into cross_section so we can calculate discounted estimated lifetime benefits
-  expectativa <- read_excel(paste0(dir,'/extra/Expectativa_Vida_IBGE.xlsx')) %>%
+  expectativa <- read_excel(file.path(PATHS$extra, "Expectativa_Vida_IBGE.xlsx")) %>%
     setDT() %>%
     setnames(c('Ano','Idade','Expectativa'), c('table_year', 'age_disc', 'expec_ibge'))
 
@@ -71,7 +64,7 @@ if (DATA_MODE == "full") {
 
   ### New variables: Normalized Points
   dt[, points_d := floor(points_claim)] %>%
-    .[, points_norm := ifelse(male == 0, points_d - 85, points_d - 95)]
+    .[, points_norm := ifelse(male == 0, points_d - P_BAR_WOMEN, points_d - P_BAR_MEN)]
 
   ### New variable: Claim quarter relative to reform
   dt[, dist_reform := 4*(claim_quarter - 2015.25)]
@@ -333,8 +326,8 @@ plots_old
 
 #First, we'll calculate the replacement Rate (using post-reform choices) for all normalized points
 
-dt[male==0,replacement_rate:=0.69+(0.021*(points_norm))]
-dt[male==1,replacement_rate:=0.82+(0.025*(points_norm))]
+dt[male==0,replacement_rate:=RR_INTERCEPT_WOMEN+(RR_SLOPE_WOMEN*(points_norm))]
+dt[male==1,replacement_rate:=RR_INTERCEPT_MEN+(RR_SLOPE_MEN*(points_norm))]
 
 # Now we'll use the counterfactual reforms' designs to use RR and define both bL(x'it) and bS(xit') =>
 # Which are both bL and bS (benefits under the counterfactual level and slope reforms) for the post-reform choices
@@ -348,8 +341,8 @@ dt[male==1,replacement_rate:=0.82+(0.025*(points_norm))]
 # coefficient captures beta * f(points_norm) where f = 1/RR_pre, which varies across groups.
 # The same assumption applies to benefits_bS below.
 # [ASSUMPTION: ratio-based bL/bS formula — verify derivation against canonical deck appendix]
-dt[male==1, benefits_bL:= fifelse(points_norm<0,pv_benefits_old,pv_benefits_old*(1+(1-0.82)/replacement_rate))]
-dt[male==0, benefits_bL:= fifelse(points_norm<0,pv_benefits_old,pv_benefits_old*(1+(1-0.69)/replacement_rate))]
+dt[male==1, benefits_bL:= fifelse(points_norm<0,pv_benefits_old,pv_benefits_old*(1+(1-RR_INTERCEPT_MEN)/replacement_rate))]
+dt[male==0, benefits_bL:= fifelse(points_norm<0,pv_benefits_old,pv_benefits_old*(1+(1-RR_INTERCEPT_WOMEN)/replacement_rate))]
 
 # Calculating bS
 # Pure Slope: RR_PS(p) = RR_pbar (constant, slope=0). Slide 25/57.
@@ -357,12 +350,12 @@ dt[male==0, benefits_bL:= fifelse(points_norm<0,pv_benefits_old,pv_benefits_old*
 # NOTE: previously had 0.082/0.069 (decimal error, off by factor of 10).
 dt[male==1, benefits_bS:= fifelse(points_norm<0,
                                   pv_benefits_old,
-                                  pv_benefits_old*(0.82/replacement_rate))]
-dt[male==0, benefits_bS:= fifelse(points_norm<0,pv_benefits_old,pv_benefits_old*(0.69/replacement_rate))]
+                                  pv_benefits_old*(RR_INTERCEPT_MEN/replacement_rate))]
+dt[male==0, benefits_bS:= fifelse(points_norm<0,pv_benefits_old,pv_benefits_old*(RR_INTERCEPT_WOMEN/replacement_rate))]
 
 
 # Step 1.1- Calcuting Delta_bL and Delta_bS
-dt[,RR_pbar:= fifelse(male==1,0.82,0.69)]
+dt[,RR_pbar:= fifelse(male==1,RR_INTERCEPT_MEN,RR_INTERCEPT_WOMEN)]
 #Calculando o delta_bL individual para cada um
 dt[points_norm>=0,delta_bL_i:=pv_benefits_new*(1-RR_pbar/replacement_rate)]
 delta_bL<- dt[dist_reform==13& points_norm>=0, mean(delta_bL_i,na.rm = TRUE)]
@@ -370,7 +363,7 @@ delta_bL
 #calculando o delta_bS geral usando o número de mulheres e homens como pesos
 shares_sex<- dt[dist_reform==13& points_norm>=0,.(s_m=mean(male==1,na.rm=TRUE),
                                                   s_w=mean(male==0,na.rm=TRUE))]
-delta_bS<- with(shares_sex,s_w*0.021+s_m*0.025)
+delta_bS<- with(shares_sex,s_w*RR_SLOPE_WOMEN+s_m*RR_SLOPE_MEN)
 delta_bS
 #Step 1.2- Calculating the Mean Benefit for the treated in t=13
 mean_benefit_in_T<- dt[dist_reform==13& points_norm>=0, mean(pv_benefits_new,na.rm = TRUE)]
@@ -607,7 +600,7 @@ dt_wide<- dcast(data_counterfactual_reforms_step_2,
 
 
 #then, we'll match with the data that has the info for frequencies N^L (named claims_L in the data) and N^S(named claims_S in the data), calculated in the previous file
-dt_all_pure_reforms<- fread(paste0("output/F/new_counterfactual_claim_counts_with_pure_schedules_3", SUFFIX, ".csv"))
+dt_all_pure_reforms<- fread(file.path(PATHS$output_F, paste0("new_counterfactual_claim_counts_with_pure_schedules_3", SUFFIX, ".csv")))
 #renaming the variables p and t so they are named points_norm and dist_reform to ease the merge below
 setnames(dt_all_pure_reforms,c("p","t"),c("points_norm","dist_reform"))
 #merging both databases
@@ -763,14 +756,14 @@ dt_flows<- merge(dt_master,MECH_by_qtr, by=c("dist_reform"),all.x=TRUE)
 # Step 6.1- Calculate the variables above
 #get the parameters necessary (gamma,cpop and cb)
 parameters<-data.table(dist_reform = seq(0,12,1),
-                       gamma = 4,
-                       cons_inss = 1536.4,
-                       cons_pop = 1473.1)
+                       gamma = GAMMA_BASELINE,
+                       cons_inss = CONS_INSS,
+                       cons_pop = CONS_POP)
 dt_welfare_pure_reforms <- full_join(dt_flows,
                                      data.table(dist_reform = seq(0,12,1),
-                                                gamma = 4,
-                                                cons_inss = 1536.4,
-                                                cons_pop = 1473.1),
+                                                gamma = GAMMA_BASELINE,
+                                                cons_inss = CONS_INSS,
+                                                cons_pop = CONS_POP),
                                      by = 'dist_reform')
 
 dt_results<- dt_welfare_pure_reforms[,
@@ -967,52 +960,53 @@ plot_rr_bS_men
 # ******************************************************************************
 # FIX: dt_agg was overwritten at line 380 with different column names
 # (avg_pv_benefits_new/old instead of avg_benefits_new/old_pv)
+dir.create(PATHS$output_G, recursive = TRUE, showWarnings = FALSE)
 out <- merge(rbind(dt_agg[dist_reform >= 0,.(points_norm, dist_reform, period = 'new', avg_benefits_pv = avg_pv_benefits_new, group)],
                    dt_agg[dist_reform >= 0,.(points_norm, dist_reform, period = 'old', avg_benefits_pv = avg_pv_benefits_old, group)]),
              results[,.(group, dist_reform = claim_quarter, period, point_estimate)],
              by = c('group','dist_reform','period'))
-fwrite(out, file = paste0('output/G/G5_table_results_selection', SUFFIX, '.csv'))
+fwrite(out, file = file.path(PATHS$output_G, paste0('G5_table_results_selection', SUFFIX, '.csv')))
 
 
 out_cf <- DT_With_avg_benefits
 
-fwrite(out_cf, file = paste0('output/G/G5_table_results_contrafactual_reforms_and_benefits_freq', SUFFIX, '.csv'))
+fwrite(out_cf, file = file.path(PATHS$output_G, paste0('G5_table_results_contrafactual_reforms_and_benefits_freq', SUFFIX, '.csv')))
 
 
-ggsave(plots_new, filename = paste0('output/G/G4_eventstudy_benefits_new', SUFFIX, '.pdf'),
+ggsave(plots_new, filename = file.path(PATHS$output_G, paste0('G4_eventstudy_benefits_new', SUFFIX, '.pdf')),
        height = 6, width = 6)
 
-ggsave(plots_old, filename = paste0('output/G/G4_eventstudy_benefits_old', SUFFIX, '.pdf'),
+ggsave(plots_old, filename = file.path(PATHS$output_G, paste0('G4_eventstudy_benefits_old', SUFFIX, '.pdf')),
        height = 6, width = 6)
 
-ggsave(list_plots_new[['new_[-6,-3]']], filename = 'output/G/G4_eventstudy_benegits_new_1.pdf', 
+ggsave(list_plots_new[['new_[-6,-3]']], filename = file.path(PATHS$output_G, 'G4_eventstudy_benegits_new_1.pdf'),
        height = 3, width = 4)
-ggsave(list_plots_new[['new_[-2,-1]']], filename = 'output/G/G4_eventstudy_benegits_new_2.pdf', 
+ggsave(list_plots_new[['new_[-2,-1]']], filename = file.path(PATHS$output_G, 'G4_eventstudy_benegits_new_2.pdf'),
        height = 3, width = 4)
-ggsave(list_plots_new[['new_[0,1]']], filename = 'output/G/G4_eventstudy_benegits_new_3.pdf', 
+ggsave(list_plots_new[['new_[0,1]']], filename = file.path(PATHS$output_G, 'G4_eventstudy_benegits_new_3.pdf'),
        height = 3, width = 4)
-ggsave(list_plots_new[['new_[2,6]']], filename = 'output/G/G4_eventstudy_benegits_new_4.pdf', 
+ggsave(list_plots_new[['new_[2,6]']], filename = file.path(PATHS$output_G, 'G4_eventstudy_benegits_new_4.pdf'),
        height = 3, width = 4)
-ggsave(list_plots_new[['new_[7,15]']], filename = 'output/G/G4_eventstudy_benegits_new_5.pdf', 
+ggsave(list_plots_new[['new_[7,15]']], filename = file.path(PATHS$output_G, 'G4_eventstudy_benegits_new_5.pdf'),
        height = 3, width = 4)
 
-ggsave(list_plots_old[['old_[-6,-3]']], filename = 'output/G/G4_eventstudy_benegits_old_1.pdf', 
+ggsave(list_plots_old[['old_[-6,-3]']], filename = file.path(PATHS$output_G, 'G4_eventstudy_benegits_old_1.pdf'),
        height = 3, width = 4)
-ggsave(list_plots_old[['old_[-2,-1]']], filename = 'output/G/G4_eventstudy_benegits_old_2.pdf', 
+ggsave(list_plots_old[['old_[-2,-1]']], filename = file.path(PATHS$output_G, 'G4_eventstudy_benegits_old_2.pdf'),
        height = 3, width = 4)
-ggsave(list_plots_old[['old_[0,1]']], filename = 'output/G/G4_eventstudy_benegits_old_3.pdf', 
+ggsave(list_plots_old[['old_[0,1]']], filename = file.path(PATHS$output_G, 'G4_eventstudy_benegits_old_3.pdf'),
        height = 3, width = 4)
-ggsave(list_plots_old[['old_[2,6]']], filename = 'output/G/G4_eventstudy_benegits_old_4.pdf', 
+ggsave(list_plots_old[['old_[2,6]']], filename = file.path(PATHS$output_G, 'G4_eventstudy_benegits_old_4.pdf'),
        height = 3, width = 4)
-ggsave(list_plots_old[['old_[7,15]']], filename = 'output/G/G4_eventstudy_benegits_old_5.pdf',
+ggsave(list_plots_old[['old_[7,15]']], filename = file.path(PATHS$output_G, 'G4_eventstudy_benegits_old_5.pdf'),
        height = 3, width = 4)
 
 # Replacement rate schedules under pure reforms
-ggsave(plot_rr_bL_women, filename = paste0('output/G/G5_pension_schedule_bL_women', SUFFIX, '.pdf'),
+ggsave(plot_rr_bL_women, filename = file.path(PATHS$output_G, paste0('G5_pension_schedule_bL_women', SUFFIX, '.pdf')),
        height = 3, width = 5)
-ggsave(plot_rr_bL_men, filename = paste0('output/G/G5_pension_schedule_bL_men', SUFFIX, '.pdf'),
+ggsave(plot_rr_bL_men, filename = file.path(PATHS$output_G, paste0('G5_pension_schedule_bL_men', SUFFIX, '.pdf')),
        height = 3, width = 5)
-ggsave(plot_rr_bS_women, filename = paste0('output/G/G5_pension_schedule_bS_women', SUFFIX, '.pdf'),
+ggsave(plot_rr_bS_women, filename = file.path(PATHS$output_G, paste0('G5_pension_schedule_bS_women', SUFFIX, '.pdf')),
        height = 3, width = 5)
-ggsave(plot_rr_bS_men, filename = paste0('output/G/G5_pension_schedule_bS_men', SUFFIX, '.pdf'),
+ggsave(plot_rr_bS_men, filename = file.path(PATHS$output_G, paste0('G5_pension_schedule_bS_men', SUFFIX, '.pdf')),
        height = 3, width = 5)

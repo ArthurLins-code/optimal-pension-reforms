@@ -13,39 +13,28 @@ pkgs <- c('scales','zoo','binsreg','ggpubr','readstata13','purrr','readxl','did'
           'lubridate','stringi','foreign','haven','ggplot2','grid','broom',
           'RColorBrewer')
 
-# --- Environment detection ---------------------------------------------------
-if (dir.exists("F:/Users/tucalins/Documents/transf_11_11/directory_2025")) {
-  dir <- "F:/Users/tucalins/Documents/transf_11_11/directory_2025"
-  DATA_MODE <- "full"
-  .libPaths('F:/docs/R-library')
-} else if (dir.exists("U:/Documents/Paper/directory_2025")) {
-  dir <- "U:/Documents/Paper/directory_2025"
-  DATA_MODE <- "full"
-  .libPaths('F:/docs/R-library')
-} else if (dir.exists("C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement")) {
-  dir <- "C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement"
-  DATA_MODE <- "sample"
-} else {
-  stop("No recognized data directory found. Set 'dir' manually.")
-}
-setwd(dir)
+for (pkg in pkgs) library(pkg, character.only = TRUE)
+
+# --- Config layer (restructure) ----------------------------------------------
+source(here::here("config", "paths.R"))
+source(here::here("config", "constants.R"))
+dir <- PATHS$data_root
+if (DATA_MODE == "full") .libPaths(Sys.getenv("PENSION_R_LIBPATH", unset = "F:/docs/R-library"))
 SUFFIX <- if (DATA_MODE == "sample") "_sample" else ""
 message("Pure: Data mode = ", DATA_MODE, " | dir = ", dir)
-
-for (pkg in pkgs) library(pkg, character.only = TRUE)
 
 set.seed(123)
 
 # Ensure output directories exist
-dir.create('output/F', recursive = TRUE, showWarnings = FALSE)
-dir.create('output/new_counter_claiming', recursive = TRUE, showWarnings = FALSE)
+dir.create(PATHS$output_F, recursive = TRUE, showWarnings = FALSE)
+dir.create(PATHS$output_new_counter, recursive = TRUE, showWarnings = FALSE)
 
 if (DATA_MODE == "full") {
   # --- Full data path (original lines 25-29) ---
-  dt <- fread('working/D3_cross_section.csv.gz') %>%
+  dt <- fread(file.path(PATHS$build_working, 'D3_cross_section.csv.gz')) %>%
     .[!is.na(dist_claim_cutoff)]
   gc()
-  panel <- fread('working/D4_panel_reform.csv.gz')
+  panel <- fread(file.path(PATHS$build_working, 'D4_panel_reform.csv.gz'))
   gc()
   a <- panel[indiv %in% sample(dt$indiv, 10)]
 
@@ -64,7 +53,7 @@ dt_inflow <- panel[!is.na(claim_haz)] %>%
 
 sum(dt_inflow$inflow)
 
-results <- fread('output/F/F5_table_results.csv') %>% 
+results <- fread(file.path(PATHS$output_F, "F5_table_results.csv")) %>% 
   left_join(dt_claim, by = c('dist_reform_quarters', 'points_norm')) %>% 
   left_join(dt_elig, by = c('dist_reform_quarters', 'points_norm')) %>% 
   left_join(dt_inflow, by = c('dist_reform_quarters', 'points_norm')) %>% 
@@ -133,9 +122,9 @@ dt_final <- rbindlist(list_cohorts)
 #######################################################################################
 
 #Importing the database that Gabriel generated and sent
-gabriel_path <- paste0("output/new_counter_claiming/actual_reform_gabriel/claims_actual_counterfactual_t_p", SUFFIX, ".csv")
+gabriel_path <- file.path(PATHS$output_new_counter, "actual_reform_gabriel", paste0("claims_actual_counterfactual_t_p", SUFFIX, ".csv"))
 if (!file.exists(gabriel_path)) {
-  gabriel_path <- paste0("tmp/claims_actual_counterfactual_t_p", SUFFIX, ".csv")
+  gabriel_path <- file.path(PATHS$analysis_temp, paste0("claims_actual_counterfactual_t_p", SUFFIX, ".csv"))
 }
 if (!file.exists(gabriel_path)) {
   stop("Gabriel output not found. Run new_counterfactual_claiming3_gabriel.R first.")
@@ -353,7 +342,7 @@ list_plots_freq_S["4"]
 
 
 # saving the database for this file so we can carry on the pure reform steps in the next files
-fwrite(dt_final, paste0("output/F/new_counterfactual_claim_counts_with_pure_schedules_3", SUFFIX, ".csv"))
+fwrite(dt_final, file.path(PATHS$output_F, paste0("new_counterfactual_claim_counts_with_pure_schedules_3", SUFFIX, ".csv")))
 message("Saved pure reform counts with suffix '", SUFFIX, "': ", nrow(dt_final), " rows")
 #Saving all contrafactual level reforms densities plots
 ggsave(list_plots_freq_L[['-1']], filename  = 'output/new_counter_claiming/new_counterfactual_claiming3_pure_level_reform_claiming_frequency_quarterly_2014_Q4.pdf',height = 3, width = 5)

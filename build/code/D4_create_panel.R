@@ -8,13 +8,15 @@
 pkgs <- c('scales','zoo','binsreg','ggpubr','readstata13','purrr','readxl','did',
           'stargazer','fixest','MatchIt','tidyr','stringr','data.table','dplyr',
           'lubridate','stringi','foreign','haven','ggplot2','knitr','grid','broom')
-.libPaths('F:/docs/R-library')
 for (pkg in pkgs) library(pkg, character.only = TRUE)
 
-# Directory
-
-dir <- 'U:/Documents/Paper/directory_2025'
-setwd(paste(dir))
+# Directory  [restructure: config layer]
+source(here::here("config", "paths.R"))
+source(here::here("config", "constants.R"))
+if (DATA_MODE != "full") stop("D4_create_panel.R is full-data only — no sample branch. Run on the server with DATA_MODE=full.")
+dir <- PATHS$full_build_root                  # full-data BUILD root
+if (DATA_MODE == "full") .libPaths(Sys.getenv("PENSION_R_LIBPATH", unset = "F:/docs/R-library"))
+SUFFIX <- if (DATA_MODE == "sample") "_sample" else ""
 
 set.seed(123)
 
@@ -31,7 +33,7 @@ aux_normalization <- CJ(year = 2002:2020, month = 1:12) %>%
   .[, dist_quarters := floor(dist_months/3)] %>% 
   .[, dist_years := floor(dist_months/12)]
 
-cs_save <- fread('working/D3_cross_section.csv.gz')
+cs_save <- fread(file.path(PATHS$build_working, "D3_cross_section.csv.gz"))
 
 indivs <- unique(cs_save$indiv)
 
@@ -49,7 +51,7 @@ conv_cnae <- fread(paste0(dir,'/extra/conversao_cnae_cbo/conversao_cnae.csv'))
 conv_cbo <- fread(paste0(dir,'/extra/conversao_cnae_cbo/conversao_cbo.csv')) 
 
 # Municipality codes
-ibge_munic <- read_dta('extra/microrregioes.dta') %>% 
+ibge_munic <- read_dta(file.path(PATHS$full_build_root, 'extra', 'microrregioes.dta')) %>%
   setDT() %>% 
   .[, lapply(.SD, as.vector)] %>% 
   setnames(old = c('microrregiao','cod_municipio'), new = c('microregion_code','municipality_code')) %>% 
@@ -84,7 +86,7 @@ vars_iii <- c(vars_all, c('clascnae20','ocup2002'))
 
 fn_open_rais_y <- function(y) {
   
-  rais_y <- fread(paste0('working/C3_filtered_rais/C3_',y,'.csv'))
+  rais_y <- fread(file.path(PATHS$build_working, "C3_filtered_rais", paste0("C3_", y, ".csv")))
   
   # Keep relevant variables only
   vars_out <- setdiff(vars_all, names(rais_y))
@@ -371,7 +373,7 @@ list_panels[[paste0(i)]][, points_quarter := contr_time + age]
 
 list_panels[[paste0(i)]][, points_d := floor(points_quarter)]
 
-list_panels[[paste0(i)]][, points_norm := ifelse(male == 0, points_d - 85, points_d - 95)]
+list_panels[[paste0(i)]][, points_norm := ifelse(male == 0, points_d - P_BAR_WOMEN, points_d - P_BAR_MEN)]
 
 # Renaming taxes variable
 
@@ -408,6 +410,8 @@ gc()
 # SAVING -------------------------------------------------------------------
 # ******************************************************************************
 
-fwrite(list_panels[['reform']], file = 'working/D4_panel_reform.csv.gz')
+dir.create(PATHS$build_working, recursive = TRUE, showWarnings = FALSE)
 
-fwrite(list_panels[['claim']], file = 'working/D4_panel_claim.csv.gz')
+fwrite(list_panels[['reform']], file = file.path(PATHS$build_working, "D4_panel_reform.csv.gz"))
+
+fwrite(list_panels[['claim']], file = file.path(PATHS$build_working, "D4_panel_claim.csv.gz"))

@@ -9,13 +9,16 @@
 pkgs <- c('scales','zoo','binsreg','ggpubr','readstata13','purrr','readxl','did',
           'stargazer','fixest','MatchIt','tidyr','stringr','data.table','dplyr',
           'lubridate','stringi','foreign','haven','ggplot2','knitr','grid','broom')
-.libPaths('F:/docs/R-library')
 for (pkg in pkgs) library(pkg, character.only = TRUE)
 
-# Directory
-
-dir <- 'U:/Documents/Paper/directory_2025'
-setwd(paste(dir))
+# --- restructure: config layer (replaces old setwd/.libPaths block) ---
+source(here::here("config", "paths.R"))
+source(here::here("config", "constants.R"))
+if (DATA_MODE != "full")
+  stop("C6_estimate_continuous_contrib.R is full-data only — no sample branch. Run on the server with DATA_MODE=full.")
+dir <- PATHS$full_build_root                     # full-data BUILD root
+if (DATA_MODE == "full") .libPaths(Sys.getenv("PENSION_R_LIBPATH", unset = "F:/docs/R-library"))
+SUFFIX <- if (DATA_MODE == "sample") "_sample" else ""
 
 set.seed(123)
 
@@ -23,10 +26,10 @@ set.seed(123)
 # DATA ---------------------------------------------------------
 # ******************************************************************************
 
-suibe_save <- fread('working/C5_restricted_sample.csv.gz')
+suibe_save <- fread(file.path(PATHS$build_working, "C5_restricted_sample.csv.gz"))
 
 # IBGE - Suivival expectancy
-expectativa <- read_excel(paste0(dir,'/extra/Expectativa_Vida_IBGE.xlsx')) %>% 
+expectativa <- read_excel(file.path(PATHS$full_build_root, "extra", "Expectativa_Vida_IBGE.xlsx")) %>%
   setDT() %>% 
   setnames(c('Ano','Idade','Expectativa'), c('table_year', 'age_disc', 'expec_ibge')) 
 
@@ -430,4 +433,5 @@ colnames(dt)
 
 dt <- dt[,.(CPF_mode, pred_contr_time, contr_time_est)]
 
-fwrite(dt, file = 'working/C6_estimated_contrib_time.csv.gz')
+dir.create(PATHS$build_working, recursive = TRUE, showWarnings = FALSE)
+fwrite(dt, file = file.path(PATHS$build_working, "C6_estimated_contrib_time.csv.gz"))

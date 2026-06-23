@@ -13,39 +13,28 @@ pkgs <- c('scales','zoo','binsreg','ggpubr','readstata13','purrr','readxl','did'
           'lubridate','stringi','foreign','haven','ggplot2','grid','broom',
           'RColorBrewer')
 
-# --- Environment detection ---------------------------------------------------
-if (dir.exists("U:/Documents/Paper/directory_2025")) {
-  dir <- "U:/Documents/Paper/directory_2025"
-  DATA_MODE <- "full"
-  .libPaths('F:/docs/R-library')
-} else if (dir.exists("F:/Users/tucalins/Documents/transf_11_11/directory_2025")) {
-  dir <- "F:/Users/tucalins/Documents/transf_11_11/directory_2025"
-  DATA_MODE <- "full"
-  .libPaths('F:/docs/R-library')
-} else if (dir.exists("C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement")) {
-  dir <- "C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement"
-  DATA_MODE <- "sample"
-} else {
-  stop("No recognized data directory found. Set 'dir' manually.")
-}
-setwd(dir)
+for (pkg in pkgs) library(pkg, character.only = TRUE)
+
+# --- Config layer (restructure) ----------------------------------------------
+source(here::here("config", "paths.R"))
+source(here::here("config", "constants.R"))
+dir <- PATHS$data_root
+if (DATA_MODE == "full") .libPaths(Sys.getenv("PENSION_R_LIBPATH", unset = "F:/docs/R-library"))
 SUFFIX <- if (DATA_MODE == "sample") "_sample" else ""
 message("Gabriel: Data mode = ", DATA_MODE, " | dir = ", dir)
-
-for (pkg in pkgs) library(pkg, character.only = TRUE)
 
 set.seed(123)
 
 # Ensure output directories exist
-dir.create('output/F', recursive = TRUE, showWarnings = FALSE)
-dir.create('output/new_counter_claiming/actual_reform_gabriel', recursive = TRUE, showWarnings = FALSE)
-dir.create('tmp', recursive = TRUE, showWarnings = FALSE)
+dir.create(PATHS$output_F, recursive = TRUE, showWarnings = FALSE)
+dir.create(file.path(PATHS$output_new_counter, "actual_reform_gabriel"), recursive = TRUE, showWarnings = FALSE)
+dir.create(PATHS$analysis_temp, recursive = TRUE, showWarnings = FALSE)
 
 # --- Data loading -------------------------------------------------------------
 if (DATA_MODE == "full") {
-  dt <- fread('working/D3_cross_section.csv.gz') %>%
+  dt <- fread(file.path(PATHS$build_working, 'D3_cross_section.csv.gz')) %>%
     .[!is.na(dist_claim_cutoff)]
-  panel <- fread('working/D4_panel_reform.csv.gz')
+  panel <- fread(file.path(PATHS$build_working, 'D4_panel_reform.csv.gz'))
 } else {
   # Sample mode: load 5% sample CSVs with column renames
   dt <- fread(file.path(dir, 'data', 'dt_sampled_anon.csv')) %>%
@@ -80,7 +69,7 @@ sum(dt_inflow$inflow)
 
 # Using all periods
 
-results <- fread('output/F/F5_table_results.csv') %>% 
+results <- fread(file.path(PATHS$output_F, "F5_table_results.csv")) %>%
   left_join(dt_claim, by = c('dist_reform_quarters', 'points_norm')) %>% 
   left_join(dt_elig, by = c('dist_reform_quarters', 'points_norm')) %>% 
   left_join(dt_inflow, by = c('dist_reform_quarters', 'points_norm')) %>% 
@@ -186,7 +175,7 @@ plot_count_2014 <- ggarrange(list_plots_count[['-5']],list_plots_count[['-4']],
 
 # Only for post reform period
 
-results <- fread('output/F/F5_table_results.csv') %>%
+results <- fread(file.path(PATHS$output_F, "F5_table_results.csv")) %>%
   left_join(dt_claim, by = c('dist_reform_quarters', 'points_norm')) %>%
   left_join(dt_elig, by = c('dist_reform_quarters', 'points_norm')) %>%
   left_join(dt_inflow, by = c('dist_reform_quarters', 'points_norm')) %>%
@@ -301,10 +290,10 @@ plot_count_2018 <- ggarrange(list_plots_count[['11']],list_plots_count[['12']],
 dt_save <- dt_final[,.(t, p, claims, claims_c)]
 
 # Full counterfactual counts file — consumed by I4 and I6
-fwrite(dt_save, file = paste0('output/F/new_counterfactual_claim_counts', SUFFIX, '.csv'))
+fwrite(dt_save, file = file.path(PATHS$output_F, paste0('new_counterfactual_claim_counts', SUFFIX, '.csv')))
 # Trimmed copies — consumed by Pure and legacy references
-fwrite(dt_save, file = paste0('tmp/claims_actual_counterfactual_t_p', SUFFIX, '.csv'))
-fwrite(dt_save, file = paste0('output/new_counter_claiming/actual_reform_gabriel/claims_actual_counterfactual_t_p', SUFFIX, '.csv'))
+fwrite(dt_save, file = file.path(PATHS$analysis_temp, paste0('claims_actual_counterfactual_t_p', SUFFIX, '.csv')))
+fwrite(dt_save, file = file.path(PATHS$output_new_counter, 'actual_reform_gabriel', paste0('claims_actual_counterfactual_t_p', SUFFIX, '.csv')))
 message("Saved claims files with suffix '", SUFFIX, "'")
 
 # All periods
@@ -442,11 +431,11 @@ p3 <- ggplot()+
 
 # Saving
 
-ggsave(plot_all, filename = 'tmp/claims_distribution_actual_count_agg.pdf',
+ggsave(plot_all, filename = file.path(PATHS$analysis_temp, 'claims_distribution_actual_count_agg.pdf'),
        height = 4, width = 6)
 
 for (i in -13:13) {
-  ggsave(list_plots_count[[paste0(i)]], filename = paste0('output/new_counter_claiming/actual_reform_gabriel/claims_distribution_actual_count_',i,'.pdf'),
+  ggsave(list_plots_count[[paste0(i)]], filename = file.path(PATHS$output_new_counter, 'actual_reform_gabriel', paste0('claims_distribution_actual_count_',i,'.pdf')),
          height = 3, width = 4)
 }
 
@@ -474,15 +463,15 @@ for (i in -13:13) {
 #        renamed to dist_reform_quarters above), into local objects es_dt/es_panel.
 
 if (DATA_MODE == "full") {
-  es_dt <- fread('working/D1_cross_section.csv.gz') %>%
+  es_dt <- fread(file.path(PATHS$build_working, 'D1_cross_section.csv.gz')) %>%
     .[!is.na(dist_claim_cutoff)]
-  es_panel <- fread('working/D2_panel.csv.gz')
+  es_panel <- fread(file.path(PATHS$build_working, 'D2_panel.csv.gz'))
 
   # points_norm not precomputed in D1/D2 — recompute as legacy F4 lines 36-44.
   es_dt[, points_d := floor(points_claim)] %>%
-    .[, points_norm := ifelse(male == 0, points_d - 85, points_d - 95)]
+    .[, points_norm := ifelse(male == 0, points_d - P_BAR_WOMEN, points_d - P_BAR_MEN)]
   es_panel[, points_d := floor(points_quarter)] %>%
-    .[, points_norm := ifelse(male == 0, points_d - 85, points_d - 95)]
+    .[, points_norm := ifelse(male == 0, points_d - P_BAR_WOMEN, points_d - P_BAR_MEN)]
   message("ES full: D1 cross-section ", nrow(es_dt), " obs, D2 panel ", nrow(es_panel), " obs")
 } else {
   es_dt <- fread(file.path(dir, 'data', 'dt_sampled_anon.csv')) %>%
@@ -639,8 +628,8 @@ es_make_plot <- function(g, idx) {
 for (i in seq_along(es_groups)) {
   g  <- es_groups[i]
   p_es <- es_make_plot(g, i)
-  fn_es <- paste0('output/new_counter_claiming/actual_reform_gabriel/claiming_hazard_eventstudy_',
-                  i, SUFFIX, '.pdf')
+  fn_es <- file.path(PATHS$output_new_counter, 'actual_reform_gabriel',
+                     paste0('claiming_hazard_eventstudy_', i, SUFFIX, '.pdf'))
   ggsave(p_es, filename = fn_es, height = 3, width = 4)
   message("Saved ", fn_es)
 }

@@ -45,6 +45,18 @@ DID_REF        <- -2L   # DiD reference point (2 points below threshold)
 # NOTE: Verify against canonical deck — some formulas may use different rates
 DISCOUNT_FACTOR_QUARTERLY <- 0.995
 
+# --- Cost-side quarterly interest factor (I4 cost discounting; I6 PART 1) ---
+# FLAG i4-discount: cost uses (1.005^3)^t while welfare uses 0.995^(3t); 1/1.005 = 0.995025 != 0.995,
+# so the two are NOT exact reciprocals. Both literals are kept verbatim in the code (NOT harmonized —
+# that is an econ decision for the professors). Exposed here only so the asymmetry is documented in one place.
+COST_INTEREST_Q <- 1.005
+
+# --- Consumption levels & welfare weight eta (I6 L53-55,61; ~Slide 38/56) ---
+# eta ≈ 0.828 is the marginal welfare weight on INSS beneficiaries.
+CONS_INSS <- 1536.4   # mean consumption, INSS beneficiaries
+CONS_POP  <- 1473.1   # mean consumption, comparison population
+ETA       <- 1 - GAMMA_BASELINE * (CONS_INSS - CONS_POP) / CONS_POP   # derived (elasticity lesson: computed, never re-typed)
+
 # --- Derived Constants ---
 # Reform change in slope (delta_bS) computed from sex-weighted average
 # delta_bS = share_women * RR_SLOPE_WOMEN + share_men * RR_SLOPE_MEN

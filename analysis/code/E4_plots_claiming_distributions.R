@@ -19,26 +19,15 @@ pkgs <- c('scales','zoo','binsreg','ggpubr','readstata13','purrr','readxl','did'
           'stargazer','fixest','MatchIt','tidyr','stringr','data.table','dplyr',
           'lubridate','stringi','foreign','haven','ggplot2','knitr','grid','broom')
 
-# --- Environment detection ---------------------------------------------------
-if (dir.exists("F:/Users/tucalins/Documents/transf_11_11/directory_2025")) {
-  dir <- "F:/Users/tucalins/Documents/transf_11_11/directory_2025"
-  DATA_MODE <- "full"
-  .libPaths('F:/docs/R-library')
-} else if (dir.exists("U:/Documents/transf_11_11/directory_2025")) {
-  dir <- "U:/Documents/transf_11_11/directory_2025"
-  DATA_MODE <- "full"
-  .libPaths('F:/docs/R-library')
-} else if (dir.exists("C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement")) {
-  dir <- "C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement"
-  DATA_MODE <- "sample"
-} else {
-  stop("No recognized data directory found. Set 'dir' manually.")
-}
-setwd(dir)
-message("E4 running in ", DATA_MODE, " mode from: ", dir)
-SUFFIX <- if (DATA_MODE == "sample") "_sample" else ""
-
 for (pkg in pkgs) library(pkg, character.only = TRUE)
+
+# --- Config layer (paths + constants); replaces old setwd/dir.exists block ---
+source(here::here("config", "paths.R"))
+source(here::here("config", "constants.R"))
+dir <- PATHS$data_root
+if (DATA_MODE == "full") .libPaths(Sys.getenv("PENSION_R_LIBPATH", unset = "F:/docs/R-library"))
+SUFFIX <- if (DATA_MODE == "sample") "_sample" else ""
+message("E4 running in ", DATA_MODE, " mode from: ", dir)
 
 set.seed(123)
 
@@ -47,13 +36,13 @@ set.seed(123)
 # ******************************************************************************
 
 if (DATA_MODE == "full") {
-  dt <- fread('working/D3_cross_section.csv.gz') %>%
+  dt <- fread(file.path(PATHS$build_working, 'D3_cross_section.csv.gz')) %>%
     .[!is.na(dist_claim_cutoff)]
-  panel <- fread('working/D4_panel_reform.csv.gz')
+  panel <- fread(file.path(PATHS$build_working, 'D4_panel_reform.csv.gz'))
 } else {
-  dt <- fread('data/dt_sampled_anon.csv') %>%
+  dt <- fread(file.path(dir, 'data', 'dt_sampled_anon.csv')) %>%
     .[!is.na(dist_claim_cutoff)]
-  panel <- fread('data/panel_sampled_anon.csv')
+  panel <- fread(file.path(dir, 'data', 'panel_sampled_anon.csv'))
   # Harmonize column names: sample panel uses year_quarter, full uses year_month
   if ("year_quarter" %in% names(panel) && !"year_month" %in% names(panel)) {
     setnames(panel, "year_quarter", "year_month")
@@ -67,6 +56,8 @@ if (DATA_MODE == "full") {
 # ******************************************************************************
 # PLOTS ---------------------------------------------------------
 # ******************************************************************************
+
+dir.create(PATHS$analysis_temp, recursive = TRUE, showWarnings = FALSE)  # scratch ggsave target
 
 # 1 - Claiming haz for each quarter rel to the reform --------
 
@@ -124,7 +115,7 @@ plot1 <- panel[!is.na(claim_haz) & year_month >= 2012 & year_month <= 2018.5] %>
 
 plot1
 
-ggsave(plot1, filename = 'tmp/teste_plot.pdf', height = 3, width = 5)
+ggsave(plot1, filename = file.path(PATHS$analysis_temp, 'teste_plot.pdf'), height = 3, width = 5)
 
 # 2 - Claiming haz for each quarter rel to the reform - grouping by points --------
 
@@ -193,7 +184,7 @@ plot2 <- panel[!is.na(claim_haz) & year_month >= 2012 & year_month < 2018.5 & po
 
 plot2
 
-ggsave(plot2, filename = 'tmp/teste_plot.pdf', height = 3.5, width = 5)
+ggsave(plot2, filename = file.path(PATHS$analysis_temp, 'teste_plot.pdf'), height = 3.5, width = 5)
 
 # 3 - Claiming haz for each quarter rel to the threshold - claimed before/after --------
 
@@ -240,7 +231,7 @@ plot3 <- panel[!is.na(claim_haz) & points_norm >= -15 & points_norm <= 15] %>%
 
 plot3
 
-ggsave(plot3, filename = 'tmp/teste_plot.pdf', height = 3, width = 5)
+ggsave(plot3, filename = file.path(PATHS$analysis_temp, 'teste_plot.pdf'), height = 3, width = 5)
 
 # 5 - Claiming haz for each quarter rel to threhsold - below/above 1.25 MW --------
 
@@ -407,7 +398,7 @@ plot7 <- df7_3 %>%
 
 plot7
 
-ggsave(plot7, filename = 'tmp/teste_plot.pdf', height = 3, width = 5)
+ggsave(plot7, filename = file.path(PATHS$analysis_temp, 'teste_plot.pdf'), height = 3, width = 5)
 
 # 8 - Claiming density for each quarter rel to the threshold - by gender --------
 
@@ -574,29 +565,31 @@ plot_sched_men
 # SAVING ---------------------------------------------------------
 # ******************************************************************************
 
-ggsave(plot1, filename = 'output/E/E4_claiming_haz_quarters.pdf',
+dir.create(PATHS$output_E, recursive = TRUE, showWarnings = FALSE)
+
+ggsave(plot1, filename = file.path(PATHS$output_E, 'E4_claiming_haz_quarters.pdf'),
        height = 3, width = 5)
 
-ggsave(plot2, filename = 'output/E/E4_claiming_haz_quarters_group.pdf',
+ggsave(plot2, filename = file.path(PATHS$output_E, 'E4_claiming_haz_quarters_group.pdf'),
        height = 3.5, width = 5)
 
-ggsave(plot3, filename = 'output/E/E4_claiming_haz_dist.pdf',
+ggsave(plot3, filename = file.path(PATHS$output_E, 'E4_claiming_haz_dist.pdf'),
        height = 3, width = 5)
 
-# ggsave(plot5, filename = 'output/E/E4_claiming_haz_dist_MWs.pdf',
+# ggsave(plot5, filename = file.path(PATHS$output_E, 'E4_claiming_haz_dist_MWs.pdf'),
 #        height = 3, width = 8)
 
-ggsave(plot7, filename = 'output/E/E4_claiming_density.pdf',
+ggsave(plot7, filename = file.path(PATHS$output_E, 'E4_claiming_density.pdf'),
        height = 3, width = 5)
 
-ggsave(plot8, filename = 'output/E/E4_claiming_density_women.pdf',
+ggsave(plot8, filename = file.path(PATHS$output_E, 'E4_claiming_density_women.pdf'),
        height = 3, width = 5)
 
-ggsave(plot9, filename = 'output/E/E4_claiming_density_men.pdf',
+ggsave(plot9, filename = file.path(PATHS$output_E, 'E4_claiming_density_men.pdf'),
        height = 3, width = 5)
 
-ggsave(plot_sched_women, filename = 'output/E/E4_pension_schedule_women.pdf',
+ggsave(plot_sched_women, filename = file.path(PATHS$output_E, 'E4_pension_schedule_women.pdf'),
        height = 3, width = 5)
 
-ggsave(plot_sched_men, filename = 'output/E/E4_pension_schedule_men.pdf',
+ggsave(plot_sched_men, filename = file.path(PATHS$output_E, 'E4_pension_schedule_men.pdf'),
        height = 3, width = 5)

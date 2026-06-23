@@ -47,44 +47,26 @@ pkgs <- c('scales', 'zoo', 'readxl', 'fixest', 'tidyr', 'stringr',
 
 for (pkg in pkgs) library(pkg, character.only = TRUE)
 
+# --- Config (restructure Stage 2): centralized paths + constants -------------
+source(here::here("config", "paths.R"))
+source(here::here("config", "constants.R"))
+dir <- PATHS$data_root
+if (DATA_MODE == "full") .libPaths(Sys.getenv("PENSION_R_LIBPATH", unset = "F:/docs/R-library"))
+SUFFIX <- if (DATA_MODE == "sample") "_sample" else ""
+
 # --- Constants ---------------------------------------------------------------
-P_BAR_WOMEN    <- 85L
-P_BAR_MEN      <- 95L
-GAMMA_BASELINE <- 4L
-CONS_INSS      <- 1536.4
-CONS_POP       <- 1473.1
+# P_BAR_WOMEN/MEN, GAMMA_BASELINE, CONS_INSS/POP, ETA now come from config/constants.R
 R_ANNUAL       <- 0.06
 REFORM_QUARTER <- 2015.25
 MAX_HORIZON    <- 13L
 
 R_Q <- (1 + R_ANNUAL)^(1/4) - 1
-ETA <- 1 - GAMMA_BASELINE * (CONS_INSS - CONS_POP) / CONS_POP
-
-# --- Directory ---------------------------------------------------------------
-# Capture the repo root BEFORE we setwd() into the data dir, so sample-mode runs
-# can write outputs back into the repo's trans_retirement/output tree (where the
-# figures_central_folder collector looks). Assumes this script is launched from the
-# repo root, e.g.  Rscript trans_retirement/code/I6_wmvpf_with_pure_reforms_freq.R
-REPO_TRANS <- file.path(getwd(), "trans_retirement")
-
-if (dir.exists("F:/Users/tucalins/Documents/transf_11_11/directory_2025")) {
-  dir <- "F:/Users/tucalins/Documents/transf_11_11/directory_2025"
-  DATA_MODE <- "full"
-  .libPaths('F:/docs/R-library')
-} else if (dir.exists("C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement")) {
-  dir <- "C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement"
-  DATA_MODE <- "sample"
-} else {
-  stop("No data directory found. Set 'dir' manually.")
-}
 
 message("I6: Data mode = ", DATA_MODE, " | dir = ", dir)
-SUFFIX <- if (DATA_MODE == "sample") "_sample" else ""
-setwd(dir)
 
 set.seed(20260512L)
 
-dir.create('output/I', recursive = TRUE, showWarnings = FALSE)
+dir.create(PATHS$output_I, recursive = TRUE, showWarnings = FALSE)
 
 # --- Data Loading ------------------------------------------------------------
 
@@ -96,13 +78,13 @@ if (DATA_MODE == "sample") {
   message("Loaded sample data: ", nrow(dt_cs), " cross-section obs, ",
           nrow(panel), " panel obs")
 } else {
-  dt_cs <- fread('working/D3_cross_section.csv.gz')
+  dt_cs <- fread(file.path(PATHS$build_working, 'D3_cross_section.csv.gz'))
   gc()
   dt_cs[, points_d := floor(points_claim)] %>%
     .[, points_norm := ifelse(male == 0, points_d - P_BAR_WOMEN, points_d - P_BAR_MEN)]
   dt_cs[, dist_reform := 4 * (claim_quarter - REFORM_QUARTER)]
 
-  expectativa <- read_excel(paste0(dir, '/extra/Expectativa_Vida_IBGE.xlsx')) %>%
+  expectativa <- read_excel(file.path(PATHS$extra, 'Expectativa_Vida_IBGE.xlsx')) %>%
     setDT() %>%
     setnames(c('Ano','Idade','Expectativa'), c('table_year', 'age_disc', 'expec_ibge'))
 
@@ -127,7 +109,7 @@ if (DATA_MODE == "sample") {
                      by = c('claim_year','claim_month','age_disc'))
   gc()
 
-  panel <- fread('working/D2_panel.csv.gz')
+  panel <- fread(file.path(PATHS$build_working, 'D2_panel.csv.gz'))
   gc()
   panel[, 'benefits' := NULL]
   panel <- left_join(panel, dt_cs[,.(indiv, benef_size, expec_ibge, fp_est, points_norm)],
@@ -206,14 +188,14 @@ n_claims <- dt_cs[d_claim_post_reform == 1 & claim_quarter <= MAX_CLAIM_QUARTER,
 
 # --- Step C: External files --------------------------------------------------
 # F-stage counterfactual counts (sample-aware via SUFFIX)
-cf_counts <- fread(paste0('output/F/new_counterfactual_claim_counts', SUFFIX, '.csv'))
+cf_counts <- fread(file.path(PATHS$output_F, paste0('new_counterfactual_claim_counts', SUFFIX, '.csv')))
 setnames(cf_counts, c("t","p"), c("dist_reform","points_norm"), skip_absent = TRUE)
 
 # G4: selection-corrected average benefits (sample-aware via SUFFIX)
-results_selection <- fread(paste0('output/G/G4_table_results', SUFFIX, '.csv'))
+results_selection <- fread(file.path(PATHS$output_G, paste0('G4_table_results', SUFFIX, '.csv')))
 
 # H2: tax elasticity DD estimates (sample-aware via SUFFIX)
-results_taxes <- fread(paste0('output/H/H2_table_results', SUFFIX, '.csv'))
+results_taxes <- fread(file.path(PATHS$output_H, paste0('H2_table_results', SUFFIX, '.csv')))
 
 message("Step C: Loaded cf_counts (", nrow(cf_counts), " rows), ",
         "G4 (", nrow(results_selection), " rows), ",
@@ -402,8 +384,8 @@ message("\n=== PART 2: Pure Reform WMVPF (bL / bS decomposition) ===")
 #   avg_post_pure_reform_benefits_bL/bS, Beta_LP/SP/LA/SA,
 #   claims_L, claims_S
 
-g5_pure_path <- paste0('output/G/G5_table_results_contrafactual_reforms_and_benefits_freq',
-                       SUFFIX, '.csv')
+g5_pure_path <- file.path(PATHS$output_G,
+  paste0('G5_table_results_contrafactual_reforms_and_benefits_freq', SUFFIX, '.csv'))
 
 if (!file.exists(g5_pure_path)) {
   message("WARNING: G5 pure reform output not found at: ", g5_pure_path)
@@ -488,8 +470,8 @@ if (PURE_REFORM_AVAILABLE) {
   # --- Verify g_pta exists in G5 data ---
   if (!'g_pta' %in% names(g5_data)) {
     message("WARNING: g_pta not found in G5 CSV. Attempting F-stage load...")
-    f_pure_path <- paste0('output/F/new_counterfactual_claim_counts_with_pure_schedules_3',
-                          SUFFIX, '.csv')
+    f_pure_path <- file.path(PATHS$output_F,
+      paste0('new_counterfactual_claim_counts_with_pure_schedules_3', SUFFIX, '.csv'))
     if (file.exists(f_pure_path)) {
       f_data <- fread(f_pure_path, select = c('dist_reform', 'points_norm', 'g_pta'))
       g5_data <- merge(g5_data, f_data, by = c('dist_reform', 'points_norm'), all.x = TRUE)
@@ -928,54 +910,49 @@ if (!is.na(wmvpf_bL) && !is.na(wmvpf_bS)) {
 
 message("\n=== Saving outputs ===")
 
-# Sample workflow: write outputs into the repo's trans_retirement/output tree so
-# figures_central_folder/collector.py can pick them up. Inputs were read above from
-# the (OneDrive) sample dir. Full/server mode is unaffected (stays under `dir`).
-if (DATA_MODE == "sample" && exists("REPO_TRANS") && dir.exists(REPO_TRANS)) {
-  setwd(REPO_TRANS)
-  message("Sample mode: redirecting outputs to ", REPO_TRANS)
-}
-dir.create('output/I', recursive = TRUE, showWarnings = FALSE)
+# Outputs go to the canonical analysis output dir (PATHS$output_I). The presentation
+# collector picks them up from there; sample/full modes both resolve via config.
+dir.create(PATHS$output_I, recursive = TRUE, showWarnings = FALSE)
 
 # Actual reform
-fwrite(out_actual, file = paste0('output/I/I6_wmvpf_actual', SUFFIX, '.csv'))
+fwrite(out_actual, file = file.path(PATHS$output_I, paste0('I6_wmvpf_actual', SUFFIX, '.csv')))
 message("Saved: output/I/I6_wmvpf_actual", SUFFIX, ".csv")
 
 # I4-format backward compatibility (same columns as I4_table_wmvpf)
-fwrite(dt_wmvpf, file = paste0('output/I/I6_table_wmvpf', SUFFIX, '.csv'))
+fwrite(dt_wmvpf, file = file.path(PATHS$output_I, paste0('I6_table_wmvpf', SUFFIX, '.csv')))
 message("Saved: output/I/I6_table_wmvpf", SUFFIX, ".csv")
 
 # Pure reforms
 if (PURE_REFORM_AVAILABLE && exists("out_L")) {
-  fwrite(out_L, file = paste0('output/I/I6_wmvpf_pure_L', SUFFIX, '.csv'))
+  fwrite(out_L, file = file.path(PATHS$output_I, paste0('I6_wmvpf_pure_L', SUFFIX, '.csv')))
   message("Saved: output/I/I6_wmvpf_pure_L", SUFFIX, ".csv")
 }
 
 if (PURE_REFORM_AVAILABLE && exists("out_S")) {
-  fwrite(out_S, file = paste0('output/I/I6_wmvpf_pure_S', SUFFIX, '.csv'))
+  fwrite(out_S, file = file.path(PATHS$output_I, paste0('I6_wmvpf_pure_S', SUFFIX, '.csv')))
   message("Saved: output/I/I6_wmvpf_pure_S", SUFFIX, ".csv")
 }
 
 # Summary
-fwrite(summary_dt, file = paste0('output/I/I6_summary', SUFFIX, '.csv'))
+fwrite(summary_dt, file = file.path(PATHS$output_I, paste0('I6_summary', SUFFIX, '.csv')))
 message("Saved: output/I/I6_summary", SUFFIX, ".csv")
 
 # Plots
 ggsave(p_actual,
-       filename = paste0('output/I/I6_plot_actual_reform', SUFFIX, '.pdf'),
+       filename = file.path(PATHS$output_I, paste0('I6_plot_actual_reform', SUFFIX, '.pdf')),
        height = 3.8, width = 5)
 message("Saved: output/I/I6_plot_actual_reform", SUFFIX, ".pdf")
 
 if (PURE_REFORM_AVAILABLE && exists("p_pure_L")) {
   ggsave(p_pure_L,
-         filename = paste0('output/I/I6_plot_pure_L_reform', SUFFIX, '.pdf'),
+         filename = file.path(PATHS$output_I, paste0('I6_plot_pure_L_reform', SUFFIX, '.pdf')),
          height = 3.8, width = 5)
   message("Saved: output/I/I6_plot_pure_L_reform", SUFFIX, ".pdf")
 }
 
 if (PURE_REFORM_AVAILABLE && exists("p_pure_S")) {
   ggsave(p_pure_S,
-         filename = paste0('output/I/I6_plot_pure_S_reform', SUFFIX, '.pdf'),
+         filename = file.path(PATHS$output_I, paste0('I6_plot_pure_S_reform', SUFFIX, '.pdf')),
          height = 3.8, width = 5)
   message("Saved: output/I/I6_plot_pure_S_reform", SUFFIX, ".pdf")
 }
@@ -983,14 +960,14 @@ if (PURE_REFORM_AVAILABLE && exists("p_pure_S")) {
 # Per-quarter plots (for Juan)
 if (PURE_REFORM_AVAILABLE && exists("p_pure_L_t")) {
   ggsave(p_pure_L_t,
-         filename = paste0('output/I/I6_plot_pure_L_reform_per_qtr', SUFFIX, '.pdf'),
+         filename = file.path(PATHS$output_I, paste0('I6_plot_pure_L_reform_per_qtr', SUFFIX, '.pdf')),
          height = 3.8, width = 5)
   message("Saved: output/I/I6_plot_pure_L_reform_per_qtr", SUFFIX, ".pdf")
 }
 
 if (PURE_REFORM_AVAILABLE && exists("p_pure_S_t")) {
   ggsave(p_pure_S_t,
-         filename = paste0('output/I/I6_plot_pure_S_reform_per_qtr', SUFFIX, '.pdf'),
+         filename = file.path(PATHS$output_I, paste0('I6_plot_pure_S_reform_per_qtr', SUFFIX, '.pdf')),
          height = 3.8, width = 5)
   message("Saved: output/I/I6_plot_pure_S_reform_per_qtr", SUFFIX, ".pdf")
 }
@@ -1038,7 +1015,7 @@ p_actual_cumsum_x20 <- ggplot(out_actual_x20, aes(x = dist_reform)) +
   xlab('Quarter') + ylab(NULL) +
   ggtitle(paste0('Actual Reform: WMVPF = ', round(wmvpf_actual, 3)))
 ggsave(p_actual_cumsum_x20,
-       filename = paste0('output/I/I6_plot_cumsum_actual_reform_multby20', SUFFIX, '.pdf'),
+       filename = file.path(PATHS$output_I, paste0('I6_plot_cumsum_actual_reform_multby20', SUFFIX, '.pdf')),
        height = 3.8, width = 5)
 message("Saved: output/I/I6_plot_cumsum_actual_reform_multby20", SUFFIX, ".pdf")
 
@@ -1071,7 +1048,7 @@ if (PURE_REFORM_AVAILABLE && exists("out_L")) {
     ggtitle(paste0('Pure Level: WMVPF_bL = ', round(wmvpf_bL_cum, 3)))
 
   ggsave(p_pure_L_x20,
-         filename = paste0('output/I/I6_plot_pure_L_reform_multby20', SUFFIX, '.pdf'),
+         filename = file.path(PATHS$output_I, paste0('I6_plot_pure_L_reform_multby20', SUFFIX, '.pdf')),
          height = 3.8, width = 5)
   message("Saved: output/I/I6_plot_pure_L_reform_multby20", SUFFIX, ".pdf")
 }
@@ -1104,7 +1081,7 @@ if (PURE_REFORM_AVAILABLE && exists("out_S")) {
     ggtitle(paste0('Pure Slope: WMVPF_bS = ', round(wmvpf_bS_cum, 3)))
 
   ggsave(p_pure_S_x20,
-         filename = paste0('output/I/I6_plot_pure_S_reform_multby20', SUFFIX, '.pdf'),
+         filename = file.path(PATHS$output_I, paste0('I6_plot_pure_S_reform_multby20', SUFFIX, '.pdf')),
          height = 3.8, width = 5)
   message("Saved: output/I/I6_plot_pure_S_reform_multby20", SUFFIX, ".pdf")
 }

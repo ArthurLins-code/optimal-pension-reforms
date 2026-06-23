@@ -23,31 +23,23 @@
 pkgs <- c('data.table', 'dplyr')
 for (pkg in pkgs) library(pkg, character.only = TRUE)
 
+# --- Config layer (restructure: paths + constants) ---------------------------
+source(here::here("config", "paths.R"))
+source(here::here("config", "constants.R"))
+dir <- PATHS$data_root
+if (DATA_MODE == "full") .libPaths(Sys.getenv("PENSION_R_LIBPATH", unset = "F:/docs/R-library"))
+SUFFIX <- if (DATA_MODE == "sample") "_sample" else ""
+
 # --- Constants (same as G5 / I6) ---------------------------------------------
 
-P_BAR_WOMEN    <- 85L
-P_BAR_MEN      <- 95L
 R_ANNUAL       <- 0.06
 R_Q            <- (1 + R_ANNUAL)^(1/4) - 1
 REFORM_QUARTER <- 2015.25
 
 # --- Directory (same as I6) --------------------------------------------------
 
-if (dir.exists("F:/Users/tucalins/Documents/transf_11_11/directory_2025")) {
-  dir <- "F:/Users/tucalins/Documents/transf_11_11/directory_2025"
-  DATA_MODE <- "full"
-  .libPaths('F:/docs/R-library')
-} else if (dir.exists("C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement")) {
-  dir <- "C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement"
-  DATA_MODE <- "sample"
-} else {
-  stop("No data directory found. Set 'dir' manually.")
-}
-
 message("Diagnostic: Data mode = ", DATA_MODE, " | dir = ", dir)
-SUFFIX <- if (DATA_MODE == "sample") "_sample" else ""
-setwd(dir)
-dir.create('output/I', recursive = TRUE, showWarnings = FALSE)
+dir.create(PATHS$output_I, recursive = TRUE, showWarnings = FALSE)
 
 # ==============================================================================
 # PART 1: Micro-level benefit computations (replicating G5 lines 88-356)
@@ -60,7 +52,7 @@ if (DATA_MODE == "sample") {
     .[!is.na(dist_claim_cutoff)]
   setnames(dt, 'cpf_anon', 'indiv', skip_absent = TRUE)
 } else {
-  dt <- fread('working/D3_cross_section.csv.gz')
+  dt <- fread(file.path(PATHS$build_working, "D3_cross_section.csv.gz"))
   gc()
   dt[, points_d := floor(points_claim)]
   dt[, points_norm := ifelse(male == 0, points_d - P_BAR_WOMEN, points_d - P_BAR_MEN)]
@@ -98,24 +90,24 @@ dt[, pv_benefits_new := 3 * benefits_new * ann_factor_q]
 
 # --- Replacement rate + benefits_bL / benefits_bS (G5 lines 334-356) ---------
 
-dt[male == 0, replacement_rate := 0.69 + (0.021 * points_norm)]
-dt[male == 1, replacement_rate := 0.82 + (0.025 * points_norm)]
+dt[male == 0, replacement_rate := RR_INTERCEPT_WOMEN + (RR_SLOPE_WOMEN * points_norm)]
+dt[male == 1, replacement_rate := RR_INTERCEPT_MEN + (RR_SLOPE_MEN * points_norm)]
 
 # Pure Level (bL)
 dt[male == 1, benefits_bL := fifelse(
   points_norm < 0, pv_benefits_new,
-  pv_benefits_new * (1 + (1 - 0.82) / replacement_rate))]
+  pv_benefits_new * (1 + (1 - RR_INTERCEPT_MEN) / replacement_rate))]
 dt[male == 0, benefits_bL := fifelse(
   points_norm < 0, pv_benefits_new,
-  pv_benefits_new * (1 + (1 - 0.69) / replacement_rate))]
+  pv_benefits_new * (1 + (1 - RR_INTERCEPT_WOMEN) / replacement_rate))]
 
 # Pure Slope (bS)
 dt[male == 1, benefits_bS := fifelse(
   points_norm < 0, pv_benefits_new,
-  pv_benefits_new * (0.82 / replacement_rate))]
+  pv_benefits_new * (RR_INTERCEPT_MEN / replacement_rate))]
 dt[male == 0, benefits_bS := fifelse(
   points_norm < 0, pv_benefits_new,
-  pv_benefits_new * (0.69 / replacement_rate))]
+  pv_benefits_new * (RR_INTERCEPT_WOMEN / replacement_rate))]
 
 # --- Restrict points_norm range (G5 lines 106-107) ---------------------------
 
@@ -161,8 +153,8 @@ print(summary(tbl_micro$ratio_vs_3ann))
 
 message("\n--- Loading G5 CSV ---")
 
-g5_file <- paste0('output/G/G5_table_results_contrafactual_reforms_and_benefits_freq',
-                  SUFFIX, '.csv')
+g5_file <- file.path(PATHS$output_G,
+  paste0('G5_table_results_contrafactual_reforms_and_benefits_freq', SUFFIX, '.csv'))
 g5 <- fread(g5_file)
 message("G5 data: ", nrow(g5), " cells (", uniqueN(g5$points_norm), " points_norm x ",
         uniqueN(g5$dist_reform), " dist_reform)")
@@ -317,9 +309,11 @@ message("\n--- PART 7: counterfactual b(x) by points_norm (I6 Step D table) ---"
 MAX_HORIZON <- 13L   # same horizon as I6
 
 # F-stage counterfactual counts + G4 selection-corrected benefits (sample-aware)
-cf_counts <- fread(paste0('output/F/new_counterfactual_claim_counts', SUFFIX, '.csv'))
+cf_counts <- fread(file.path(PATHS$output_F,
+  paste0('new_counterfactual_claim_counts', SUFFIX, '.csv')))
 setnames(cf_counts, c("t", "p"), c("dist_reform", "points_norm"), skip_absent = TRUE)
-results_selection <- fread(paste0('output/G/G4_table_results', SUFFIX, '.csv'))
+results_selection <- fread(file.path(PATHS$output_G,
+  paste0('G4_table_results', SUFFIX, '.csv')))
 
 aux1 <- results_selection[period == 'old' & dist_reform >= 0 & dist_reform <= MAX_HORIZON,
   .(dist_reform, points_norm, delta_ben = (avg_benefits_pv - point_estimate))]
@@ -337,7 +331,8 @@ tabela_cntrf <- aux3_provisory[dist_reform == 9 & points_norm <= 15 & points_nor
 message("\nCounterfactual b(x) by points_norm at dist_reform = 9:")
 print(tabela_cntrf[order(points_norm)], digits = 6)
 
-out_cntrf <- paste0('output/I/I7_diagnostic_cntrf_by_points_norm', SUFFIX, '.csv')
+out_cntrf <- file.path(PATHS$output_I,
+  paste0('I7_diagnostic_cntrf_by_points_norm', SUFFIX, '.csv'))
 fwrite(tabela_cntrf[order(points_norm)], out_cntrf)
 message("Saved: ", out_cntrf)
 
@@ -345,8 +340,8 @@ message("Saved: ", out_cntrf)
 # PART 8: Save outputs
 # ==============================================================================
 
-out_micro <- paste0('output/I/I7_diagnostic_by_points_norm', SUFFIX, '.csv')
-out_g5    <- paste0('output/I/I7_diagnostic_g5_cells', SUFFIX, '.csv')
+out_micro <- file.path(PATHS$output_I, paste0('I7_diagnostic_by_points_norm', SUFFIX, '.csv'))
+out_g5    <- file.path(PATHS$output_I, paste0('I7_diagnostic_g5_cells', SUFFIX, '.csv'))
 
 fwrite(tbl_micro, out_micro)
 fwrite(tbl_g5,    out_g5)
