@@ -108,9 +108,8 @@
     <a href="#dag">9 · The pipeline DAG</a>
     <a href="#flags">10 · Bugs flagged</a>
     <a href="#hygiene">11 · Used vs. archived code</a>
-    <a href="#timeline">12 · Commit timeline</a>
-    <a href="#run">13 · How to run now</a>
-    <a href="#open">14 · What's left</a>
+    <a href="#run">12 · How to run now</a>
+    <a href="#open">13 · What's left</a>
   </nav>
 
   <main>
@@ -613,40 +612,9 @@ clear_dirs(...)   <span class="cm"># wipe temp before a build (G–S "clear befo
     </div>
   </section>
 
-  <!-- ===================== TIMELINE ===================== -->
-  <section id="timeline">
-    <h2><span class="n">12</span> Commit timeline</h2>
-    <figure class="fig">
-      <svg viewBox="0 0 940 295" width="100%" role="img" aria-label="Commit timeline">
-        <style>.cm-h{font:700 12px ui-monospace,monospace;fill:#0f172a}.cm-t{font:11px sans-serif;fill:#334155}.cm-d{font:10px sans-serif;fill:#94a3b8}</style>
-        <line x1="60" y1="40" x2="60" y2="260" stroke="#cbd5e1" stroke-width="2"/>
-        <!-- nodes -->
-        <g>
-          <circle cx="60" cy="52" r="8" fill="#2563eb"/><text x="84" y="48" class="cm-h">7f07617 · 15:18 · Stage 1</text><text x="84" y="64" class="cm-t">Move to functional dirs + config layer — <b>328 files, 314 renames</b></text>
-        </g>
-        <g>
-          <circle cx="60" cy="92" r="8" fill="#16a34a"/><text x="84" y="88" class="cm-h">1ea2dd8 · 15:46 · Stage 2a</text><text x="84" y="104" class="cm-t">Adapt analysis+build I/O to config/paths.R + wire constants — <b>14 files</b></text>
-        </g>
-        <g>
-          <circle cx="60" cy="132" r="8" fill="#16a34a"/><text x="84" y="128" class="cm-h">ae0c299 · 15:51 · Stage 2b</text><text x="84" y="144" class="cm-t">Repath the 4 presentation figure tools (post-ESC recovery) — <b>5 files</b></text>
-        </g>
-        <g>
-          <circle cx="60" cy="172" r="8" fill="#7c3aed"/><text x="84" y="168" class="cm-h">1d1cb3f · 16:10 · Stage 3 fix</text><text x="84" y="184" class="cm-t">Absolutize 30 ggsave paths in pure.R (FINDING-1) — <b>1 file, 30/30</b></text>
-        </g>
-        <g>
-          <circle cx="60" cy="212" r="8" fill="#a21caf"/><text x="84" y="208" class="cm-h">e4a9af7 · 16:18 · Stage 4</text><text x="84" y="224" class="cm-t">Re-map + docs + parity record — <b>29 files, +3,836 lines</b></text>
-        </g>
-        <g>
-          <circle cx="60" cy="252" r="8" fill="#0f766e"/><text x="84" y="248" class="cm-h">follow-up · usage audit</text><text x="84" y="264" class="cm-t">Archive 11 dead files → legacy/superseded/ + code/README manifests + h2-vs-h3 flag</text>
-        </g>
-      </svg>
-      <figcaption>Five restructure commits (~one hour) on <code>code-and-data</code>, plus a follow-up code-hygiene pass. Each commit body carries WHY + stage ref + authorship.</figcaption>
-    </figure>
-  </section>
-
   <!-- ===================== RUN ===================== -->
   <section id="run">
-    <h2><span class="n">13</span> How to run it now</h2>
+    <h2><span class="n">12</span> How to run it now</h2>
     <p>The whole motivation in three commands. The environment auto-detects via <code>config/paths.R</code>; override with the
     <code>PENSION_DATA_MODE</code> / <code>PENSION_SAMPLE_ROOT</code> env vars.</p>
     <pre><span class="cm"># From the repo root — no setwd, no path editing:</span>
@@ -659,7 +627,7 @@ Rscript build/build_all.R             <span class="cm"># full-data build (restri
 
   <!-- ===================== OPEN ===================== -->
   <section id="open">
-    <h2><span class="n">14</span> What's left for you</h2>
+    <h2><span class="n">13</span> What's left for you</h2>
     <div class="grid2">
       <div class="card">
         <h3 style="margin-top:0">Decisions</h3>
