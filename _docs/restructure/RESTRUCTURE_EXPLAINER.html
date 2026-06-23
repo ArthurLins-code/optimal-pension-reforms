@@ -615,14 +615,72 @@ clear_dirs(...)   <span class="cm"># wipe temp before a build (G–S "clear befo
   <!-- ===================== RUN ===================== -->
   <section id="run">
     <h2><span class="n">12</span> How to run it now</h2>
-    <p>The whole motivation in three commands. The environment auto-detects via <code>config/paths.R</code>; override with the
-    <code>PENSION_DATA_MODE</code> / <code>PENSION_SAMPLE_ROOT</code> env vars.</p>
-    <pre><span class="cm"># From the repo root — no setwd, no path editing:</span>
-Rscript analysis/analysis_all.R       <span class="cm"># 5% sample: panel → figures, tables, WMVPF (E4→gabriel→pure→G5→I4→I6)</span>
-Rscript presentation/build_deck.R     <span class="cm"># collect figures → compile the English deck → _main.pdf</span>
-Rscript build/build_all.R             <span class="cm"># full-data build (restricted server only; DATA_MODE=full)</span>
+    <p>Two entry styles, same result — pick whichever you prefer:</p>
+    <ul class="tight">
+      <li><b>Source a script</b> (R / RStudio, or a batch job on the server): open R at the repo root and <code>source()</code> a
+      master. <code>RUN.R</code> is the front-door signpost that lists them.</li>
+      <li><b>Terminal</b>: run a master with <code>Rscript</code> from the repo root.</li>
+    </ul>
+    <p>Either way there is <b>no <code>setwd</code> and no path editing</b> — <code>config/paths.R</code> finds the project root
+    (via the <code>.here</code> sentinel) and resolves the data environment automatically. You only choose <b>sample</b> vs
+    <b>server</b> through one env var (or it auto-detects by which data root exists).</p>
 
-<span class="cm"># RUN.R is a front-door signpost listing the three masters.</span></pre>
+    <div class="grid2">
+      <div class="card" style="border-left:4px solid var(--analysis)">
+        <h3 style="margin-top:0;color:var(--analysis)">🟢 With the sample (local, 5% data)</h3>
+        <p class="muted" style="margin-top:0">Validation on your machine. The 928&nbsp;MB panel + cross-section are pre-supplied in
+        the external sample root, so the <b>build stage is skipped</b> (the panel is an input, not rebuilt).</p>
+        <p style="margin:.5em 0 .2em"><b>From R / RStudio</b> — the script way:</p>
+        <pre><span class="cm"># open R at the repo root, then:</span>
+source("RUN.R")                                   <span class="cm"># signpost: prints the 3 entry points</span>
+source(here::here("analysis","analysis_all.R"))   <span class="cm"># panel → figures, tables, WMVPF</span>
+source(here::here("presentation","build_deck.R")) <span class="cm"># figures → English deck (_main.pdf)</span></pre>
+        <p style="margin:.5em 0 .2em"><b>From the terminal:</b></p>
+        <pre>Rscript analysis/analysis_all.R
+Rscript presentation/build_deck.R</pre>
+        <p class="muted" style="margin-bottom:0">Auto-detected as <code>DATA_MODE=sample</code> when the sample root exists; point it
+        elsewhere with <code>PENSION_SAMPLE_ROOT=…/transfer_may_retirement</code>. (<code>build/build_all.R</code> intentionally
+        <code>stop()</code>s here — the panel is an input on the sample.)</p>
+      </div>
+
+      <div class="card" style="border-left:4px solid var(--build)">
+        <h3 style="margin-top:0;color:var(--build)">🔵 On the server (full SUIBE/RAIS)</h3>
+        <p class="muted" style="margin-top:0">The real pipeline on the restricted-access server — here you <b>also rebuild the
+        panel</b> from raw data before estimating. Set the mode once, then run all three masters <b>in order</b>.</p>
+        <p style="margin:.5em 0 .2em"><b>From R / RStudio</b> — the script way:</p>
+        <pre><span class="cm"># in R, at the repo root:</span>
+Sys.setenv(PENSION_DATA_MODE = "full")            <span class="cm"># force full-data mode</span>
+source(here::here("build","build_all.R"))         <span class="cm"># raw SUIBE/RAIS → analysis-ready panel</span>
+source(here::here("analysis","analysis_all.R"))   <span class="cm"># panel → estimates, figures, WMVPF</span>
+source(here::here("presentation","build_deck.R")) <span class="cm"># figures → deck</span></pre>
+        <p style="margin:.5em 0 .2em"><b>Or as a shell / batch job:</b></p>
+        <pre>export PENSION_DATA_MODE=full
+Rscript build/build_all.R         <span class="cm"># full-data only (stops unless DATA_MODE=full)</span>
+Rscript analysis/analysis_all.R
+Rscript presentation/build_deck.R</pre>
+        <p class="muted" style="margin-bottom:0"><b>From-scratch rebuild:</b> <code>build_all.R</code> runs the canonical heads
+        A4/B4/C6/D4; the upstream lineage (A1–A3, B1–B3, C1–C5, D1–D3) that fills <code>working/</code> must run first — see
+        <code>build/code/README.md</code>. Stata steps (B1–B3, C3) run with <code>stata-mp -b do build/code/&lt;file&gt;.do</code>.</p>
+      </div>
+    </div>
+
+    <h3>Environment variables (override the defaults baked into <code>config/paths.R</code>)</h3>
+    <table>
+      <thead><tr><th>Variable</th><th>What it does</th><th>Default</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">PENSION_DATA_MODE</td><td>Force <code>full</code> or <code>sample</code> (skip auto-detection)</td><td>auto-detect by which root exists</td></tr>
+        <tr><td class="mono">PENSION_SAMPLE_ROOT</td><td>5% sample dir (holds <code>data/</code> + <code>output/</code>)</td><td class="mono">…/OneDrive/…/transfer_may_retirement</td></tr>
+        <tr><td class="mono">PENSION_FULL_ROOT</td><td>Full-data <b>analysis</b> root (server)</td><td class="mono">F:/…/directory_2025</td></tr>
+        <tr><td class="mono">PENSION_FULL_BUILD_ROOT</td><td>Full-data <b>build</b> root (the U:/-vs-F:/ split — flag O11)</td><td class="mono">U:/Documents/Paper/directory_2025</td></tr>
+        <tr><td class="mono">PENSION_R_LIBPATH</td><td>R library path (full mode only)</td><td class="mono">F:/docs/R-library</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout"><b>The mode resolves loudly.</b> <code>config/paths.R</code> uses <code>PENSION_DATA_MODE</code> if set;
+    otherwise it picks <code>sample</code> / <code>full</code> by which data root exists; if none is found it <b><code>stop()</code>s</b>
+    listing the roots it looked for — never a silent wrong path. The analysis master also runs a <b>prerequisite check</b> and stops
+    if the tables it consumes (legacy <code>F5</code>, siblings <code>G4</code>/<code>H2</code>) are missing, rather than producing a
+    wrong number.</div>
   </section>
 
   <!-- ===================== OPEN ===================== -->
