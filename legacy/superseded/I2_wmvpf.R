@@ -1,3 +1,5 @@
+stop("SUPERSEDED — not part of the current workflow. Canonical replacement: I4_wmvpf_no_pure_reforms_freq.R. Archived 2026-06-23 (usage audit); see legacy/superseded/README.md.")
+# ----- original file below (superseded; never run) -----
 # ******************************************************************************
 # This code
 #

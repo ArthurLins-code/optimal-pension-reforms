@@ -66,3 +66,23 @@ flagged (`apresentacao-graphicspath`), unchanged.
 > Static-check only this stage; **Stage 3 re-runs the pipeline on the 5% sample to prove figure+number parity vs `baseline/`.**
 > Note: ESC interrupted the first Stage-2 batch after 13/14 units (committed `1ea2dd8`); a focused recovery workflow finished the
 > presentation `.py` tools (committed in part-2).
+
+---
+
+## Post-restructure usage audit (2026-06-23)
+
+A 2-agent audit traced every file's output consumers to classify `build/code/` and `analysis/code/` as
+canonical / live-dependency / lineage-upstream / manual-diagnostic / dead-superseded.
+
+**New flag:**
+
+| id | file:line | sev | description | disposition |
+|----|-----------|-----|-------------|-------------|
+| **h2-vs-h3** | `analysis/code/H3_policy_elasticity.R` vs `H2_policy_elasticity_MW.R` | MAJOR | `CLAUDE.md` designates **H3** the canonical H stage, but in practice **H2** is the live one: H2 produces `output/H/H2_table_results*.csv` (read by I4 & I6) **and** the elasticity figure the deck pulls, while H3 is full-data-only (no sample branch), figures-only, and on no master. So the "canonical H" label and the actual data flow disagree. Per Arthur (2026-06-23): **H2 is the real H stage**; reconcile the `CLAUDE.md` designation. H3 kept in place (not archived) pending that call. | FLAG — professor/Arthur decision |
+
+**Archival (not a bug — a cleanliness fix, approved by Arthur):** 11 confirmed-dead version-predecessors in `analysis/code/`
+(`E1 E2 E3 · G1 G2 G3 · H1 · I1 I2 I3 · new_counterfactual_claiming2`) were `git mv`'d to `legacy/superseded/` and guarded with
+`stop()`. Each was verified to have **no** consumer among the masters, canonical files, or the deck (a closed island of
+mutually-referencing dead files). `build/code/` had **zero** dead files (all live lineage / deps) — nothing archived there.
+`code/README.md` manifests were added to both `build/code/` and `analysis/code/` so the folders are legible without `CLAUDE.md`.
+**Parity unaffected** — none of the moved files is on any master or read by a canonical stage (re-confirmed by sample re-run).

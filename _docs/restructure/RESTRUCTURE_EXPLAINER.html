@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Repository Restructure — optimal-pension-reforms (branch: code-and-data)</title>
+<style>
+  :root{
+    --bg:#f6f8fc; --panel:#ffffff; --ink:#1e293b; --muted:#64748b; --line:#e2e8f0;
+    --build:#2563eb; --analysis:#16a34a; --present:#9333ea; --config:#d97706; --legacy:#dc2626;
+    --pass:#16a34a; --warn:#d97706; --bad:#dc2626; --accent:#4f46e5;
+    --code:#0f172a; --codetext:#e2e8f0;
+    --shadow:0 1px 3px rgba(15,23,42,.08),0 8px 24px rgba(15,23,42,.06);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+       color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased}
+  .wrap{display:grid;grid-template-columns:248px 1fr;max-width:1280px;margin:0 auto;gap:0}
+  /* ---- header ---- */
+  header.top{grid-column:1/-1;background:linear-gradient(120deg,#0b1220 0%,#1e293b 45%,#3730a3 100%);
+       color:#fff;padding:42px 40px 36px;border-bottom:4px solid var(--accent)}
+  header.top .kicker{letter-spacing:.18em;text-transform:uppercase;font-size:12px;color:#a5b4fc;font-weight:700}
+  header.top h1{margin:.25em 0 .15em;font-size:30px;line-height:1.15}
+  header.top p{margin:.2em 0;color:#cbd5e1;max-width:70ch}
+  header.top .branch{display:inline-block;font-family:ui-monospace,Menlo,Consolas,monospace;background:rgba(255,255,255,.12);
+       border:1px solid rgba(255,255,255,.18);border-radius:6px;padding:2px 8px;color:#e0e7ff;font-size:13px}
+  .badges{margin-top:16px;display:flex;flex-wrap:wrap;gap:10px}
+  .badge{background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.16);border-radius:999px;
+       padding:6px 13px;font-size:13px;color:#eef2ff}
+  .badge b{color:#fff}
+  .badge.pass{background:rgba(22,163,74,.22);border-color:rgba(22,163,74,.5)}
+  /* ---- nav ---- */
+  nav{position:sticky;top:0;align-self:start;height:100vh;overflow:auto;padding:24px 16px 40px;
+      border-right:1px solid var(--line);background:#fbfcfe}
+  nav h4{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:18px 8px 8px}
+  nav a{display:block;color:#334155;text-decoration:none;font-size:13.5px;padding:6px 10px;border-radius:7px;border-left:2px solid transparent}
+  nav a:hover{background:#eef2ff;color:#3730a3;border-left-color:var(--accent)}
+  /* ---- main ---- */
+  main{padding:36px 44px 80px;min-width:0}
+  section{margin:0 0 44px;scroll-margin-top:20px}
+  h2{font-size:23px;margin:0 0 6px;padding-bottom:8px;border-bottom:2px solid var(--line);display:flex;align-items:center;gap:10px}
+  h2 .n{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:8px;background:var(--accent);color:#fff;font-size:15px;font-weight:700}
+  h3{font-size:17px;margin:24px 0 6px;color:#0f172a}
+  p{margin:.5em 0}
+  .lead{font-size:17px;color:#334155}
+  code{font-family:ui-monospace,Menlo,Consolas,monospace;background:#eef1f7;border:1px solid #e2e8f0;border-radius:5px;padding:.5px 5px;font-size:.86em}
+  pre{background:var(--code);color:var(--codetext);border-radius:10px;padding:16px 18px;overflow:auto;font-size:13px;line-height:1.55;box-shadow:var(--shadow)}
+  pre .c{color:#7dd3fc}.pre .k{color:#c4b5fd}
+  pre .cm{color:#64748b;font-style:italic}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px 22px;box-shadow:var(--shadow);margin:14px 0}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .callout{border-left:4px solid var(--accent);background:#f5f3ff;border-radius:0 10px 10px 0;padding:12px 16px;margin:14px 0}
+  .callout.warn{border-color:var(--warn);background:#fffbeb}
+  .callout.bad{border-color:var(--bad);background:#fef2f2}
+  .callout.good{border-color:var(--pass);background:#f0fdf4}
+  table{border-collapse:collapse;width:100%;font-size:13.5px;margin:12px 0;background:#fff;border-radius:10px;overflow:hidden;box-shadow:var(--shadow)}
+  th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:#f1f5f9;font-size:12px;letter-spacing:.03em;text-transform:uppercase;color:#475569}
+  tr:last-child td{border-bottom:none}
+  .tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;white-space:nowrap}
+  .t-build{background:#dbeafe;color:#1e40af}.t-analysis{background:#dcfce7;color:#166534}
+  .t-present{background:#f3e8ff;color:#6b21a8}.t-config{background:#fef3c7;color:#92400e}
+  .t-legacy{background:#fee2e2;color:#991b1b}.t-pass{background:#dcfce7;color:#166534}
+  .t-flag{background:#ffedd5;color:#9a3412}.t-false{background:#e2e8f0;color:#334155}
+  .metric{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:16px 0}
+  .metric .m{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;text-align:center;box-shadow:var(--shadow)}
+  .metric .m .v{font-size:26px;font-weight:800;color:#0f172a;line-height:1}
+  .metric .m .l{font-size:12px;color:var(--muted);margin-top:6px}
+  .fig{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;box-shadow:var(--shadow);margin:16px 0;overflow:auto}
+  .fig figcaption{font-size:12.5px;color:var(--muted);margin-top:8px;text-align:center}
+  .muted{color:var(--muted)} .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
+  .pillrow{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+  ul.tight{margin:.4em 0;padding-left:1.25em} ul.tight li{margin:.2em 0}
+  .sep{height:1px;background:var(--line);margin:30px 0}
+  @media(max-width:900px){.wrap{grid-template-columns:1fr}nav{display:none}main{padding:24px}.grid2,.grid3,.metric{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="kicker">Repository Restructure · Engineering Report</div>
+    <h1>From a flat script folder to a portable, parity-proven pipeline</h1>
+    <p><b>Project:</b> <i>optimal-pension-reforms</i> — MVPF/WMVPF of Brazil's 2015 pension reform (Lei 13.183/2015). Gonzaga &amp; Rios (PUC-Rio), Lemos (MIT Sloan); RA: Arthur.</p>
+    <p>Branch <span class="branch">code-and-data</span> &nbsp;·&nbsp; 5 commits <span class="mono">bc60bad → e4a9af7</span> &nbsp;·&nbsp; 2026-06-23 &nbsp;·&nbsp; <code>main</code> untouched</p>
+    <div class="badges">
+      <span class="badge"><b>357</b> files changed</span>
+      <span class="badge"><b>314</b> history-preserving renames</span>
+      <span class="badge">+<b>4,582</b> / −<b>430</b> lines</span>
+      <span class="badge pass">Parity ✓ <b>66/66</b> figures</span>
+      <span class="badge pass">Parity ✓ <b>26/26</b> numbers</span>
+      <span class="badge">0 <b>setwd</b> in canonical stages</span>
+    </div>
+  </header>
+
+  <nav>
+    <h4>Contents</h4>
+    <a href="#tldr">0 · TL;DR</a>
+    <a href="#why">1 · Why restructure</a>
+    <a href="#before-after">2 · Before → After</a>
+    <a href="#method">3 · The multi-agent method</a>
+    <a href="#stage0">4 · Stage 0 — map &amp; baseline</a>
+    <a href="#config">5 · The config layer</a>
+    <a href="#stage1">6 · Stage 1 — the move</a>
+    <a href="#stage2">7 · Stage 2 — repath &amp; constants</a>
+    <a href="#stage3">8 · Stage 3 — parity proof</a>
+    <a href="#dag">9 · The pipeline DAG</a>
+    <a href="#flags">10 · Bugs flagged</a>
+    <a href="#hygiene">11 · Used vs. archived code</a>
+    <a href="#timeline">12 · Commit timeline</a>
+    <a href="#run">13 · How to run now</a>
+    <a href="#open">14 · What's left</a>
+  </nav>
+
+  <main>
+  <!-- ===================== TLDR ===================== -->
+  <section id="tldr">
+    <h2><span class="n">0</span> TL;DR</h2>
+    <p class="lead">The pipeline that estimates the welfare value of Brazil's 2015 pension reform lived in one flat folder
+    (<code>trans_retirement/code/</code>), wired together with machine-specific absolute paths and <code>setwd()</code> calls, with
+    no single command to run it. This branch reorganised it — using a <b>team of AI sub-agents under an orchestrator</b> — into a
+    clean <b>build → analysis → presentation</b> layout with a single <b>configuration layer</b> for every path, three <b>master
+    scripts</b>, and a guarded <b>legacy</b> quarantine — and then <b>proved</b> the reorganisation changed <b>zero results</b> by
+    re-running on the 5% sample and hashing every figure and number against a snapshot taken <i>before</i> anything moved.</p>
+
+    <div class="metric">
+      <div class="m"><div class="v">5</div><div class="l">commits, ~1 hour</div></div>
+      <div class="m"><div class="v">0.2126</div><div class="l">WMVPF (actual) — identical before &amp; after</div></div>
+      <div class="m"><div class="v">142</div><div class="l">deck pages, recompiled &amp; verified</div></div>
+      <div class="m"><div class="v">10</div><div class="l">real bugs flagged (not silently fixed)</div></div>
+    </div>
+
+    <div class="callout good"><b>The keystone idea.</b> Because the "before" and "after" runs use the <i>same</i> 5% sample,
+    sampling noise cancels — so <i>any</i> difference would be the restructure's fault. There were none: 66/66 figures
+    pixel-identical, 26/26 numbers exact. The move is provably safe.</div>
+  </section>
+
+  <!-- ===================== WHY ===================== -->
+  <section id="why">
+    <h2><span class="n">1</span> Why restructure — the problems we started with</h2>
+    <p>The starting point (branch base <code>bc60bad</code>) had a working analysis but several structural hazards, the kind
+    that <a href="https://web.stanford.edu/~gentzkow/research/CodeAndData.pdf" target="_blank" rel="noopener">Gentzkow &amp; Shapiro's
+    <i>Code and Data for the Social Sciences</i></a> warns against. The guiding goals were, in priority order:
+    <b>Safe</b> (a move must never silently change a number), <b>Clear</b> (read the run order from the tree alone),
+    <b>Reproducible</b> (one command rebuilds everything), <b>Portable</b> (no machine-specific paths), and <b>Economic</b>
+    (the layout mirrors the paper's argument).</p>
+    <div class="grid2">
+      <div class="card">
+        <h3 style="margin-top:0;color:var(--bad)">⚠ Hazards in the old layout</h3>
+        <ul class="tight">
+          <li><b>Machine-specific absolute paths</b> — every script hard-coded <code>F:/</code>, <code>U:/</code>, or a
+          <code>C:/…/OneDrive/…</code> root.</li>
+          <li><b><code>setwd()</code> everywhere</b> — each stage changed the working directory, so order &amp; cwd mattered and breakage was silent.</li>
+          <li><b>Code &amp; outputs mixed</b>; figures collected through ad-hoc paths; no separation of "slow estimation" from "fast plotting".</li>
+          <li><b>No master script</b> — no <code>Makefile</code>, <code>.Rproj</code>, or <code>run_all</code>; stages A–I were run by hand.</li>
+          <li><b>A fragile <code>tmp/</code> hand-off</b> between <code>gabriel.R</code> and <code>pure.R</code> (open issue O1).</li>
+          <li><b>Legacy mixed with canonical</b> — abandoned files (F1–F7, G6, I5) sat next to the live ones.</li>
+          <li><b>CRLF/LF phantom diffs</b> — 181 files could show as "modified" from line endings alone.</li>
+          <li><b><code>constants.R</code> existed but was never wired in</b> — magic numbers (γ, replacement rates, thresholds) were retyped across files.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0;color:var(--pass)">✓ What the restructure delivers</h3>
+        <ul class="tight">
+          <li><b>One path file</b> — <code>config/paths.R</code>: a single <code>PATHS</code> list; a folder move now edits one file, not forty.</li>
+          <li><b>Zero <code>setwd()</code></b> in canonical stages; the project root is found via a <code>.here</code> sentinel.</li>
+          <li><b>Functional split</b> — <code>build/</code> (make the data) → <code>analysis/</code> (estimate) → <code>presentation/</code> (the deck).</li>
+          <li><b>Three master scripts</b> + a root <code>RUN.R</code> front door — <code>source()</code> one file to run a phase.</li>
+          <li><b>Persistent hand-off</b> — the <code>tmp/</code> seam routed to <code>PATHS$analysis_temp</code>.</li>
+          <li><b>Legacy quarantined</b> in <code>legacy/</code>, each file guarded by a loud <code>stop()</code>.</li>
+          <li><b><code>.gitattributes</code></b> (<code>* text=auto</code>) kills the line-ending churn.</li>
+          <li><b><code>constants.R</code> wired in</b> — γ, η, replacement-rate schedules, thresholds defined once.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== BEFORE / AFTER ===================== -->
+  <section id="before-after">
+    <h2><span class="n">2</span> Before → After, at a glance</h2>
+    <figure class="fig">
+      <svg viewBox="0 0 980 470" width="100%" role="img" aria-label="Before and after directory structures">
+        <style>
+          .ttl{font:700 15px sans-serif} .lbl{font:13px ui-monospace,monospace;fill:#1e293b}
+          .sub{font:11px sans-serif;fill:#64748b} .box{rx:9;stroke-width:1.5}
+          .pain{font:11px sans-serif;fill:#b91c1c} .gain{font:11px sans-serif;fill:#15803d}
+        </style>
+        <!-- BEFORE -->
+        <text x="40" y="28" class="ttl" fill="#b91c1c">BEFORE — flat, machine-bound</text>
+        <rect x="40" y="42" width="380" height="392" rx="12" fill="#fff" stroke="#fecaca"/>
+        <rect x="60" y="60" width="340" height="40" rx="9" fill="#fef2f2" stroke="#fca5a5"/>
+        <text x="74" y="78" class="lbl">trans_retirement/code/</text>
+        <text x="74" y="93" class="sub">A1–A4 B1–B4 C1–C6 D1–D4 E1–E4 …</text>
+        <rect x="60" y="108" width="340" height="86" rx="9" fill="#f8fafc" stroke="#e2e8f0"/>
+        <text x="74" y="128" class="lbl">… F1–F7  G1–G6  H1–H3  I1–I7</text>
+        <text x="74" y="146" class="lbl">gabriel.R  pure.R  constants.R</text>
+        <text x="74" y="164" class="lbl">old/  legacy/  aux_codes_RAIS/</text>
+        <text x="74" y="184" class="sub">canonical + legacy + helpers, all together</text>
+        <rect x="60" y="204" width="340" height="34" rx="9" fill="#f8fafc" stroke="#e2e8f0"/>
+        <text x="74" y="226" class="lbl">trans_retirement/output/  (mixed in)</text>
+        <rect x="60" y="246" width="165" height="34" rx="9" fill="#f8fafc" stroke="#e2e8f0"/>
+        <text x="74" y="268" class="lbl">figures_central_folder/</text>
+        <rect x="235" y="246" width="165" height="34" rx="9" fill="#f8fafc" stroke="#e2e8f0"/>
+        <text x="249" y="268" class="lbl">latex/  (root)</text>
+        <text x="60" y="312" class="pain">✗ setwd("F:/…")  ·  fread('data/…')  hard-coded</text>
+        <text x="60" y="332" class="pain">✗ no master script — run A→I by hand</text>
+        <text x="60" y="352" class="pain">✗ gabriel→pure via fragile tmp/</text>
+        <text x="60" y="372" class="pain">✗ legacy F1–F7/G6/I5 runnable, in the way</text>
+        <text x="60" y="392" class="pain">✗ constants retyped per file</text>
+        <text x="60" y="412" class="pain">✗ 181-file CRLF phantom diff</text>
+        <!-- arrow -->
+        <g transform="translate(440,235)">
+          <path d="M0,0 H78" stroke="#4f46e5" stroke-width="3" marker-end="url(#ar)"/>
+          <text x="6" y="-12" class="sub" style="fill:#4f46e5;font-weight:700">git mv +<tspan x="6" dy="14">config layer</tspan></text>
+        </g>
+        <defs><marker id="ar" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#4f46e5"/></marker></defs>
+        <!-- AFTER -->
+        <text x="560" y="28" class="ttl" fill="#15803d">AFTER — functional, portable</text>
+        <rect x="560" y="42" width="380" height="392" rx="12" fill="#fff" stroke="#bbf7d0"/>
+        <rect x="578" y="58" width="344" height="38" rx="9" fill="#fffbeb" stroke="#fcd34d"/>
+        <text x="592" y="76" class="lbl" style="fill:#92400e">config/  paths.R · constants.R</text>
+        <text x="592" y="90" class="sub">one PATHS list · DATA_MODE · no setwd</text>
+        <rect x="578" y="104" width="344" height="56" rx="9" fill="#eff6ff" stroke="#93c5fd"/>
+        <text x="592" y="123" class="lbl" style="fill:#1e40af">build/  code(A–D) · build_all.R</text>
+        <text x="592" y="141" class="sub">data construction — full-data / server only</text>
+        <rect x="578" y="168" width="344" height="56" rx="9" fill="#f0fdf4" stroke="#86efac"/>
+        <text x="592" y="187" class="lbl" style="fill:#166534">analysis/  code(E–I) · analysis_all.R</text>
+        <text x="592" y="205" class="sub">estimation &amp; results — runs on 5% sample</text>
+        <rect x="578" y="232" width="344" height="56" rx="9" fill="#faf5ff" stroke="#d8b4fe"/>
+        <text x="592" y="251" class="lbl" style="fill:#6b21a8">presentation/  figures + latex · build_deck.R</text>
+        <text x="592" y="269" class="sub">results → compiled deck</text>
+        <rect x="578" y="296" width="344" height="38" rx="9" fill="#fef2f2" stroke="#fca5a5"/>
+        <text x="592" y="319" class="lbl" style="fill:#991b1b">legacy/  F1–F7 · G6 · I5 · old/  → stop()</text>
+        <text x="578" y="358" class="gain">✓ every path via PATHS — one place to change</text>
+        <text x="578" y="378" class="gain">✓ Rscript analysis/analysis_all.R  (one command)</text>
+        <text x="578" y="398" class="gain">✓ RUN.R front door · 0 setwd · guarded legacy</text>
+        <text x="578" y="418" class="gain">✓ history preserved (git mv) · parity proven</text>
+      </svg>
+      <figcaption>The same files, regrouped by <b>function</b> and addressed through one config layer. Stage letters A–I are preserved inside.</figcaption>
+    </figure>
+    <p>The reorganisation is a pure <b>relocation + plumbing</b> change: 314 of the file changes are <code>git mv</code> renames
+    (history fully preserved), and not a single line of <b>estimation logic</b> was altered. Where the old code said
+    <code>setwd("F:/…"); fread('data/x.csv')</code>, the new code says <code>fread(file.path(PATHS$data_root, 'data', 'x.csv'))</code> —
+    same bytes read, but now portable.</p>
+  </section>
+
+  <!-- ===================== METHOD ===================== -->
+  <section id="method">
+    <h2><span class="n">3</span> The method — an orchestrator driving a team of agents</h2>
+    <p>A reorganisation like this is risky precisely because it touches everything. The work was structured as five stages with a
+    hard <b>human-approval gate</b> in the middle, and the labour was split between a single <b>orchestrator</b> (which held the
+    plan and made decisions) and <b>delegated sub-agents</b> (which did the producing — mapping, running, repathing, verifying).
+    The orchestrator never interleaved a folder move with a logic edit, so a parity failure would always have exactly one possible
+    cause.</p>
+    <figure class="fig">
+      <svg viewBox="0 0 980 300" width="100%" role="img" aria-label="Five-stage orchestration pipeline">
+        <style>
+          .s-ttl{font:700 13px sans-serif;fill:#0f172a}.s-sub{font:10.5px sans-serif;fill:#64748b}
+          .node{rx:10}.agent{font:10px sans-serif;fill:#334155}.stg{font:700 11px sans-serif;fill:#fff}
+        </style>
+        <defs><marker id="a2" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#94a3b8"/></marker></defs>
+        <!-- stage 0 -->
+        <rect x="14" y="40" width="208" height="220" rx="12" fill="#eef2ff" stroke="#c7d2fe"/>
+        <rect x="14" y="40" width="208" height="26" rx="12" fill="#4f46e5"/><text x="24" y="58" class="stg">STAGE 0 · map + baseline</text>
+        <rect x="30" y="78" width="80" height="34" class="node" fill="#fff" stroke="#c7d2fe"/><text x="40" y="99" class="agent">map: BUILD</text>
+        <rect x="30" y="116" width="80" height="34" class="node" fill="#fff" stroke="#c7d2fe"/><text x="40" y="137" class="agent">map: ANALYSIS</text>
+        <rect x="30" y="154" width="80" height="34" class="node" fill="#fff" stroke="#c7d2fe"/><text x="40" y="175" class="agent">map: PRESENT.</text>
+        <rect x="128" y="116" width="80" height="34" class="node" fill="#e0e7ff" stroke="#a5b4fc"/><text x="138" y="137" class="agent">conciliator</text>
+        <rect x="60" y="206" width="120" height="38" class="node" fill="#ddd6fe" stroke="#a78bfa"/><text x="70" y="223" class="agent" style="font-weight:700">baseline runner</text><text x="70" y="237" class="agent">hash 66 figs + 26 nums</text>
+        <path d="M110,95 H126" stroke="#94a3b8" marker-end="url(#a2)"/><path d="M110,133 H126" stroke="#94a3b8" marker-end="url(#a2)"/><path d="M110,171 H126 V150" stroke="#94a3b8" marker-end="url(#a2)"/>
+        <path d="M168,150 V204" stroke="#94a3b8" marker-end="url(#a2)"/>
+        <!-- GATE -->
+        <rect x="238" y="96" width="92" height="108" rx="12" fill="#fff7ed" stroke="#fdba74"/>
+        <text x="284" y="120" text-anchor="middle" class="s-ttl" style="fill:#c2410c">GATE</text>
+        <text x="284" y="140" text-anchor="middle" class="s-sub">plan +</text>
+        <text x="284" y="154" text-anchor="middle" class="s-sub">Arthur's</text>
+        <text x="284" y="168" text-anchor="middle" class="s-sub">approval</text>
+        <text x="284" y="190" text-anchor="middle" style="font:18px sans-serif">✋</text>
+        <path d="M222,150 H236" stroke="#94a3b8" marker-end="url(#a2)"/>
+        <!-- stage 1 -->
+        <rect x="346" y="96" width="120" height="108" rx="12" fill="#eff6ff" stroke="#bfdbfe"/>
+        <rect x="346" y="96" width="120" height="24" rx="12" fill="#2563eb"/><text x="356" y="113" class="stg">STAGE 1 · move</text>
+        <text x="360" y="140" class="agent">git mv (314)</text>
+        <text x="360" y="158" class="agent">config/ + masters</text>
+        <text x="360" y="176" class="agent">legacy stop() guards</text>
+        <text x="360" y="194" class="agent">.gitattributes</text>
+        <path d="M330,150 H344" stroke="#94a3b8" marker-end="url(#a2)"/>
+        <!-- stage 2 -->
+        <rect x="482" y="96" width="140" height="108" rx="12" fill="#f0fdf4" stroke="#bbf7d0"/>
+        <rect x="482" y="96" width="140" height="24" rx="12" fill="#16a34a"/><text x="492" y="113" class="stg">STAGE 2 · repath</text>
+        <text x="496" y="140" class="agent">14 parallel agents</text>
+        <text x="496" y="158" class="agent">paths → PATHS</text>
+        <text x="496" y="176" class="agent">wire constants</text>
+        <text x="496" y="194" class="agent">flag bugs (not fix)</text>
+        <path d="M466,150 H480" stroke="#94a3b8" marker-end="url(#a2)"/>
+        <!-- stage 3 -->
+        <rect x="638" y="96" width="150" height="108" rx="12" fill="#f5f3ff" stroke="#ddd6fe"/>
+        <rect x="638" y="96" width="150" height="24" rx="12" fill="#7c3aed"/><text x="648" y="113" class="stg">STAGE 3 · parity</text>
+        <text x="652" y="140" class="agent">re-run on sample</text>
+        <text x="652" y="158" class="agent">re-hash vs baseline</text>
+        <text x="652" y="176" class="agent" style="fill:#15803d;font-weight:700">PASS 66/66 · 26/26</text>
+        <text x="652" y="194" class="agent">fix FINDING-1 → re-verify</text>
+        <path d="M622,150 H636" stroke="#94a3b8" marker-end="url(#a2)"/>
+        <!-- stage 4 -->
+        <rect x="804" y="96" width="162" height="108" rx="12" fill="#fdf4ff" stroke="#f5d0fe"/>
+        <rect x="804" y="96" width="162" height="24" rx="12" fill="#a21caf"/><text x="814" y="113" class="stg">STAGE 4 · docs</text>
+        <text x="818" y="140" class="agent">re-map (MAP_after)</text>
+        <text x="818" y="158" class="agent">CLAUDE.md · README</text>
+        <text x="818" y="176" class="agent">parity record</text>
+        <text x="818" y="194" class="agent">main untouched</text>
+        <path d="M788,150 H802" stroke="#94a3b8" marker-end="url(#a2)"/>
+        <text x="14" y="285" class="s-sub">Read-only mapping &amp; verification ran as delegated sub-agents (all on Opus 4.8); the orchestrator held the plan, gated on approval, and committed.</text>
+      </svg>
+      <figcaption>Five stages, one human gate. "Move first, repath second, verify third" — never interleaved.</figcaption>
+    </figure>
+    <div class="callout"><b>Why split into a team?</b> One agent cannot line-level-map ~20 scripts (several over 1,000 lines)
+    <i>and</i> run the 928&nbsp;MB-panel pipeline well — too much context, and it mixes static reading with live execution. So
+    mapping fanned out by code area, a conciliator stitched the pieces into one dependency graph, and a separate runner captured
+    the baseline. The orchestrator only controlled; it never produced.</div>
+  </section>
+
+  <!-- ===================== STAGE 0 ===================== -->
+  <section id="stage0">
+    <h2><span class="n">4</span> Stage 0 — cartography &amp; the golden baseline</h2>
+    <p>Before touching anything, three read-only "area mappers" inventoried every file: its language, purpose, the paths it reads
+    and writes, its dependency edges, and every fragile path literal. A conciliator merged the three partial maps into one
+    <b>canonical dependency graph</b> and decided the <b>parity set</b> — exactly which stages actually run on the 5% sample.</p>
+    <div class="grid2">
+      <div class="card">
+        <h3 style="margin-top:0">The parity set (sample-runnable)</h3>
+        <p class="muted" style="margin-top:0">These six re-run on the 5% sample, so they can be hashed before/after:</p>
+        <div class="pillrow">
+          <span class="tag t-analysis">E4</span><span class="tag t-analysis">gabriel</span><span class="tag t-analysis">pure</span>
+          <span class="tag t-analysis">G5</span><span class="tag t-analysis">I4</span><span class="tag t-analysis">I6</span>
+        </div>
+        <p class="muted" style="margin-bottom:0">Excluded (full-data / not in parity): <span class="tag t-build">A4 B4 C6 D4</span>
+        <span class="tag t-legacy">H3 (no sample branch)</span> <span class="tag t-false">I7 (diagnostic)</span></p>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">The golden baseline captured</h3>
+        <ul class="tight" style="margin-bottom:0">
+          <li><b>66</b> figures → rendered to PNG @150 DPI &amp; SHA-256'd (metadata-independent).</li>
+          <li>The compiled deck — <b>142 pages</b>.</li>
+          <li><b>26</b> key numbers: WMVPF actual / bL / bS, η, elasticity, claiming-count tables (with CSV hashes).</li>
+          <li>Tree restored clean afterward — Stage 1's <code>git mv</code> started pristine.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="callout good"><b>Why a "before" snapshot is the whole game.</b> You cannot prove "the deck is unchanged" without a
+    fingerprint taken before the move. Because the deck embeds a <code>\today</code> build-date on every Beamer frame, the holistic
+    PDF hash always differs by date — so parity was anchored on the <i>date-free</i> per-figure PNG hashes and the numbers, not the
+    raw PDF.</div>
+  </section>
+
+  <!-- ===================== CONFIG ===================== -->
+  <section id="config">
+    <h2><span class="n">5</span> The portability layer — <span class="mono" style="font-size:18px">config/paths.R</span></h2>
+    <p>This single file is the most important fix. It finds the project root with no <code>setwd</code> (via a <code>.here</code>
+    sentinel), resolves the data environment <b>loudly</b> (an explicit error if no data root is found — never a silent wrong path),
+    and exposes one <code>PATHS</code> list that every stage uses. A folder move now changes <i>this file</i>, not forty scripts.</p>
+    <pre><span class="cm"># config/paths.R  (abridged)</span>
+PROJECT_ROOT &lt;- rprojroot::find_root(rprojroot::has_file(".here"))   <span class="cm"># no setwd, ever</span>
+
+<span class="cm"># DATA_MODE: env override → detect by existing roots → loud stop()</span>
+if (Sys.getenv("PENSION_DATA_MODE") %in% c("full","sample")) DATA_MODE &lt;- ...
+else if (dir.exists(SAMPLE_ROOT)) DATA_MODE &lt;- "sample"
+else if (dir.exists(FULL_ANALYSIS_ROOT)) DATA_MODE &lt;- "full"
+else stop("could not resolve DATA_MODE — no recognised data root")   <span class="cm"># never guess</span>
+
+PATHS &lt;- list(
+  data_root   = DATA_ROOT,          sample_data = file.path(SAMPLE_ROOT, "data"),
+  output_F    = file.path(DATA_ROOT,"output","F"),   analysis_temp = file.path(DATA_ROOT,"tmp"),
+  figures_from_code = file.path(PROJECT_ROOT,"presentation","figures_central_folder","from_code"),
+  ... )                              <span class="cm"># one list, every root + dir</span>
+
+run_stage(file)   <span class="cm"># source a stage, timed + logged, variables don't leak</span>
+clear_dirs(...)   <span class="cm"># wipe temp before a build (G–S "clear before you build")</span></pre>
+    <p>A sibling <code>config/constants.R</code> holds every economic primitive <b>once</b> — γ (CRRA) = 4, the replacement-rate
+    schedules (<code>0.69 + 0.021·p</code> women, <code>0.82 + 0.025·p</code> men), thresholds (85 / 95), the bunching window, the DiD
+    reference period, and the welfare weight η ≈ 0.828 <i>computed</i> from consumption levels rather than retyped. The
+    LaTeX-to-code mapping is now one-to-one and auditable.</p>
+  </section>
+
+  <!-- ===================== STAGE 1 ===================== -->
+  <section id="stage1">
+    <h2><span class="n">6</span> Stage 1 — the move (commit <span class="mono">7f07617</span>)</h2>
+    <p>Files were relocated with <code>git mv</code> so history follows them, and the scaffolding (config, masters, guards) was
+    created. <b>No internal path edit</b> happened here — pure relocation, so the next stage's parity test has one cause at a time.</p>
+    <table>
+      <thead><tr><th>Destination</th><th>What moved in</th><th>Count</th></tr></thead>
+      <tbody>
+        <tr><td><span class="tag t-config">config/</span></td><td><code>constants.R</code> (+ new <code>paths.R</code>)</td><td>2</td></tr>
+        <tr><td><span class="tag t-build">build/code/</span></td><td>A1–A4, B1–B4, C1–C6, D1–D4, <code>aux_codes_RAIS/</code></td><td>31</td></tr>
+        <tr><td><span class="tag t-analysis">analysis/code/</span></td><td>E1–E4, <code>…claiming3_{gabriel,pure}.R</code>, G1–G5, H1–H3, I1–I4, I6, I7, I7b</td><td>22</td></tr>
+        <tr><td><span class="tag t-present">presentation/</span></td><td><code>figures_central_folder/</code> + <code>latex/</code> (moved <i>together</i> — see note)</td><td>~248</td></tr>
+        <tr><td><span class="tag t-legacy">legacy/</span></td><td>F1–F7, G6, I5, <code>old/</code> B1–B2 — each prefixed with a <code>stop()</code> guard</td><td>12</td></tr>
+      </tbody>
+    </table>
+    <div class="callout"><b>A neat trick that avoided edits.</b> The deck's
+    <code>\graphicspath{{../../figures_central_folder/from_code/}…}</code> is a <i>relative</i> path. By moving <code>latex/</code>
+    and <code>figures_central_folder/</code> <b>together</b> under <code>presentation/</code>, the <code>../../</code> offset still
+    resolves — so the deck needed <b>zero</b> graphicspath edits.</div>
+    <p>Also added: a <code>.here</code> root sentinel, <code>.gitattributes</code> (<code>* text=auto</code>), <code>.gitkeep</code>
+    placeholders for the gitignored I/O dirs, an updated <code>.gitignore</code>, and the three masters
+    (<code>build_all.R</code>, <code>analysis_all.R</code>, <code>build_deck.R</code>) + a root <code>RUN.R</code> signpost.</p>
+  </section>
+
+  <!-- ===================== STAGE 2 ===================== -->
+  <section id="stage2">
+    <h2><span class="n">7</span> Stage 2 — repath &amp; wire constants (commits <span class="mono">1ea2dd8</span>, <span class="mono">ae0c299</span>)</h2>
+    <p>Fourteen parallel agents — one per unit — performed <b>plumbing only</b>: drop every <code>setwd</code>, add the two
+    <code>source(config/…)</code> lines, route all I/O through <code>PATHS</code>, substitute the safe constants (values are
+    identical, so outputs cannot change), and <b>flag — never fix</b> the econometric bugs.</p>
+    <div class="grid3">
+      <div class="card"><h3 style="margin-top:0;font-size:15px">Path migration</h3>
+        <p class="muted" style="margin:0"><code>setwd("F:/…")</code> + <code>fread('data/x')</code> →
+        <code>fread(file.path(PATHS$data_root,'data','x'))</code>. The O1 hand-off rerouted to <code>PATHS$analysis_temp</code>,
+        consistent on both the gabriel (write) and pure (read) sides.</p></div>
+      <div class="card"><h3 style="margin-top:0;font-size:15px">Constant wiring</h3>
+        <p class="muted" style="margin:0">Literals like <code>85/95</code>, γ=<code>4</code>, the RR coefficients → named constants.
+        The discount literals <code>1.005 / 0.995</code> were left <b>verbatim</b> (that asymmetry is a flagged bug, not ours to
+        "harmonise").</p></div>
+      <div class="card"><h3 style="margin-top:0;font-size:15px">Static-checked</h3>
+        <p class="muted" style="margin:0">Every file <code>parse()</code>d / <code>py_compile</code>d — no heavy compute here. The
+        real test was deferred to Stage 3's full re-run.</p></div>
+    </div>
+    <div class="callout warn"><b>The ESC incident &amp; recovery.</b> Mid-run, the first Stage-2 agent batch was interrupted (an
+    accidental <kbd>Esc</kbd>) after 13 of 14 units finished. Rather than redo good work, the 13 verified units were committed, and
+    a focused <b>recovery workflow</b> finished the last unit — the four presentation Python tools. It even caught that the
+    interrupted run had left <code>update_deck.py</code> half-edited (a dangling unused <code>import os</code>) and completed it.</div>
+  </section>
+
+  <!-- ===================== STAGE 3 ===================== -->
+  <section id="stage3">
+    <h2><span class="n">8</span> Stage 3 — the parity proof (commit <span class="mono">1d1cb3f</span>)</h2>
+    <p>The whole point. The new pipeline was re-run end-to-end on the 5% sample, every figure re-rendered and re-hashed, every key
+    number re-extracted, and diffed against the Stage-0 baseline.</p>
+    <figure class="fig">
+      <svg viewBox="0 0 940 210" width="100%" role="img" aria-label="Parity comparison method">
+        <style>.pl{font:12px sans-serif;fill:#334155}.pt{font:700 12px sans-serif;fill:#0f172a}.pm{font:11px ui-monospace,monospace;fill:#475569}</style>
+        <defs><marker id="a3" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#7c3aed"/></marker></defs>
+        <rect x="20" y="40" width="220" height="120" rx="12" fill="#eff6ff" stroke="#bfdbfe"/>
+        <text x="130" y="64" text-anchor="middle" class="pt">BEFORE (Stage 0)</text>
+        <text x="130" y="86" text-anchor="middle" class="pl">run current code on sample</text>
+        <text x="130" y="108" text-anchor="middle" class="pm">66 figs → PNG sha256</text>
+        <text x="130" y="126" text-anchor="middle" class="pm">26 numbers</text>
+        <text x="130" y="146" text-anchor="middle" class="pm">→ baseline_manifest.csv</text>
+
+        <rect x="360" y="40" width="220" height="120" rx="12" fill="#f0fdf4" stroke="#bbf7d0"/>
+        <text x="470" y="64" text-anchor="middle" class="pt">AFTER (Stage 3)</text>
+        <text x="470" y="86" text-anchor="middle" class="pl">run NEW code on same sample</text>
+        <text x="470" y="108" text-anchor="middle" class="pm">66 figs → PNG sha256</text>
+        <text x="470" y="126" text-anchor="middle" class="pm">26 numbers</text>
+        <text x="470" y="146" text-anchor="middle" class="pm">→ stage3_manifest.csv</text>
+
+        <rect x="700" y="55" width="220" height="90" rx="12" fill="#f5f3ff" stroke="#ddd6fe"/>
+        <text x="810" y="80" text-anchor="middle" class="pt" style="fill:#6b21a8">DIFF</text>
+        <text x="810" y="102" text-anchor="middle" class="pm">figs: exact PNG match</text>
+        <text x="810" y="120" text-anchor="middle" class="pm">nums: rel-diff &lt; 1e-6</text>
+        <text x="810" y="138" text-anchor="middle" class="pm">(ignore \today PDF date)</text>
+
+        <path d="M240,100 H358" stroke="#94a3b8" stroke-dasharray="4 4" marker-end="url(#a3)"/>
+        <text x="299" y="92" text-anchor="middle" class="pm" style="fill:#7c3aed">restructure</text>
+        <path d="M580,100 H698" stroke="#7c3aed" marker-end="url(#a3)"/>
+        <rect x="700" y="160" width="220" height="34" rx="9" fill="#dcfce7" stroke="#86efac"/>
+        <text x="810" y="182" text-anchor="middle" class="pt" style="fill:#166534">✓ PASS — 66/66 · 26/26</text>
+      </svg>
+      <figcaption>Same sample on both sides ⇒ sampling noise cancels ⇒ any difference is the restructure. There was none.</figcaption>
+    </figure>
+    <div class="metric">
+      <div class="m"><div class="v" style="color:var(--pass)">66/66</div><div class="l">figures pixel-identical</div></div>
+      <div class="m"><div class="v" style="color:var(--pass)">26/26</div><div class="l">numbers exact</div></div>
+      <div class="m"><div class="v" style="color:var(--pass)">72/72</div><div class="l">deck includes resolved</div></div>
+      <div class="m"><div class="v" style="color:var(--pass)">142</div><div class="l">deck pages (matched)</div></div>
+    </div>
+    <h3>The headline numbers — identical before &amp; after</h3>
+    <table>
+      <thead><tr><th>Quantity</th><th>Value (5% sample)</th><th>Note</th></tr></thead>
+      <tbody>
+        <tr><td>WMVPF (actual reform)</td><td class="mono">0.2126</td><td>in (0,1) ✓ — the headline</td></tr>
+        <tr><td>η (welfare weight)</td><td class="mono">0.8281</td><td>computed from consumption levels</td></tr>
+        <tr><td>WMVPF_bL cumulative (Pure Level)</td><td class="mono">1.5591</td><td>out of (0,1) — see note</td></tr>
+        <tr><td>WMVPF_bS cumulative (Pure Slope)</td><td class="mono">−2.4306</td><td>reversed vs bL — see note</td></tr>
+        <tr><td>Σ claims / Σ claims_c (F counts)</td><td class="mono">31,575 / 31,208</td><td>CSV SHA-256 byte-identical</td></tr>
+      </tbody>
+    </table>
+    <div class="callout warn"><b>Honest note (per the project's sample rule).</b> The <i>pure</i> decompositions (bL=1.56, bS=−2.43)
+    fall outside (0,1) and reverse on the 5% sample — expected sampling noise on the small pure-decomposition cells (the full-data
+    canonical values are ≈ 0.68 / 0.71). This is <b>not</b> a restructure concern: parity is before/after on the <i>same</i> sample,
+    so the baseline pins these exact values and the restructure reproduces them. It is flagged rather than silently dismissed.</div>
+    <div class="callout bad"><b>FINDING-1 — the one defect the re-run caught (and we fixed).</b> 30 <code>ggsave()</code> calls in
+    <code>pure.R</code> still wrote to a <i>relative</i> <code>'output/new_counter_claiming/…'</code> path — the Stage-2 agent missed
+    them because the path was a <code>filename=</code> argument, not the first one (a first-argument grep didn't catch it). It broke
+    the master end-to-end but <b>not parity</b> (those figures aren't in the deck). Fix: route the 30 to
+    <code>PATHS$output_new_counter</code>. A clean master re-run with <b>no workaround</b> then confirmed
+    <code>analysis_all.R</code> and <code>build_deck.R</code> both <b>EXIT=0</b> with bit-exact numbers.</div>
+  </section>
+
+  <!-- ===================== DAG ===================== -->
+  <section id="dag">
+    <h2><span class="n">9</span> The pipeline it all runs — the canonical DAG</h2>
+    <p>Reading top-to-bottom, the new tree narrates the paper's economic argument: administrative records → eligible-worker sample
+    &amp; contribution histories → claiming behaviour &amp; the counterfactual under <i>pure</i> reforms → DiD on average benefits →
+    policy elasticity → MVPF/WMVPF welfare evaluation → the deck.</p>
+    <figure class="fig">
+      <svg viewBox="0 0 960 250" width="100%" role="img" aria-label="Pipeline data-flow DAG">
+        <style>.dn{rx:9}.dl{font:11px ui-monospace,monospace;fill:#0f172a}.ds{font:10px sans-serif;fill:#64748b}.de{stroke:#94a3b8;stroke-width:1.6;fill:none}</style>
+        <defs><marker id="a4" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#94a3b8"/></marker></defs>
+        <!-- raw -->
+        <rect x="14" y="100" width="96" height="46" class="dn" fill="#f1f5f9" stroke="#cbd5e1"/>
+        <text x="62" y="120" text-anchor="middle" class="dl">SUIBE</text><text x="62" y="136" text-anchor="middle" class="dl">RAIS</text>
+        <!-- build -->
+        <rect x="140" y="92" width="150" height="62" class="dn" fill="#eff6ff" stroke="#93c5fd"/>
+        <text x="215" y="112" text-anchor="middle" class="dl" style="fill:#1e40af">build/  A4·B4·C6·D4</text>
+        <text x="215" y="130" text-anchor="middle" class="ds">→ analysis-ready panel</text>
+        <text x="215" y="146" text-anchor="middle" class="ds" style="fill:#b91c1c">full-data / server only</text>
+        <!-- analysis chain -->
+        <rect x="320" y="40" width="110" height="38" class="dn" fill="#f0fdf4" stroke="#86efac"/><text x="375" y="64" text-anchor="middle" class="dl" style="fill:#166534">E4 figures</text>
+        <rect x="320" y="96" width="110" height="38" class="dn" fill="#f0fdf4" stroke="#86efac"/><text x="375" y="120" text-anchor="middle" class="dl" style="fill:#166534">gabriel (F)</text>
+        <rect x="320" y="150" width="110" height="38" class="dn" fill="#f0fdf4" stroke="#86efac"/><text x="375" y="174" text-anchor="middle" class="dl" style="fill:#166534">pure (F)</text>
+        <rect x="455" y="96" width="92" height="38" class="dn" fill="#f0fdf4" stroke="#86efac"/><text x="501" y="120" text-anchor="middle" class="dl" style="fill:#166534">G5 (DD)</text>
+        <rect x="455" y="150" width="92" height="38" class="dn" fill="#f0fdf4" stroke="#86efac"/><text x="501" y="174" text-anchor="middle" class="dl" style="fill:#166534">I4 (WMVPF)</text>
+        <rect x="572" y="123" width="100" height="42" class="dn" fill="#dcfce7" stroke="#16a34a"/><text x="622" y="142" text-anchor="middle" class="dl" style="fill:#166534;font-weight:700">I6</text><text x="622" y="158" text-anchor="middle" class="ds">WMVPF + bL/bS, η</text>
+        <!-- present -->
+        <rect x="700" y="60" width="116" height="46" class="dn" fill="#faf5ff" stroke="#d8b4fe"/><text x="758" y="80" text-anchor="middle" class="dl" style="fill:#6b21a8">collector.py</text><text x="758" y="96" text-anchor="middle" class="ds">→ from_code/</text>
+        <rect x="700" y="150" width="116" height="46" class="dn" fill="#faf5ff" stroke="#d8b4fe"/><text x="758" y="170" text-anchor="middle" class="dl" style="fill:#6b21a8">_main.tex</text><text x="758" y="186" text-anchor="middle" class="ds">\graphicspath</text>
+        <rect x="846" y="105" width="100" height="46" class="dn" fill="#ede9fe" stroke="#a78bfa"/><text x="896" y="125" text-anchor="middle" class="dl" style="fill:#5b21b6;font-weight:700">_main.pdf</text><text x="896" y="141" text-anchor="middle" class="ds">142 pages</text>
+        <!-- edges -->
+        <path class="de" d="M110,123 H138" marker-end="url(#a4)"/>
+        <path class="de" d="M290,118 H318 M290,118 C305,118 305,59 318,59 M290,123 C305,123 305,169 318,169" marker-end="url(#a4)"/>
+        <path class="de" d="M375,134 V150" marker-end="url(#a4)"/>
+        <path class="de" d="M430,169 C443,169 443,115 454,115" marker-end="url(#a4)"/>
+        <path class="de" d="M430,115 H454" marker-end="url(#a4)"/>
+        <path class="de" d="M547,115 C560,115 560,140 571,140" marker-end="url(#a4)"/>
+        <path class="de" d="M547,169 C560,169 560,150 571,150" marker-end="url(#a4)"/>
+        <path class="de" d="M430,59 C600,59 600,78 699,78" marker-end="url(#a4)"/>
+        <path class="de" d="M672,144 C685,144 685,168 699,168" marker-end="url(#a4)"/>
+        <path class="de" d="M758,106 V150" marker-end="url(#a4)"/>
+        <path class="de" d="M816,173 C832,173 832,135 845,131" marker-end="url(#a4)"/>
+        <text x="320" y="222" class="ds">Green = runs on the 5% sample (E4 · gabriel → pure → G5 → I4 → I6).  Blue build &amp; H3 = full-data only.</text>
+      </svg>
+      <figcaption>The canonical runnable graph — orchestrated by the three masters; H3 (elasticity figures) and A4–D4 are full-data only.</figcaption>
+    </figure>
+  </section>
+
+  <!-- ===================== FLAGS ===================== -->
+  <section id="flags">
+    <h2><span class="n">10</span> Bugs flagged — never silently fixed</h2>
+    <p>A firm rule governed the whole job: <b>plumbing may be changed; estimation logic may not.</b> Real econometric issues were
+    surfaced with <code>file:line</code> for the professors to decide on — not quietly "corrected". Notably, the
+    re-mapping <b>disproved part of the prior bug list</b>.</p>
+    <table>
+      <thead><tr><th>ID</th><th>Where</th><th>What</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>O5b</td><td class="mono">G5:780,784</td><td>WVMVPF welfare factor multiplies only <code>CNTRF</code>, not <code>(MECH−CNTRF)</code></td><td><span class="tag t-flag">FLAG</span></td></tr>
+        <tr><td>g5-d1</td><td class="mono">G5:41</td><td>Reads <code>D1</code> cross-section while peers read <code>D3</code></td><td><span class="tag t-flag">FLAG</span></td></tr>
+        <tr><td>g-f5</td><td class="mono">gabriel:83,189</td><td>New-F producer reads a <b>legacy</b> <code>F5_table_results.csv</code></td><td><span class="tag t-flag">FLAG</span></td></tr>
+        <tr><td>i4-g4h2</td><td class="mono">I4:134,136</td><td>Reads non-canonical G4/H2 tables, with no <code>_sample</code> suffix</td><td><span class="tag t-flag">FLAG</span></td></tr>
+        <tr><td>i4-discount</td><td class="mono">I4:208–216</td><td>Cost vs welfare discount not exact reciprocals (1.005 vs 0.995)</td><td><span class="tag t-flag">FLAG</span></td></tr>
+        <tr><td>h3-nosample</td><td class="mono">H3:14,19,20</td><td>No sample branch (hard-coded <code>U:/</code>); also uses old <code>indiv</code> id</td><td><span class="tag t-flag">FLAG</span></td></tr>
+        <tr><td>O11</td><td class="mono">build vs analysis</td><td><code>U:/</code> (build) vs <code>F:/</code> (analysis) full-data roots diverge</td><td><span class="tag t-flag">FLAG</span></td></tr>
+        <tr><td>manifest typo</td><td class="mono">manifest.csv</td><td><code>benegits</code> misspelling — must stay byte-matched to G5's ggsave names</td><td><span class="tag t-flag">leave as-is</span></td></tr>
+        <tr><td>PT graphicspath</td><td class="mono">apresentacao:3</td><td>Portuguese deck is off the collector pipeline (parity hazard)</td><td><span class="tag t-flag">FLAG</span></td></tr>
+        <tr><td>h2-vs-h3</td><td class="mono">H3 vs H2</td><td>CLAUDE.md calls H3 canonical, but H2 is the one that actually runs (table + deck figure consumed by I4/I6)</td><td><span class="tag t-flag">FLAG</span></td></tr>
+        <tr><td>O3</td><td class="mono">D4 ~249</td><td>"Stray <code>)</code>" — parens actually balance; file parses</td><td><span class="tag t-false">FALSE POSITIVE</span></td></tr>
+        <tr><td>O5a</td><td class="mono">G5 MECH</td><td>"MECH uses claims_L/S" — it uses <code>claims_c</code> correctly</td><td><span class="tag t-false">NOT PRESENT</span></td></tr>
+        <tr><td>O5c</td><td class="mono">G5 delta_ben</td><td>"×3 from G2" — G2 import already removed; PV from G5's own data</td><td><span class="tag t-false">ALREADY FIXED</span></td></tr>
+      </tbody>
+    </table>
+    <div class="callout"><b>One bug was fixed</b> — because it was pure plumbing: FINDING-1 (the 30 relative <code>ggsave</code>
+    paths in <code>pure.R</code>). And one was a deliberate <i>improvement</i> the spec allowed: the gabriel→pure <code>/tmp</code>
+    hand-off (O1) was routed to a persistent <code>PATHS$analysis_temp</code>.</div>
+  </section>
+
+  <!-- ===================== HYGIENE ===================== -->
+  <section id="hygiene">
+    <h2><span class="n">11</span> Code hygiene — used vs. archived</h2>
+    <p>The functional move grouped files by area, but did not by itself separate "what the workflow runs" from superseded
+    predecessors. A follow-up <b>usage audit</b> (two agents tracing every file's output consumers) fixed that — answering, for
+    every file, <i>is anything live actually consuming this?</i> — so the folders are now legible without reading <code>CLAUDE.md</code>.</p>
+    <figure class="fig">
+      <svg viewBox="0 0 940 152" width="100%" role="img" aria-label="analysis/code before and after the audit">
+        <style>.hl{font:11px sans-serif;fill:#334155}.ht{font:700 12px sans-serif;fill:#0f172a}</style>
+        <text x="20" y="24" class="ht">analysis/code/ — 22 files, flat  →  11 used + 11 archived</text>
+        <text x="20" y="56" class="hl">before</text>
+        <rect x="80" y="44" width="840" height="20" rx="5" fill="#e2e8f0" stroke="#cbd5e1"/>
+        <text x="500" y="59" text-anchor="middle" class="hl">22 files in one flat folder — canonical &amp; dead indistinguishable</text>
+        <text x="20" y="96" class="hl">after</text>
+        <rect x="80" y="84" width="280" height="20" rx="5" fill="#16a34a"/><text x="220" y="99" text-anchor="middle" class="hl" style="fill:#fff">6 canonical (on master)</text>
+        <rect x="362" y="84" width="104" height="20" fill="#2563eb"/><text x="414" y="99" text-anchor="middle" class="hl" style="fill:#fff">2 live-dep</text>
+        <rect x="468" y="84" width="74" height="20" fill="#9333ea"/><text x="505" y="99" text-anchor="middle" class="hl" style="fill:#fff">2 diag</text>
+        <rect x="544" y="84" width="40" height="20" fill="#d97706"/><text x="564" y="99" text-anchor="middle" class="hl" style="fill:#fff">H3</text>
+        <rect x="586" y="84" width="334" height="20" rx="5" fill="#94a3b8"/><text x="753" y="99" text-anchor="middle" class="hl" style="fill:#fff">11 archived → legacy/superseded/</text>
+        <text x="80" y="134" class="hl">🟢 E4 · gabriel · pure · G5 · I4 · I6   🔵 G4 · H2   🟣 I7 · I7b   🟠 H3 (flagged)   ⚫ E1–E3 · G1–G3 · H1 · I1–I3 · claiming2</text>
+      </svg>
+      <figcaption><code>build/code/</code> had <b>zero</b> dead files (all live lineage / cross-stage deps) — nothing archived there. Both folders gained a <code>code/README.md</code> manifest.</figcaption>
+    </figure>
+    <div class="grid2">
+      <div class="card">
+        <h3 style="margin-top:0">What changed</h3>
+        <ul class="tight" style="margin-bottom:0">
+          <li><b>11 confirmed-dead</b> predecessors (E1–E3, G1–G3, H1, I1–I3, <code>claiming2</code>) → <code>legacy/superseded/</code>, each guarded with <code>stop()</code>.</li>
+          <li>Every "dead" verdict was proven by grepping the file's output names and finding <b>no</b> live consumer.</li>
+          <li>A <code>code/README.md</code> manifest now labels every file in <code>build/code/</code> and <code>analysis/code/</code>.</li>
+          <li><b>Nothing deleted</b> — all <code>git mv</code> (reversible). Parity re-confirmed: no moved file is on any master.</li>
+        </ul>
+      </div>
+      <div class="card" style="border-left:4px solid var(--config)">
+        <h3 style="margin-top:0;color:var(--config)">⚠ The H2-vs-H3 puzzle (flagged)</h3>
+        <p style="margin:0">CLAUDE.md calls <b>H3</b> the canonical H stage — but <b>H2</b> is the one that actually runs: H2
+        produces the elasticity table read by I4/I6 <i>and</i> the deck's elasticity figure, while H3 is full-data-only,
+        figures-only, and on no master. Per Arthur, <b>H2 is the real H stage</b>; the <code>CLAUDE.md</code> label needs
+        reconciling. H3 was kept in place (not archived) and the discrepancy recorded as <code>h2-vs-h3</code> in the findings.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== TIMELINE ===================== -->
+  <section id="timeline">
+    <h2><span class="n">12</span> Commit timeline</h2>
+    <figure class="fig">
+      <svg viewBox="0 0 940 295" width="100%" role="img" aria-label="Commit timeline">
+        <style>.cm-h{font:700 12px ui-monospace,monospace;fill:#0f172a}.cm-t{font:11px sans-serif;fill:#334155}.cm-d{font:10px sans-serif;fill:#94a3b8}</style>
+        <line x1="60" y1="40" x2="60" y2="260" stroke="#cbd5e1" stroke-width="2"/>
+        <!-- nodes -->
+        <g>
+          <circle cx="60" cy="52" r="8" fill="#2563eb"/><text x="84" y="48" class="cm-h">7f07617 · 15:18 · Stage 1</text><text x="84" y="64" class="cm-t">Move to functional dirs + config layer — <b>328 files, 314 renames</b></text>
+        </g>
+        <g>
+          <circle cx="60" cy="92" r="8" fill="#16a34a"/><text x="84" y="88" class="cm-h">1ea2dd8 · 15:46 · Stage 2a</text><text x="84" y="104" class="cm-t">Adapt analysis+build I/O to config/paths.R + wire constants — <b>14 files</b></text>
+        </g>
+        <g>
+          <circle cx="60" cy="132" r="8" fill="#16a34a"/><text x="84" y="128" class="cm-h">ae0c299 · 15:51 · Stage 2b</text><text x="84" y="144" class="cm-t">Repath the 4 presentation figure tools (post-ESC recovery) — <b>5 files</b></text>
+        </g>
+        <g>
+          <circle cx="60" cy="172" r="8" fill="#7c3aed"/><text x="84" y="168" class="cm-h">1d1cb3f · 16:10 · Stage 3 fix</text><text x="84" y="184" class="cm-t">Absolutize 30 ggsave paths in pure.R (FINDING-1) — <b>1 file, 30/30</b></text>
+        </g>
+        <g>
+          <circle cx="60" cy="212" r="8" fill="#a21caf"/><text x="84" y="208" class="cm-h">e4a9af7 · 16:18 · Stage 4</text><text x="84" y="224" class="cm-t">Re-map + docs + parity record — <b>29 files, +3,836 lines</b></text>
+        </g>
+        <g>
+          <circle cx="60" cy="252" r="8" fill="#0f766e"/><text x="84" y="248" class="cm-h">follow-up · usage audit</text><text x="84" y="264" class="cm-t">Archive 11 dead files → legacy/superseded/ + code/README manifests + h2-vs-h3 flag</text>
+        </g>
+      </svg>
+      <figcaption>Five restructure commits (~one hour) on <code>code-and-data</code>, plus a follow-up code-hygiene pass. Each commit body carries WHY + stage ref + authorship.</figcaption>
+    </figure>
+  </section>
+
+  <!-- ===================== RUN ===================== -->
+  <section id="run">
+    <h2><span class="n">13</span> How to run it now</h2>
+    <p>The whole motivation in three commands. The environment auto-detects via <code>config/paths.R</code>; override with the
+    <code>PENSION_DATA_MODE</code> / <code>PENSION_SAMPLE_ROOT</code> env vars.</p>
+    <pre><span class="cm"># From the repo root — no setwd, no path editing:</span>
+Rscript analysis/analysis_all.R       <span class="cm"># 5% sample: panel → figures, tables, WMVPF (E4→gabriel→pure→G5→I4→I6)</span>
+Rscript presentation/build_deck.R     <span class="cm"># collect figures → compile the English deck → _main.pdf</span>
+Rscript build/build_all.R             <span class="cm"># full-data build (restricted server only; DATA_MODE=full)</span>
+
+<span class="cm"># RUN.R is a front-door signpost listing the three masters.</span></pre>
+  </section>
+
+  <!-- ===================== OPEN ===================== -->
+  <section id="open">
+    <h2><span class="n">14</span> What's left for you</h2>
+    <div class="grid2">
+      <div class="card">
+        <h3 style="margin-top:0">Decisions</h3>
+        <ul class="tight" style="margin-bottom:0">
+          <li>Review the <b>10 flagged issues</b> (table §10, incl. <code>h2-vs-h3</code>) — each awaits a professor call.</li>
+          <li>Decide whether to harmonise the <b>i4-discount</b> asymmetry and the <b>D1 vs D3</b> cross-section, and reconcile the <b>CLAUDE.md "H3 canonical"</b> label with the reality that H2 is the live H stage.</li>
+          <li>The <b>vestigial <code>trans_retirement/</code></b> directory (only gitignored content) was left in place — safe to delete whenever.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">Next step</h3>
+        <p style="margin:0">Everything is on <code>code-and-data</code>; <code>main</code> is <b>untouched</b>. When you're satisfied,
+        open a PR <code>code-and-data → main</code>. No PR or merge was opened on your behalf.</p>
+        <p class="muted" style="margin:.6em 0 0">Full artifacts: <code>_docs/restructure/MAP_after.md</code> ·
+        <code>quality_reports/restructure_findings.md</code> · <code>quality_reports/restructure_parity.md</code> ·
+        <code>baseline/</code> (manifests + numbers).</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="sep"></div>
+  <p class="muted" style="font-size:12.5px">Generated for Arthur · branch <code>code-and-data</code> · 2026-06-23 · Gentzkow–Shapiro restructure of <i>optimal-pension-reforms</i>. Estimation logic unchanged; figure + number parity proven on the 5% sample.</p>
+  </main>
+</div>
+</body>
+</html>

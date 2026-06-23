@@ -1,3 +1,5 @@
+stop("SUPERSEDED — not part of the current workflow. Canonical replacement: G5_effect_average_benefit_freq_bL_and_bS.R. Archived 2026-06-23 (usage audit); see legacy/superseded/README.md.")
+# ----- original file below (superseded; never run) -----
 # ******************************************************************************
 # This code
 #
