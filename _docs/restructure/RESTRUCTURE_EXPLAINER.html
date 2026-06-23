@@ -128,7 +128,7 @@
       <div class="m"><div class="v">5</div><div class="l">commits, ~1 hour</div></div>
       <div class="m"><div class="v">0.2126</div><div class="l">WMVPF (actual) — identical before &amp; after</div></div>
       <div class="m"><div class="v">142</div><div class="l">deck pages, recompiled &amp; verified</div></div>
-      <div class="m"><div class="v">10</div><div class="l">real bugs flagged (not silently fixed)</div></div>
+      <div class="m"><div class="v">8</div><div class="l">open live-workflow bugs flagged</div></div>
     </div>
 
     <div class="callout good"><b>The keystone idea.</b> Because the "before" and "after" runs use the <i>same</i> 5% sample,
@@ -546,26 +546,23 @@ clear_dirs(...)   <span class="cm"># wipe temp before a build (G–S "clear befo
 
   <!-- ===================== FLAGS ===================== -->
   <section id="flags">
-    <h2><span class="n">10</span> Bugs flagged — never silently fixed</h2>
+    <h2><span class="n">10</span> Bugs flagged — the open set (live workflow)</h2>
     <p>A firm rule governed the whole job: <b>plumbing may be changed; estimation logic may not.</b> Real econometric issues were
-    surfaced with <code>file:line</code> for the professors to decide on — not quietly "corrected". Notably, the
-    re-mapping <b>disproved part of the prior bug list</b>.</p>
+    surfaced with <code>file:line</code> for the professors to decide on — not quietly "corrected". A <b>2026-06-23 re-verification</b>
+    (one agent per file) re-checked every flag against the current code and keeps here only the <b>8</b> bugs that are
+    <b>still present <i>and</i> in the live workflow</b>. Off-workflow bugs (the superseded H3; the Portuguese deck) and
+    corrected / false-positive ones (O5a, O5c, O3) were moved to <code>quality_reports/legacy_bugs.md</code>.</p>
     <table>
       <thead><tr><th>ID</th><th>Where</th><th>What</th><th>Status</th></tr></thead>
       <tbody>
-        <tr><td>O5b</td><td class="mono">G5:780,784</td><td>WVMVPF welfare factor multiplies only <code>CNTRF</code>, not <code>(MECH−CNTRF)</code></td><td><span class="tag t-flag">FLAG</span></td></tr>
-        <tr><td>g5-d1</td><td class="mono">G5:41</td><td>Reads <code>D1</code> cross-section while peers read <code>D3</code></td><td><span class="tag t-flag">FLAG</span></td></tr>
-        <tr><td>g-f5</td><td class="mono">gabriel:83,189</td><td>New-F producer reads a <b>legacy</b> <code>F5_table_results.csv</code></td><td><span class="tag t-flag">FLAG</span></td></tr>
-        <tr><td>i4-g4h2</td><td class="mono">I4:134,136</td><td>Reads non-canonical G4/H2 tables, with no <code>_sample</code> suffix</td><td><span class="tag t-flag">FLAG</span></td></tr>
-        <tr><td>i4-discount</td><td class="mono">I4:208–216</td><td>Cost vs welfare discount not exact reciprocals (1.005 vs 0.995)</td><td><span class="tag t-flag">FLAG</span></td></tr>
-        <tr><td>h3-nosample</td><td class="mono">H3:14,19,20</td><td>No sample branch (hard-coded <code>U:/</code>); also uses old <code>indiv</code> id</td><td><span class="tag t-flag">FLAG</span></td></tr>
-        <tr><td>O11</td><td class="mono">build vs analysis</td><td><code>U:/</code> (build) vs <code>F:/</code> (analysis) full-data roots diverge</td><td><span class="tag t-flag">FLAG</span></td></tr>
-        <tr><td>manifest typo</td><td class="mono">manifest.csv</td><td><code>benegits</code> misspelling — must stay byte-matched to G5's ggsave names</td><td><span class="tag t-flag">leave as-is</span></td></tr>
-        <tr><td>PT graphicspath</td><td class="mono">apresentacao:3</td><td>Portuguese deck is off the collector pipeline (parity hazard)</td><td><span class="tag t-flag">FLAG</span></td></tr>
-        <tr><td>h2-vs-h3</td><td class="mono">H3 vs H2</td><td>CLAUDE.md calls H3 canonical, but H2 is the one that actually runs (table + deck figure consumed by I4/I6)</td><td><span class="tag t-flag">FLAG</span></td></tr>
-        <tr><td>O3</td><td class="mono">D4 ~249</td><td>"Stray <code>)</code>" — parens actually balance; file parses</td><td><span class="tag t-false">FALSE POSITIVE</span></td></tr>
-        <tr><td>O5a</td><td class="mono">G5 MECH</td><td>"MECH uses claims_L/S" — it uses <code>claims_c</code> correctly</td><td><span class="tag t-false">NOT PRESENT</span></td></tr>
-        <tr><td>O5c</td><td class="mono">G5 delta_ben</td><td>"×3 from G2" — G2 import already removed; PV from G5's own data</td><td><span class="tag t-false">ALREADY FIXED</span></td></tr>
+        <tr><td>g-f5</td><td class="mono">gabriel:72,178</td><td>Canonical new-F producer reads a <b>legacy</b> <code>F5_table_results.csv</code></td><td><span class="tag t-flag">FLAG</span></td></tr>
+        <tr><td>g5-d1</td><td class="mono">G5:34</td><td>Full-mode reads <code>D1</code> cross-section while peers read <code>D3</code></td><td><span class="tag t-flag">FLAG</span></td></tr>
+        <tr><td>O5b-wvmvpf-paren</td><td class="mono">G5:773,777</td><td>WVMVPF factor multiplies only <code>CNTRF</code>, not <code>(MECH−CNTRF)</code> — but the value is <i>never persisted</i> (non-load-bearing)</td><td><span class="tag t-flag">FLAG</span></td></tr>
+        <tr><td>i4-g4h2</td><td class="mono">I4:127,129</td><td>Reads non-canonical G4/H2 tables, with no <code>_sample</code> suffix</td><td><span class="tag t-flag">FLAG</span></td></tr>
+        <tr><td>i4-discount</td><td class="mono">I4:201–209</td><td>Cost vs welfare discount not exact reciprocals (1.005 vs 0.995)</td><td><span class="tag t-flag">FLAG</span></td></tr>
+        <tr><td>h2-vs-h3</td><td class="mono">H2:482 vs H3</td><td>CLAUDE.md calls H3 canonical, but <b>H2</b> is the one that actually runs (table + deck figure consumed by I4/I6)</td><td><span class="tag t-flag">FLAG</span></td></tr>
+        <tr><td>O11-uvf-split</td><td class="mono">config/paths.R:31-34</td><td><code>U:/</code> (build) vs <code>F:/</code> (analysis) full-data roots diverge</td><td><span class="tag t-flag">FLAG</span></td></tr>
+        <tr><td>manifest typo</td><td class="mono">manifest.csv:56-65</td><td><code>benegits</code> misspelling — must stay byte-matched to G5's ggsave names</td><td><span class="tag t-flag">leave as-is</span></td></tr>
       </tbody>
     </table>
     <div class="callout"><b>One bug was fixed</b> — because it was pure plumbing: FINDING-1 (the 30 relative <code>ggsave</code>
@@ -667,7 +664,7 @@ Rscript build/build_all.R             <span class="cm"># full-data build (restri
       <div class="card">
         <h3 style="margin-top:0">Decisions</h3>
         <ul class="tight" style="margin-bottom:0">
-          <li>Review the <b>10 flagged issues</b> (table §10, incl. <code>h2-vs-h3</code>) — each awaits a professor call.</li>
+          <li>Review the <b>8 open live-workflow bugs</b> (table §10) — each awaits a professor call. (2 off-workflow + 3 closed are in <code>legacy_bugs.md</code>.)</li>
           <li>Decide whether to harmonise the <b>i4-discount</b> asymmetry and the <b>D1 vs D3</b> cross-section, and reconcile the <b>CLAUDE.md "H3 canonical"</b> label with the reality that H2 is the live H stage.</li>
           <li>The <b>vestigial <code>trans_retirement/</code></b> directory (only gitignored content) was left in place — safe to delete whenever.</li>
         </ul>
