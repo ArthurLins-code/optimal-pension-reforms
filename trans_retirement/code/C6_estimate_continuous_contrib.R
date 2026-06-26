@@ -4,6 +4,7 @@
 # Estimates the continuous contributive time for claimants without reported fator
 # previdenciario, based on the discrete variable and covariates
 #
+# teste
 # ******************************************************************************
 
 pkgs <- c('scales','zoo','binsreg','ggpubr','readstata13','purrr','readxl','did',
