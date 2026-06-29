@@ -2,8 +2,8 @@
 
 > Stage-4 re-map of `optimal-pension-reforms` after the functional restructuring.
 > Read-only snapshot. Every load-bearing claim below was re-verified against source
-> (file:line, grep counts). Companion baseline: `baseline/MAP_before.md`,
-> `baseline/dependency_graph.md`. Binding spec: `_docs/restructure/REPO_STRUCTURE_GUIDELINES.md`.
+> (file:line, grep counts). Companion baseline: `quality_reports/baseline/MAP_before.md`,
+> `quality_reports/baseline/dependency_graph.md`. Binding spec: `_docs/restructure/REPO_STRUCTURE_GUIDELINES.md`.
 
 ---
 
@@ -52,8 +52,7 @@ optimal-pension-reforms/
 ├── _docs/                          # knowledge base, plans, logs, memory, restructure/, doc templates, references/
 │     ├── pedro_hc_santanna_templates_for_projects/   # doc templates used by the .claude skills/rules
 │     └── references/               # CodeAndData.pdf, transition instructions, meeting-notes PDF
-├── baseline/                       # pre-restructure golden baseline + Stage-3 parity artifacts
-├── quality_reports/                # specs, reviews, parity reports, restructure_findings + legacy_bugs
+├── quality_reports/                # specs, reviews, parity reports, restructure_findings + legacy_bugs, baseline/ (parity evidence)
 ├── scripts/                        # quality tooling (quality_score.py)
 ├── Surrogate Indices/              # future tax-externality work
 └── paper/                          # canonical reference decks: "old strat reverted" + "(10)" (gitignored)
@@ -108,7 +107,7 @@ Net: every script the masters actually run is `setwd`-free and resolves paths th
 
 ## 3. The canonical runnable DAG (sample) + the three masters
 
-**Sample-runnable DAG** (from `analysis/analysis_all.R`, generated from `baseline/dependency_graph.md`):
+**Sample-runnable DAG** (from `analysis/analysis_all.R`, generated from `quality_reports/baseline/dependency_graph.md`):
 
 ```
 E4 ─(terminal: claiming figures)

@@ -29,10 +29,10 @@ analysis/input/*
 !analysis/input/.gitkeep
 
 # --- Golden-baseline heavy artifacts (keep the .md/.csv provenance, ignore the bulk) ---
-baseline/figures_before/
-baseline/figures_asis/
-baseline/logs/
-baseline/logs_stage3/
+quality_reports/baseline/figures_before/
+quality_reports/baseline/figures_asis/
+quality_reports/baseline/logs/
+quality_reports/baseline/logs_stage3/
 
 # --- Versões do paper e apresentações (PDFs binários) ---
 paper/
