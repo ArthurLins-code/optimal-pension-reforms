@@ -69,6 +69,12 @@ User instructions: "Reason given by user: ..." verbatim.
 - Session logs in `_docs/session_logs/`.
 - Pause-friendly: checkpoint summary at every stopping point.
 - Token-budget aware: ask whether to continue or pause at natural breaks.
+- Side-chat edits: assume the user may keep editing Codex's edits; do not
+  suggest commit messages unless explicitly asked, and always report all source
+  lines changed in each edit.
+- When suggesting an exact LaTeX replacement in chat, put the replacement in a
+  fenced `latex` code block rather than only inline text. If the equation is too
+  long to read comfortably, also state the substantive change in prose.
 
 ## Pipeline (canonical files)
 

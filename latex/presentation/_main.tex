@@ -502,9 +502,175 @@
 % \end{itemize}
 % \end{frame}
 
+\begin{frame}[label=lowerBoundSetup]{Large-Reform Lower Bound}
+    \small
+    \begin{itemize}
+        \item For a large reform, evaluate welfare holding no-reform behavior fixed.
+        \item Let \(c^c_{it}\) be the consumption component of the no-reform choice vector \(x^c_{it}\) 
+        \item The consumption that would result from applying the actual benefit schedule to the same no-reform choices is:
+        \begin{align*}
+            c^{a|c}_{it}
+            &\equiv c^c_{it}+b^a(x^c_{it})-b^c(x^c_{it}).
+        \end{align*}
+        \item The no-response exact welfare gain is:
+        \begin{align*}
+            \underline W^{NR}
+            \equiv
+            \sum_i\sum_t E\left[
+            \beta^t
+            \left\{
+            u(c^{a|c}_{it},x^c_{it,-c})
+            -
+            u(x^c_{it})
+            \right\}
+            \right].
+        \end{align*}
+        \item Where \(x^c_{it}=(c^c_{it},x^c_{it,-c})\) and \(x^c_{it,-c}\)
+collects all non-consumption choices.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[label=lowerBoundRP]{Lower Bound: Revealed Preference}
+    \small
+    \begin{itemize}
+        \item Under the actual schedule, the agent can always choose the old behavior:
+        \begin{align*}
+            \sum_t E\left[
+            \beta^t u(x^a_{it})
+            \right]
+            \ge
+            \sum_t E\left[
+            \beta^t u(c^{a|c}_{it},x^c_{it,-c})
+            \right].
+        \end{align*}
+        \item The no-reform utility term is unchanged in both comparisons:
+        \begin{align*}
+            \sum_t E\left[
+            \beta^t u(x^c_{it})
+            \right].
+        \end{align*}
+        \item Thus, the exact welfare gain of the reform is bounded below by the no-response exact welfare gain:
+        \begin{align*}
+            \sum_i\sum_t E\left[
+            \beta^t
+            \left\{
+            u(x^a_{it})
+            -
+            u(x^c_{it})
+            \right\}
+            \right]
+            \ge
+            \underline W^{NR}.
+        \end{align*}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[label=lowerBoundWMVPF]{Lower Bound: WMVPF}
+    \begin{itemize}
+        \item Define the exact large-reform WMVPF as:
+        \begin{align*}
+            WMVPF^E(b^c,b^a)
+            \equiv
+            \frac{
+            \sum_i\sum_t E\left[
+            \beta^t
+            \left\{
+            u(x^a_{it})
+            -
+            u(x^c_{it})
+            \right\}
+            \right]
+            }{C(b^c,b^a)}.
+        \end{align*}
+        \item Assume behavioral responses do not reduce welfare on average:
+        \begin{align*}
+            \sum_i\sum_t E\left[
+            \beta^t
+            \left\{
+            u(x^a_{it})
+            -
+            u(c^{a|c}_{it},x^c_{it,-c})
+            \right\}
+            \right]
+            \ge 0.
+        \end{align*}
+        \item This allows for some misoptimization.
+        \item If $C(b^c,b^a)>0$ (cost-increasing reform), then:
+        \begin{align*}
+            WMVPF^E(b^c,b^a)
+            \ge
+            \underline{WMVPF}^{\,NR}(b^c,b^a)
+            \equiv
+            \frac{\underline W^{NR}}{C(b^c,b^a)}.
+        \end{align*}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[label=lowerBoundMU]{Lower Bound: Marginal Utility}
+    \begin{itemize}
+        \item With concavity in consumption and $b^a(x^c_{it})-b^c(x^c_{it})\geq 0$:
+        \begin{align*}          
+            \frac{\partial u(c^{a|c}_{it},x^c_{it,-c})}{\partial c_{it}}
+            \left[b^a(x^c_{it})-b^c(x^c_{it})\right] \le u(c^{a|c}_{it},x^c_{it,-c})
+            -
+            u(x^c_{it})
+        \end{align*}
+        \item With $C(b^c,b^a)>0$, a conservative lower bound is:
+        \begin{align*}
+            \frac{\sum_i\sum_t E\left[
+            \beta^t
+            \frac{\partial u(c^{a|c}_{it},x^c_{it,-c})}{\partial c_{it}}
+            \left[b^a(x^c_{it})-b^c(x^c_{it})\right]
+            \right]}{C(b^c,b^a)}
+            \le WMVPF^E(b^c,b^a).
+        \end{align*}
+        \item Normalize mgU to the avg. in the economy + constant CRRA $\gamma$:
+       \begin{align*}
+            \frac{\sum_i\sum_t E\left[
+            \beta^t
+            \left(
+            1-\gamma\frac{c^{a|c}_{it}-c}{c}
+            \right)
+            \left[b^a(x^c_{it})-b^c(x^c_{it})\right]
+            \right]}{C(b^c,b^a)}
+            \le WMVPF^E(b^c,b^a).
+        \end{align*}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[label=lowerBoundEta]{Lower Bound: Average Gap}
+    \begin{itemize}
+        \item Assume the consumption gap is uncorrelated with the discounted benefit gain:
+        \begin{align*}
+            \operatorname{Cov}\left(
+            \frac{c^{a|c}_{it}-c}{c},
+            \beta^t\left[b^a(x^c_{it})-b^c(x^c_{it})\right]
+            \right)=0.
+        \end{align*}
+        \item Let $\bar c^{a|c}$ be the average no-response consumption under the actual schedule:
+        \begin{align*}
+            \bar c^{a|c}
+            \equiv
+            \frac{\sum_i\sum_t E\left[c^{a|c}_{it}\right]}
+            {\sum_i\sum_t E[1]}.
+        \end{align*}
+        \item Then the conservative lower bound simplifies to:
+        \begin{align*}
+            \frac{\sum_i\sum_t E\left[
+            \beta^t
+            \left(
+            1-\gamma\frac{\bar c^{a|c}-c}{c}
+            \right)
+            \left[b^a(x^c_{it})-b^c(x^c_{it})\right]
+            \right]}{C(b^c,b^a)}
+            \le WMVPF^E(b^c,b^a).
+        \end{align*}
+    \end{itemize}
+\end{frame}
+
 \begin{frame}[label=wmvpfMvpf]{WMVPF and MVPF of the Reform}
     \begin{itemize}
-        \item Under envelope conditions, the welfare effect per dollar spent is:
+        \item Under envelope conditions or for a local reform:
         % It is an approximation because we are considering a non-infinitesimal reform
         \begin{align*}
             WMVPF(b^c,b^a)&\approx \frac{\sum_i \sum_t E\left(\beta^t \frac{\partial u(x_{it})}{\partial c_{it}}*[b^a(x_{it}^c)-b^c(x_{it}^c)]\right)}{C(b^c,b^a)} \\
@@ -512,6 +678,7 @@
         \end{align*}
         % technically, we are also holding constant the state of the world in b^a(x,pi). I believe we want the same distribution as in the absence of the reform.
         % For example, if someone gets fired with a higher probability under the reformed schedule, we want to compute their benefits with the lower probability before the reform was enacted
+        \item For a large reform, the previous slides give the lower-bound version.
         \item Where $\eta$ is the incidence-weighted average welfare weight
         \item Normalize mgU to the avg. in the economy + constant CRRA $\gamma=4$:
         %\equiv \frac{\sum_i \sum_t E\left(\beta^t \frac{\partial u(x_{it})}{\partial c_{it}}*[b^a(x_{it}^c)-b^c(x_{it}^c)]\right)}{\sum_i \sum_t E\left[b^a(x_{it}^c)-b^c(x_{it}^c)\right]}
