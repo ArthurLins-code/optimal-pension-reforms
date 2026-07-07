@@ -277,7 +277,7 @@
         \end{align*}
         % b_a'=b^a(x_{it}|a(x_{it})=a)
         % b_a=b(x_{it}|a(x_{it})=a)
-        \item Implicit assumption: utilitarian planner
+        \item We consider a utilitarian planner and normalize $u_c=1$ at the avg consumption in the economy at $t=0$.
         \item $C(b^c,b^a)$ is the cost of the reform, including fiscal externalities:
     \end{itemize}
     \small
@@ -512,7 +512,7 @@
             c^{a|c}_{it}
             &\equiv c^c_{it}+b^a(x^c_{it})-b^c(x^c_{it}).
         \end{align*}
-        \item The no-response exact welfare gain is:
+        \item The no-response welfare gain is:
         \begin{align*}
             \underline W^{NR}
             \equiv
@@ -533,23 +533,20 @@ collects all non-consumption choices.
 \begin{frame}[label=lowerBoundRP]{Lower Bound: Revealed Preference}
     \small
     \begin{itemize}
-        \item Under the actual schedule, the agent can always choose the old behavior:
+        \item Assume behavioral responses do not reduce welfare on average:
         \begin{align*}
-            \sum_t E\left[
-            \beta^t u(x^a_{it})
+            \sum_i\sum_t E\left[
+            \beta^t
+            \left\{
+            u(x^a_{it})
+            -
+            u(c^{a|c}_{it},x^c_{it,-c})
+            \right\}
             \right]
-            \ge
-            \sum_t E\left[
-            \beta^t u(c^{a|c}_{it},x^c_{it,-c})
-            \right].
+            \ge 0.
         \end{align*}
-        \item The no-reform utility term is unchanged in both comparisons:
-        \begin{align*}
-            \sum_t E\left[
-            \beta^t u(x^c_{it})
-            \right].
-        \end{align*}
-        \item Thus, the exact welfare gain of the reform is bounded below by the no-response exact welfare gain:
+        \item This allows for some misoptimization and is satisfied if individuals are optimizing by revealed preference
+        \item Thus, the exact welfare gain of the reform is bounded below by the no-response welfare gain:
         \begin{align*}
             \sum_i\sum_t E\left[
             \beta^t
@@ -582,19 +579,6 @@ collects all non-consumption choices.
             \right]
             }{C(b^c,b^a)}.
         \end{align*}
-        \item Assume behavioral responses do not reduce welfare on average:
-        \begin{align*}
-            \sum_i\sum_t E\left[
-            \beta^t
-            \left\{
-            u(x^a_{it})
-            -
-            u(c^{a|c}_{it},x^c_{it,-c})
-            \right\}
-            \right]
-            \ge 0.
-        \end{align*}
-        \item This allows for some misoptimization.
         \item If $C(b^c,b^a)>0$ (cost-increasing reform), then:
         \begin{align*}
             WMVPF^E(b^c,b^a)
@@ -656,11 +640,10 @@ collects all non-consumption choices.
         \end{align*}
         \item Then the conservative lower bound simplifies to:
         \begin{align*}
-            \frac{\sum_i\sum_t E\left[
-            \beta^t
             \left(
             1-\gamma\frac{\bar c^{a|c}-c}{c}
-            \right)
+            \right)\frac{\sum_i\sum_t E\left[
+            \beta^t
             \left[b^a(x^c_{it})-b^c(x^c_{it})\right]
             \right]}{C(b^c,b^a)}
             \le WMVPF^E(b^c,b^a).
@@ -668,27 +651,58 @@ collects all non-consumption choices.
     \end{itemize}
 \end{frame}
 
+\begin{frame}[label=upperBoundApprox]{Upper Bound: Average Gap}
+    \begin{itemize}
+        \item The analogous upper bound evaluates the pre-reform schedule at actual choices.
+        \item Let \(c^{c|a}_{it}\) be consumption under \(b^c\), holding \(x^a_{it,-c}\) fixed:
+        \begin{align*}
+            c^{c|a}_{it}
+            &\equiv c^a_{it}-\left[b^a(x^a_{it})-b^c(x^a_{it})\right].
+        \end{align*}
+        \item If \(b^a(x^a_{it})\geq b^c(x^a_{it})\), $\operatorname{Cov}\left(
+            \frac{c^{c|a}_{it}-c}{c},
+            \beta^t\left[b^a(x^a_{it})-b^c(x^a_{it})\right]
+            \right)=0$ \& CRRA
+        \begin{align*}
+            WMVPF^E(b^c,b^a)
+            \le
+            \left(
+            1-\gamma\frac{\bar c^{c|a}-c}{c}
+            \right)\frac{\sum_i\sum_t E\left[
+            \beta^t
+            \left[b^a(x^a_{it})-b^c(x^a_{it})\right]
+            \right]}{C(b^c,b^a)}.
+        \end{align*}
+        \item Where $\bar c^{c|a}
+            \equiv
+            \frac{\sum_i\sum_t E\left[c^{c|a}_{it}\right]}
+            {\sum_i\sum_t E[1]}$
+    \end{itemize}
+    \bfootnote{\hyperlink{upperBoundProofSetup}{\beamerbutton{Proof}}}
+\end{frame}
+
 \begin{frame}[label=wmvpfMvpf]{WMVPF and MVPF of the Reform}
     \begin{itemize}
         \item Under envelope conditions or for a local reform:
         % It is an approximation because we are considering a non-infinitesimal reform
         \begin{align*}
-            WMVPF(b^c,b^a)&\approx \frac{\sum_i \sum_t E\left(\beta^t \frac{\partial u(x_{it})}{\partial c_{it}}*[b^a(x_{it}^c)-b^c(x_{it}^c)]\right)}{C(b^c,b^a)} \\
-            & = \eta \frac{\sum_i \sum_t  E[b^a(x_{it}^c)-b^c(x_{it}^c)]}{C(b^c,b^a)} =\eta * MVPF(b^c,b^a)
+            WMVPF(b^c,b^a)&\approx \frac{\sum_i \sum_t E\left(\beta^t \frac{\partial u(x_{it})}{\partial c_{it}}*[b^a(x_{it}^c)-b^c(x_{it}^c)]\right)}{C(b^c,b^a)}
         \end{align*}
         % technically, we are also holding constant the state of the world in b^a(x,pi). I believe we want the same distribution as in the absence of the reform.
         % For example, if someone gets fired with a higher probability under the reformed schedule, we want to compute their benefits with the lower probability before the reform was enacted
         \item For a large reform, the previous slides give the lower-bound version.
-        \item Where $\eta$ is the incidence-weighted average welfare weight
-        \item Normalize mgU to the avg. in the economy + constant CRRA $\gamma=4$:
+        \item Normalize mgU to the avg. in the economy + constant CRRA $\gamma$ and assume that \(\operatorname{Cov}\left(
+c_{it}-c,
+\beta^t\left[b^a(x^c_{it})-b^c(x^c_{it})\right]
+\right)=0\) then:
         %\equiv \frac{\sum_i \sum_t E\left(\beta^t \frac{\partial u(x_{it})}{\partial c_{it}}*[b^a(x_{it}^c)-b^c(x_{it}^c)]\right)}{\sum_i \sum_t E\left[b^a(x_{it}^c)-b^c(x_{it}^c)\right]}
         % CRRA constant across individuals, allow us to write gamma without i
         % CRRA constant across consumption levels allow us to use equal instead of approx
         \begin{align*}
-            \eta = \beta^{t}\left(1-\gamma\frac{c_{p}-c}{c}\right)
+            WMVPF(b^c,b^a) = \left(1-\gamma\frac{c_{p}-c}{c}\right)\frac{\sum_i \sum_t  \beta^{t}E[b^a(x_{it}^c)-b^c(x_{it}^c)]}{C(b^c,b^a)}
         \end{align*}
         \begin{itemize}
-            \item $c_p$ is the avg. cons. among beneficiaries, and $c$ is avg consumption in Brazil $\Rightarrow \frac{c_{p}-c}{c}=4.2\%$ from surveys
+            \item $c_p$ is the avg. cons. among reform-beneficiaries, and $c$ is avg consumption in Brazil $\Rightarrow \frac{c_{p}-c}{c}=4.2\%$ from surveys
         \end{itemize}
     \end{itemize}
 \bfootnote{\hyperlink{survey}{\beamerbutton{Survey Evidence}}}
@@ -1183,6 +1197,138 @@ collects all non-consumption choices.
     \end{itemize}
     \bfootnote{\hyperlink{costReform}{\beamerbutton{Back}}}
     % The estimate for the average benefit that would have been paid in the absence of the reform at point p and quarter t is estimated as bar b^o_{p,t}-\beta_{t,p}
+\end{frame}
+
+\begin{frame}[label=upperBoundProofSetup]{Upper Bound: Setup}
+    \small
+    \begin{itemize}
+        \item For the upper bound, evaluate welfare holding actual behavior fixed.
+        \item Let \(c^a_{it}\) be the consumption component of the actual choice vector \(x^a_{it}\).
+        \item The consumption that would result from applying the no-reform schedule to the same actual choices is:
+        \begin{align*}
+            c^{c|a}_{it}
+            &\equiv c^a_{it}-\left[b^a(x^a_{it})-b^c(x^a_{it})\right].
+        \end{align*}
+        \item The actual-response welfare gain is:
+        \begin{align*}
+            \overline W^{AR}
+            \equiv
+            \sum_i\sum_t E\left[
+            \beta^t
+            \left\{
+            u(x^a_{it})
+            -
+            u(c^{c|a}_{it},x^a_{it,-c})
+            \right\}
+            \right].
+        \end{align*}
+        \item Where \(x^a_{it}=(c^a_{it},x^a_{it,-c})\).
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[label=upperBoundProofRP]{Upper Bound: Revealed Preference}
+    \small
+    \begin{itemize}
+        \item Assume choices under the no-reform schedule do not yield lower welfare than actual behavior evaluated under the no-reform benefit schedule:
+        \begin{align*}
+            \sum_i \sum_t E\left[
+            \beta^t u(x^c_{it})
+            \right]
+            \ge
+            \sum_i \sum_t E\left[
+            \beta^t u(c^{c|a}_{it},x^a_{it,-c})
+            \right].
+        \end{align*}
+        % Once again satisfied by rational/optimizing agents and allows for some misoptimization
+        \item Rearranging gives:
+        \begin{align*}
+            \sum_i\sum_t E\left[
+            \beta^t
+            \left\{
+            u(x^a_{it})
+            -
+            u(x^c_{it})
+            \right\}
+            \right]
+            \le
+            \overline W^{AR}.
+        \end{align*}
+        \item The upper bound uses \(x^a_{it}\), because it asks how valuable the reform looks when actual behavior is held fixed.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[label=upperBoundProofWMVPF]{Upper Bound: WMVPF}
+    \small
+    \begin{itemize}
+        \item With a cost-increasing reform, \(C(b^c,b^a)>0\), divide by the same cost:
+        \begin{align*}
+            WMVPF^E(b^c,b^a)
+            \le
+            \overline{WMVPF}^{\,AR}(b^c,b^a)
+            \equiv
+            \frac{\overline W^{AR}}{C(b^c,b^a)}.
+        \end{align*}
+        \item This is the exact large-reform upper bound in utility differences.
+        \item It does not use the envelope theorem.
+        \item The gap comes from the fact that \(x^a_{it}\) may be worse than \(x^c_{it}\) under \(b^c\).
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[label=upperBoundProofMU]{Upper Bound: Marginal Utility}
+    \small
+    \begin{itemize}
+        \item If \(b^a(x^a_{it})-b^c(x^a_{it})\geq 0\), concavity implies:
+        \begin{align*}
+            u(x^a_{it})
+            -
+            u(c^{c|a}_{it},x^a_{it,-c})
+            &\le
+            \frac{\partial u(c^{c|a}_{it},x^a_{it,-c})}{\partial c_{it}}
+            \left[b^a(x^a_{it})-b^c(x^a_{it})\right].
+        \end{align*}
+        \item Therefore:
+        \begin{align*}
+            WMVPF^E(b^c,b^a)
+            \le
+            \frac{\sum_i\sum_t E\left[
+            \beta^t
+            \frac{\partial u(c^{c|a}_{it},x^a_{it,-c})}{\partial c_{it}}
+            \left[b^a(x^a_{it})-b^c(x^a_{it})\right]
+            \right]}{C(b^c,b^a)}.
+        \end{align*}
+        \item This is conservative because it uses the high marginal utility endpoint.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[label=upperBoundProofEta]{Upper Bound: Average Gap}
+    \small
+    \begin{itemize}
+        \item Normalize marginal utility to the average in the economy with constant CRRA \(\gamma\):
+        \begin{align*}
+            \frac{\partial u(c^{c|a}_{it},x^a_{it,-c})/\partial c_{it}}{\lambda}
+            \approx
+            1-\gamma\frac{c^{c|a}_{it}-c}{c}.
+        \end{align*}
+        \item If this consumption gap is uncorrelated with the discounted actual-choice benefit gain, define:
+        \begin{align*}
+            \bar c^{c|a}
+            \equiv
+            \frac{\sum_i\sum_t E\left[c^{c|a}_{it}\right]}
+            {\sum_i\sum_t E[1]}.
+        \end{align*}
+        \item Then:
+        \begin{align*}
+            WMVPF^E(b^c,b^a)
+            \le
+            \left(
+            1-\gamma\frac{\bar c^{c|a}-c}{c}
+            \right)\frac{\sum_i\sum_t E\left[
+            \beta^t
+            \left[b^a(x^a_{it})-b^c(x^a_{it})\right]
+            \right]}{C(b^c,b^a)}.
+        \end{align*}
+    \end{itemize}
+    \bfootnote{\hyperlink{upperBoundApprox}{\beamerbutton{Back}}}
 \end{frame}
 
 \begin{frame}[label=survey]{ELSI: Consumption by Normalized Points}
