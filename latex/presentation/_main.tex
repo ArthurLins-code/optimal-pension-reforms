@@ -559,175 +559,31 @@ c_{it}-c,
 \end{frame}
 
 \begin{frame}[label=boundsEndpoints]{The Bounds Need Two Consumption Endpoints}
-    \small
+    \scriptsize
     \begin{itemize}
-        \item Let $g\in\{c,a\}$ index the choice distribution:
-        \begin{itemize}
-            \item $g=c$: no-reform choices, proxied by pre-reform claimers.
-            \item $g=a$: actual choices, proxied by post-reform claimers.
-        \end{itemize}
-        \item Estimate a per-capita consumption profile $\widehat c^{g,ELSI}_{p}$ by normalized points $p$, without time $t$.
-        \item Use POF only to anchor the level; use ELSI to recover how consumption varies with $p$ and $g$.
-        \item The endpoint cells are:
+        \item Estimate the average consumption levels $\bar c^{a|c}$ and $\bar c^{c|a}$ from ELSI and POF; the appendix gives claimant-group definitions and implementation details.
+        \item Let $\widehat n^g_p$ be average household size among ELSI claimers in group $g$ at point $p$; define per-capita benefit changes:
+        \begin{align*}
+            \Delta b^{c,pc}_{p,t}
+            &\equiv
+            \frac{b^a(x^c_{p,t})-b^c(x^c_{p,t})}{\widehat n^c_p},
+            &
+            \Delta b^{a,pc}_{p,t}
+            &\equiv
+            \frac{b^a(x^a_{p,t})-b^c(x^a_{p,t})}{\widehat n^a_p}.
+        \end{align*}
+        \vspace{-1em}
+        \item The household per-capita endpoint cells are:
         \begin{align*}
             \widehat c^{a|c}_{p,t}
             &\equiv
-            \widehat c^c_p+\kappa\Delta b^c_{p,t},
+            \widehat c^c_p+\rho\Delta b^{c,pc}_{p,t},
             &
-            \Delta b^c_{p,t}
-            &\equiv b^a(x^c_{p,t})-b^c(x^c_{p,t}),\\
             \widehat c^{c|a}_{p,t}
             &\equiv
-            \widehat c^a_p-\kappa\Delta b^a_{p,t},
-            &
-            \Delta b^a_{p,t}
-            &\equiv b^a(x^a_{p,t})-b^c(x^a_{p,t}).
+            \widehat c^a_p-\rho\Delta b^{a,pc}_{p,t}.
         \end{align*}
-        \item Baseline: $\kappa=1$, the mechanical benefit change is consumed one-for-one.
-    \end{itemize}
-\end{frame}
-
-\begin{frame}[label=elsiGroups]{ELSI Defines Claiming Groups and Points}
-    \footnotesize
-    \begin{itemize}
-        \item Use ELSI-Brasil wave 1 (2015--16) and wave 2 (2019--21).
-        \item Keep own-retirement recipients:
-        \begin{itemize}
-            \item Wave 1: $i16=1$ and $i17\_1=1$ for INSS retirement.
-            \item Wave 2: $i0\_32=1$ and $i17\_1=1$ for INSS retirement.
-            \item Drop death-pension-only cases: $i17\_7=1$ with no own retirement.
-        \end{itemize}
-        \item Assign the claimant group using retirement age:
-        \begin{align*}
-            \widehat y_i^{claim}
-            =
-            y_i^{interview}
-            -
-            \left(age_i^{interview}-i18_i\right).
-        \end{align*}
-        \item Set $g_i=c$ if $\widehat y_i^{claim}<2015$ and $g_i=a$ if $\widehat y_i^{claim}\geq 2015$.
-        \item Compute normalized points at claiming:
-        \begin{align*}
-            p_i=i18_i+contrib_i-\bar p_i,
-            \qquad
-            \bar p_i=
-            \begin{cases}
-            85, & \text{women},\\
-            95, & \text{men}.
-            \end{cases}
-        \end{align*}
-        \item For $contrib_i$, use wave-1 $i8$ years paying INSS; for wave-2 panel observations, carry forward wave-1 $i8$ when no wave-2 contribution-history variable is available.
-    \end{itemize}
-\end{frame}
-
-\begin{frame}[label=elsiConsumption]{ELSI Gives Per-Capita Consumption Within Each Group}
-    \footnotesize
-    \begin{itemize}
-        \item Build household spending from ELSI household expenses. Let
-        \[
-            \mathcal M=\{c2,c4,c5,c6,c7,c8,c9,c10,c11,c17\}.
-        \]
-        Then
-        \begin{align*}
-            C_h^{ELSI}
-            =
-            \sum_{q\in\mathcal M}m(q_h)
-            +
-            \frac{m(c15_h)+m(c18_h)}{12}.
-        \end{align*}
-        \item $m(\cdot)$ maps each bracket to its midpoint; top-coded cells use the mean from POF in the same bracket.
-        \item Coding rules: set $c4_h=0$ if $c3_h=0$; set $c17_h=0$ if $c16_h=0$; drop $99$ and treat $88$ as not applicable.
-        \item Exclude taxes and asset purchases from consumption: $c12$ (IPTU/ITR), $c13$ (IPVA), and $c14$ (vehicle purchases).
-        \item Divide by household size:
-        \begin{align*}
-            c_i^{ELSI}=\frac{C_{h(i)}^{ELSI}}{n_{h(i)}^{ELSI}}.
-        \end{align*}
-        \item Household size: wave 1 uses $ar6$; wave 2 uses the released household resident count if present, otherwise count the roster from $ar10$ plus nonmissing $idade2$--$idade12$.
-    \end{itemize}
-\end{frame}
-
-\begin{frame}[label=elsiProfile]{Estimate \texorpdfstring{$\widehat c^{g,ELSI}_{p}$}{c-hat by group and points}}
-    \small
-    \begin{itemize}
-        \item For each $g\in\{c,a\}$ and normalized-point cell $p$, estimate:
-        \begin{align*}
-            \widehat c^{g,ELSI}_{p}
-            =
-            \frac{
-            \sum_i peso\_calibrado_i
-            1\{g_i=g,\;p_i=p\}c_i^{ELSI}
-            }{
-            \sum_i peso\_calibrado_i
-            1\{g_i=g,\;p_i=p\}
-            }.
-        \end{align*}
-        \item Use the ELSI survey design: $peso\_calibrado$, $upa$, and $estrato$.
-        \item Convert all ELSI monetary values to the POF 2017--18 price year before averaging.
-        \item Use the same point bins as the administrative analysis. If a $(g,p)$ cell has fewer than 30 observations, pool adjacent point cells before estimating the mean.
-        \item Output one table with columns: $g$, $p$, $\widehat c^{g,ELSI}_{p}$, standard error, cell count, and effective cell count.
-    \end{itemize}
-\end{frame}
-
-\begin{frame}[label=pofLevel]{POF Anchors the Consumption Level}
-    \footnotesize
-    \begin{itemize}
-        \item Use POF 2017--18 because it is the closest detailed expenditure survey after the reform.
-        \item Unit identifiers: $UF$, $COD\_UPA$, $NUM\_DOM$, and $NUM\_UC$.
-        \item Household size is not the right denominator. Build $n_u^{POF}$ by counting records in \textit{Morador} within the consumption unit, excluding $V0306\in\{18,19\}$.
-        \item Expenditure tabs: \textit{Aluguel Estimado}, \textit{Despesa Coletiva}, \textit{Caderneta Coletiva}, \textit{Despesa Individual}, and non-monetary POF 2/4 services.
-        \item Spending variables: $V8000\_DEFLA$, $FATOR\_ANUALIZACAO$, $V9011$, $QUADRO$, and $V9001$.
-        \item Keep consumption items using $Tradutor\_Despesa\_Geral.xls$ with $Nivel\_2=11$.
-        \item Identify own-INSS-retirement units in \textit{Outros Rendimentos}: $V9001=5400401$; robustness includes $5400501$ for INSS pensions.
-    \end{itemize}
-\end{frame}
-
-\begin{frame}[label=scaledConsumption]{Scale ELSI Profiles to the POF Level}
-    \small
-    \begin{itemize}
-        \item Construct POF per-capita consumption for retired consumption units:
-        \begin{align*}
-            \widehat c^{POF}_{ret}
-            =
-            \frac{
-            \sum_u PESO\_FINAL_u
-            1\{u\in ret\}
-            c_u^{POF}
-            }{
-            \sum_u PESO\_FINAL_u
-            1\{u\in ret\}
-            },
-            \qquad
-            c_u^{POF}
-            =
-            \frac{\sum_{r\in u}E_{ur}}{n_u^{POF}}.
-        \end{align*}
-        \item Let $\widehat c^{ELSI}_{ret}$ be the pooled ELSI retired mean using the same consumption proxy.
-        \item Scale each ELSI group-point mean to the POF level:
-        \begin{align*}
-            \widehat c^g_p
-            =
-            \widehat c^{POF}_{ret}
-            \times
-            \frac{\widehat c^{g,ELSI}_{p}}{\widehat c^{ELSI}_{ret}}.
-        \end{align*}
-        \item This preserves ELSI variation across $p$ and across claimant groups, while using POF for the consumption level.
-    \end{itemize}
-\end{frame}
-
-\begin{frame}[label=endpointAverages]{Construct \texorpdfstring{$\bar c^{a|c}$}{c a given c} and \texorpdfstring{$\bar c^{c|a}$}{c c given a}}
-    \small
-    \begin{itemize}
-        \item From the administrative data, take $N^c_{p,t}$, $N^a_{p,t}$, $\Delta b^c_{p,t}$, and $\Delta b^a_{p,t}$.
-        \item Build endpoint consumption by point and quarter:
-        \begin{align*}
-            \widehat c^{a|c}_{p,t}
-            =
-            \widehat c^c_p+\kappa\Delta b^c_{p,t},
-            \qquad
-            \widehat c^{c|a}_{p,t}
-            =
-            \widehat c^a_p-\kappa\Delta b^a_{p,t}.
-        \end{align*}
+        \vspace{-1em}
         \item Aggregate using the same cell support as the benefit calculations:
         \begin{align*}
             \bar c^{a|c}
@@ -740,10 +596,11 @@ c_{it}-c,
             \frac{\sum_{p,t}N^a_{p,t}\widehat c^{c|a}_{p,t}}
             {\sum_{p,t}N^a_{p,t}}.
         \end{align*}
-        \item Robustness: replace $N^g_{p,t}$ with $\beta^tN^g_{p,t}\Delta b^g_{p,t}$ to compute benefit-weighted endpoint means.
+        \vspace{-1em}
+        \item Baseline: $\rho\equiv\partial c/\partial b=0.33$, following Gerard and Gonzaga.
     \end{itemize}
+    \bfootnote{\hyperlink{elsiGroups}{\beamerbutton{Estimating $\hat c^c_p$ and $\hat c^a_p$}}}
 \end{frame}
-
 
 \begin{frame}[label=welfareGraph]{Welfare Weighted MVPF}
     \begin{figure}
@@ -1450,6 +1307,131 @@ c_{it}-c,
         \end{align*}
     \end{itemize}
     \bfootnote{\hyperlink{boundsSummary}{\beamerbutton{Back}}}
+\end{frame}
+
+\begin{frame}[label=elsiGroups]{ELSI Defines Claiming Groups and Endpoint Means}
+    \scriptsize
+    \begin{itemize}
+        \item Let $g\in\{c,a\}$ index the choice distribution: $g=c$ denotes no-reform choices, proxied by pre-reform claimers; $g=a$ denotes actual choices, proxied by post-reform claimers.
+        \item Use ELSI-Brasil wave 1 (2015--16) and wave 2 (2019--21).
+        \item Keep own-retirement recipients:
+        \begin{itemize}
+            \item Wave 1: $i16=1$ and $i17\_1=1$ for INSS retirement.
+            \item Wave 2: $i0\_32=1$ and $i17\_1=1$ for INSS retirement.
+            \item Drop death-pension-only cases: $i17\_7=1$ with no own retirement.
+        \end{itemize}
+        \item Assign the claimant group using retirement age:
+        \begin{align*}
+            \widehat y_i^{claim}
+            =
+            y_i^{interview}
+            -
+            \left(age_i^{interview}-i18_i\right).
+        \end{align*}
+        \item Set $g_i=c$ if $\widehat y_i^{claim}<2015$ and $g_i=a$ if $\widehat y_i^{claim}\geq 2015$.
+        \item For $p_i>0$, estimate endpoint consumption as $\widehat c^{a|c}=\widehat E_{ELSI}\!\left[c_i\mid g_i=c,\;p_i>0\right]$ and $\widehat c^{c|a}=\widehat E_{ELSI}\!\left[c_i\mid g_i=a,\;p_i>0\right]$: before- and after-reform claimers, respectively.
+        \item Compute normalized points at claiming as $p_i=i18_i+contrib_i-\bar p_i$, with $\bar p_i=85$ for women and $95$ for men.
+        \item For $contrib_i$, use wave-1 $i8$ years paying INSS; for wave-2 panel observations, carry forward wave-1 $i8$ when no wave-2 contribution-history variable is available.
+    \end{itemize}
+    \bfootnote{\hyperlink{boundsEndpoints}{\beamerbutton{Back}}}
+\end{frame}
+
+\begin{frame}[label=elsiConsumption]{ELSI Gives Per-Capita Consumption Within Each Group}
+    \footnotesize
+    \begin{itemize}
+        \item Build household spending from ELSI household expenses. Let
+        \[
+            \mathcal M=\{c2,c4,c5,c6,c7,c8,c9,c10,c11,c17\}.
+        \]
+        Then
+        \begin{align*}
+            C_h^{ELSI}
+            =
+            \sum_{q\in\mathcal M}m(q_h)
+            +
+            \frac{m(c15_h)+m(c18_h)}{12}.
+        \end{align*}
+        \item $m(\cdot)$ maps each bracket to its midpoint; top-coded cells use the mean from POF in the same bracket.
+        \item Coding rules: set $c4_h=0$ if $c3_h=0$; set $c17_h=0$ if $c16_h=0$; drop $99$ and treat $88$ as not applicable.
+        \item Exclude taxes and asset purchases from consumption: $c12$ (IPTU/ITR), $c13$ (IPVA), and $c14$ (vehicle purchases).
+        \item Divide by household size:
+        \begin{align*}
+            c_i^{ELSI}=\frac{C_{h(i)}^{ELSI}}{n_{h(i)}^{ELSI}}.
+        \end{align*}
+        \item Household size: wave 1 uses $ar6$; wave 2 uses the released household resident count if present, otherwise count the roster from $ar10$ plus nonmissing $idade2$--$idade12$.
+    \end{itemize}
+    \bfootnote{\hyperlink{boundsEndpoints}{\beamerbutton{Back}}}
+\end{frame}
+
+\begin{frame}[label=elsiProfile]{Estimate \texorpdfstring{$\widehat c^{g,ELSI}_{p}$}{c-hat by group and points}}
+    \small
+    \begin{itemize}
+        \item For each $g\in\{c,a\}$ and normalized-point cell $p$, estimate:
+        \begin{align*}
+            \widehat c^{g,ELSI}_{p}
+            =
+            \frac{
+            \sum_i peso\_calibrado_i
+            1\{g_i=g,\;p_i=p\}c_i^{ELSI}
+            }{
+            \sum_i peso\_calibrado_i
+            1\{g_i=g,\;p_i=p\}
+            }.
+        \end{align*}
+        \item Use the ELSI survey design: $peso\_calibrado$, $upa$, and $estrato$.
+        \item Convert all ELSI monetary values to the POF 2017--18 price year before averaging.
+        \item Use the same point bins as the administrative analysis. If a $(g,p)$ cell has fewer than 30 observations, pool adjacent point cells before estimating the mean.
+        \item Output one table with columns: $g$, $p$, $\widehat c^{g,ELSI}_{p}$, standard error, cell count, and effective cell count.
+    \end{itemize}
+    \bfootnote{\hyperlink{boundsEndpoints}{\beamerbutton{Back}}}
+\end{frame}
+
+\begin{frame}[label=pofLevel]{POF Anchors the Consumption Level}
+    \footnotesize
+    \begin{itemize}
+        \item Use POF 2017--18 because it is the closest detailed expenditure survey after the reform.
+        \item Unit identifiers: $UF$, $COD\_UPA$, $NUM\_DOM$, and $NUM\_UC$.
+        \item Household size is not the right denominator. Build $n_u^{POF}$ by counting records in \textit{Morador} within the consumption unit, excluding $V0306\in\{18,19\}$.
+        \item Expenditure tabs: \textit{Aluguel Estimado}, \textit{Despesa Coletiva}, \textit{Caderneta Coletiva}, \textit{Despesa Individual}, and non-monetary POF 2/4 services.
+        \item Spending variables: $V8000\_DEFLA$, $FATOR\_ANUALIZACAO$, $V9011$, $QUADRO$, and $V9001$.
+        \item Keep consumption items using $Tradutor\_Despesa\_Geral.xls$ with $Nivel\_2=11$.
+        \item Identify own-INSS-retirement units in \textit{Outros Rendimentos}: $V9001=5400401$; robustness includes $5400501$ for INSS pensions.
+    \end{itemize}
+    \bfootnote{\hyperlink{boundsEndpoints}{\beamerbutton{Back}}}
+\end{frame}
+
+\begin{frame}[label=scaledConsumption]{Scale ELSI Profiles to the POF Level}
+    \small
+    \begin{itemize}
+        \item Construct POF per-capita consumption for retired consumption units:
+        \begin{align*}
+            \widehat c^{POF}_{ret}
+            =
+            \frac{
+            \sum_u PESO\_FINAL_u
+            1\{u\in ret\}
+            c_u^{POF}
+            }{
+            \sum_u PESO\_FINAL_u
+            1\{u\in ret\}
+            },
+            \qquad
+            c_u^{POF}
+            =
+            \frac{\sum_{r\in u}E_{ur}}{n_u^{POF}}.
+        \end{align*}
+        \item Let $\widehat c^{ELSI}_{ret}$ be the pooled ELSI retired mean using the same consumption proxy.
+        \item Scale each ELSI group-point mean to the POF level:
+        \begin{align*}
+            \widehat c^g_p
+            =
+            \widehat c^{POF}_{ret}
+            \times
+            \frac{\widehat c^{g,ELSI}_{p}}{\widehat c^{ELSI}_{ret}}.
+        \end{align*}
+        \item This preserves ELSI variation across $p$ and across claimant groups, while using POF for the consumption level.
+    \end{itemize}
+    \bfootnote{\hyperlink{boundsEndpoints}{\beamerbutton{Back}}}
 \end{frame}
 
 \begin{frame}[label=survey]{ELSI: Consumption by Normalized Points}
