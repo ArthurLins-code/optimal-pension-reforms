@@ -124,9 +124,12 @@ cf_counts <- fread(file.path(PATHS$output_F, paste0('new_counterfactual_claim_co
 setnames(cf_counts, "t", "dist_reform")
 setnames(cf_counts, "p", "points_norm")
 
-results_selection <- fread(file.path(PATHS$prereq_root, 'G', 'G4_table_results.csv'))
+# i4-g4h2 fix (per Arthur): read the suffix-aware G4/H2 — the _sample tables regenerated in-repo by
+# the G4/H2 stages — consistent with I6. (Was the full-data no-suffix tables from prereq_root; that
+# mixed sample counts with full-data benefits/taxes. This CHANGES I4's SAMPLE number.)
+results_selection <- fread(file.path(PATHS$output_G, paste0('G4_table_results', SUFFIX, '.csv')))
 
-results_taxes <- fread(file.path(PATHS$prereq_root, 'H', 'H2_table_results.csv'))
+results_taxes <- fread(file.path(PATHS$output_H, paste0('H2_table_results', SUFFIX, '.csv')))
 
 # Benefit changes
 # change: dt_gab for panel

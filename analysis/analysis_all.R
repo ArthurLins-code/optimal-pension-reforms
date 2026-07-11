@@ -11,21 +11,19 @@ source(here::here("config", "constants.R"))
 # external (PATHS$prereq_root) and are never touched here.
 clear_dirs(PATHS$analysis_temp)
 
-# --- external prerequisite INPUTS (FLAGS g-f5, i4-g4h2) — fail LOUDLY if absent -------------------
-# Read from the EXTERNAL data root (PATHS$prereq_root), not produced in-repo: F5 has no sample
-# producer (legacy/full-data only); the no-suffix G4/H2 are the full-data tables I4 reads. The
-# _sample G4/H2 tables are now PRODUCED in-repo by the G4/H2 stages below (no longer prereqs).
+# --- external prerequisite INPUT (FLAG g-f5) — fail LOUDLY if absent ------------------------------
+# F5 is the ONLY external input: it has no sample producer (legacy full-data F5/F6/F7 only) and is
+# read by gabriel/pure. Everything else — including the G4/H2 _sample tables I4 and I6 now both read
+# (i4-g4h2 fixed) — is PRODUCED in-repo by the stages below.
 .prereqs <- c(
-  file.path(PATHS$prereq_root, "F", "F5_table_results.csv"),   # gabriel/pure read legacy F5 (full-data input)
-  file.path(PATHS$prereq_root, "G", "G4_table_results.csv"),   # I4 reads full-data G4 (i4-g4h2)
-  file.path(PATHS$prereq_root, "H", "H2_table_results.csv")    # I4 reads full-data H2 (i4-g4h2)
+  file.path(PATHS$prereq_root, "F", "F5_table_results.csv")    # gabriel/pure read legacy F5 (full-data input)
 )
 .missing <- unique(.prereqs[!file.exists(.prereqs)])
 if (length(.missing))
-  stop("analysis_all.R: missing external prerequisite input(s):\n  ",
+  stop("analysis_all.R: missing external prerequisite input:\n  ",
        paste(.missing, collapse = "\n  "),
-       "\nThese live in the external data root (F5 + full-data G4/H2). See ",
-       "quality_reports/restructure_findings.md (flags g-f5, i4-g4h2). Stage them before running.")
+       "\nF5 lives in the external data root (legacy full-data table; no sample producer). See ",
+       "quality_reports/restructure_findings.md (flag g-f5). Stage it before running.")
 
 run_stage("E4_plots_claiming_distributions.R")          # claiming-distribution figures (terminal)
 run_stage("new_counterfactual_claiming3_gabriel.R")     # F counterfactual claim counts (upstream of pure)
