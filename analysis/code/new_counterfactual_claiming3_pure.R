@@ -53,7 +53,7 @@ dt_inflow <- panel[!is.na(claim_haz)] %>%
 
 sum(dt_inflow$inflow)
 
-results <- fread(file.path(PATHS$output_F, "F5_table_results.csv")) %>% 
+results <- fread(file.path(PATHS$prereq_root, "F", "F5_table_results.csv")) %>% 
   left_join(dt_claim, by = c('dist_reform_quarters', 'points_norm')) %>% 
   left_join(dt_elig, by = c('dist_reform_quarters', 'points_norm')) %>% 
   left_join(dt_inflow, by = c('dist_reform_quarters', 'points_norm')) %>% 

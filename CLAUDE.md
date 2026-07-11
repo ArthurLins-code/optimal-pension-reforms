@@ -13,7 +13,7 @@ Restructured 2026-06-23 into a functional layout (Gentzkow–Shapiro). Full map:
 - `presentation/` — `figures_central_folder/` (collector/update/verify/deck_compare + `from_code/` + `static/`) and `latex/` (EN `presentation/`, PT `apresentacao/`). Master: `presentation/build_deck.R`.
 - `legacy/` — Quarantined, each guarded by a `stop()`: F1-F7, G6, I5, `old/` B1-B2. Never run.
 - `RUN.R` — root front-door signpost dispatching to the three masters.
-- `build/{output,temp}`, `analysis/{output,temp}` — generated artifacts (gitignored). In **sample mode the stage I/O lives in the external sample root**, not the repo.
+- `build/{output,temp}`, `analysis/{output,temp}` — generated artifacts (gitignored). **OUTPUTS (figures/tables/temp) land in the repo's gitignored `analysis/output`|`temp` in BOTH sample and full mode.** INPUTS stay external: the 5% sample CSVs, the full-data build intermediates, and the `F5` + full-data (no-suffix) `G4`/`H2` prereq tables (read via `PATHS$prereq_root`).
 - `data_local/` — 5% anonymized sample (NEVER committed).
 - `_docs/memory/` — Knowledge base (01-10). `_docs/restructure/` — restructure spec + MAP_before/after.
 - `quality_reports/` — plans, session logs, `restructure_findings.md`, `restructure_parity.md`.

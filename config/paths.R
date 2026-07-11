@@ -57,8 +57,14 @@ DATA_ROOT <- if (DATA_MODE == "sample") SAMPLE_ROOT else FULL_ANALYSIS_ROOT
 if (!dir.exists(DATA_ROOT))
   stop("config/paths.R: DATA_MODE='", DATA_MODE, "' but its root does not exist: ", DATA_ROOT)
 
+# --- Repo-internal output roots (relocation: outputs live in the repo, gitignored) -----------
+# Outputs are regeneratable and non-confidential-by-construction, so they live INSIDE the repo
+# (analysis/output, analysis/temp) in BOTH modes. Confidential/large INPUTS stay external (DATA_ROOT).
+REPO_OUTPUT <- file.path(PROJECT_ROOT, "analysis", "output")
+REPO_TEMP   <- file.path(PROJECT_ROOT, "analysis", "temp")
+
 # --- The one PATHS list ------------------------------------------------------
-.out <- function(...) file.path(DATA_ROOT, "output", ...)
+.out <- function(...) file.path(REPO_OUTPUT, ...)
 PATHS <- list(
   project_root        = PROJECT_ROOT,
   data_mode           = DATA_MODE,
@@ -68,16 +74,17 @@ PATHS <- list(
   sample_data         = file.path(SAMPLE_ROOT, "data"),       # dt_sampled_anon.csv, panel_sampled_anon.csv
   build_working       = file.path(FULL_BUILD_ROOT, "working"),# full-mode A-D intermediates
   extra               = file.path(DATA_ROOT, "extra"),         # IBGE life-expectancy etc. (full mode)
+  prereq_root         = file.path(DATA_ROOT, "output"),        # external pre-supplied INPUTS: F5 + full-data G4/H2 (read-only)
 
-  # analysis outputs (external dir in both modes; large/confidential — stay outside the repo)
-  analysis_output     = file.path(DATA_ROOT, "output"),
+  # analysis outputs (relocated INTO the repo: gitignored & regenerable — see REPO_OUTPUT)
+  analysis_output     = REPO_OUTPUT,
   output_E            = .out("E"),
   output_F            = .out("F"),
   output_G            = .out("G"),
   output_H            = .out("H"),
   output_I            = .out("I"),
   output_new_counter  = .out("new_counter_claiming"),
-  analysis_temp       = file.path(DATA_ROOT, "tmp"),           # persistent temp; the former /tmp seam (O1) lands here
+  analysis_temp       = REPO_TEMP,                             # persistent temp; gabriel->pure handoff seam
 
   # build (full data / server only)
   build_output        = file.path(FULL_BUILD_ROOT, "output"),

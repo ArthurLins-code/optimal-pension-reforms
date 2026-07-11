@@ -11,22 +11,15 @@ pkgs <- c('scales','zoo','binsreg','ggpubr','readstata13','purrr','readxl','did'
           'lubridate','stringi','foreign','haven','ggplot2','knitr','grid','broom',
           'RColorBrewer')
 
-# --- Environment detection ---------------------------------------------------
-if (dir.exists("F:/Users/tucalins/Documents/transf_11_11/directory_2025")) {
-  dir <- "F:/Users/tucalins/Documents/transf_11_11/directory_2025"
-  DATA_MODE <- "full"
-  .libPaths('F:/docs/R-library')
-} else if (dir.exists("C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement")) {
-  dir <- "C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement"
-  DATA_MODE <- "sample"
-} else {
-  stop("No recognized data directory found. Set 'dir' manually.")
-}
-setwd(dir)
-message("G4 running in ", DATA_MODE, " mode from: ", dir)
-SUFFIX <- if (DATA_MODE == "sample") "_sample" else ""
-
 for (pkg in pkgs) library(pkg, character.only = TRUE)
+
+# --- Config layer (restructure Stage 2) --------------------------------------
+source(here::here("config", "paths.R"))
+source(here::here("config", "constants.R"))
+dir <- PATHS$data_root
+if (DATA_MODE == "full") .libPaths(Sys.getenv("PENSION_R_LIBPATH", unset = "F:/docs/R-library"))
+SUFFIX <- if (DATA_MODE == "sample") "_sample" else ""
+message("G4 running in ", DATA_MODE, " mode from: ", dir)
 
 set.seed(123)
 
@@ -35,11 +28,11 @@ set.seed(123)
 # ******************************************************************************
 
 if (DATA_MODE == "full") {
-  dt <- fread('working/D1_cross_section.csv.gz') %>%
+  dt <- fread(file.path(PATHS$build_working, "D1_cross_section.csv.gz")) %>%
     .[!is.na(dist_claim_cutoff)]
 
   # New variables: Life Expectancy merged into cross_section so we can calculate discounted estimated lifetime benefits
-  expectativa <- read_excel(paste0(dir,'/extra/Expectativa_Vida_IBGE.xlsx')) %>%
+  expectativa <- read_excel(file.path(PATHS$extra, "Expectativa_Vida_IBGE.xlsx")) %>%
     setDT() %>%
     setnames(c('Ano','Idade','Expectativa'), c('table_year', 'age_disc', 'expec_ibge'))
 
@@ -326,32 +319,34 @@ out <- merge(rbind(dt_agg[dist_reform >= 0,.(points_norm, dist_reform, period = 
              results[,.(group, dist_reform = claim_quarter, period, point_estimate)],
              by = c('group','dist_reform','period'))
 
-fwrite(out, file = paste0('output/G/G4_table_results', SUFFIX, '.csv'))
+dir.create(PATHS$output_G, recursive = TRUE, showWarnings = FALSE)
 
-ggsave(plots_new, filename = paste0('output/G/G4_eventstudy_benefits_new', SUFFIX, '.pdf'),
+fwrite(out, file = file.path(PATHS$output_G, paste0('G4_table_results', SUFFIX, '.csv')))
+
+ggsave(plots_new, filename = file.path(PATHS$output_G, paste0('G4_eventstudy_benefits_new', SUFFIX, '.pdf')),
        height = 6, width = 6)
 
-ggsave(plots_old, filename = paste0('output/G/G4_eventstudy_benefits_old', SUFFIX, '.pdf'),
+ggsave(plots_old, filename = file.path(PATHS$output_G, paste0('G4_eventstudy_benefits_old', SUFFIX, '.pdf')),
        height = 6, width = 6)
 
-ggsave(list_plots_new[['new_[-6,-3]']], filename = paste0('output/G/G4_eventstudy_benegits_new_1', SUFFIX, '.pdf'),
+ggsave(list_plots_new[['new_[-6,-3]']], filename = file.path(PATHS$output_G, paste0('G4_eventstudy_benegits_new_1', SUFFIX, '.pdf')),
        height = 3, width = 4)
-ggsave(list_plots_new[['new_[-2,-1]']], filename = paste0('output/G/G4_eventstudy_benegits_new_2', SUFFIX, '.pdf'),
+ggsave(list_plots_new[['new_[-2,-1]']], filename = file.path(PATHS$output_G, paste0('G4_eventstudy_benegits_new_2', SUFFIX, '.pdf')),
        height = 3, width = 4)
-ggsave(list_plots_new[['new_[0,1]']], filename = paste0('output/G/G4_eventstudy_benegits_new_3', SUFFIX, '.pdf'),
+ggsave(list_plots_new[['new_[0,1]']], filename = file.path(PATHS$output_G, paste0('G4_eventstudy_benegits_new_3', SUFFIX, '.pdf')),
        height = 3, width = 4)
-ggsave(list_plots_new[['new_[2,6]']], filename = paste0('output/G/G4_eventstudy_benegits_new_4', SUFFIX, '.pdf'),
+ggsave(list_plots_new[['new_[2,6]']], filename = file.path(PATHS$output_G, paste0('G4_eventstudy_benegits_new_4', SUFFIX, '.pdf')),
        height = 3, width = 4)
-ggsave(list_plots_new[['new_[7,15]']], filename = paste0('output/G/G4_eventstudy_benegits_new_5', SUFFIX, '.pdf'),
+ggsave(list_plots_new[['new_[7,15]']], filename = file.path(PATHS$output_G, paste0('G4_eventstudy_benegits_new_5', SUFFIX, '.pdf')),
        height = 3, width = 4)
 
-ggsave(list_plots_old[['old_[-6,-3]']], filename = paste0('output/G/G4_eventstudy_benegits_old_1', SUFFIX, '.pdf'),
+ggsave(list_plots_old[['old_[-6,-3]']], filename = file.path(PATHS$output_G, paste0('G4_eventstudy_benegits_old_1', SUFFIX, '.pdf')),
        height = 3, width = 4)
-ggsave(list_plots_old[['old_[-2,-1]']], filename = paste0('output/G/G4_eventstudy_benegits_old_2', SUFFIX, '.pdf'),
+ggsave(list_plots_old[['old_[-2,-1]']], filename = file.path(PATHS$output_G, paste0('G4_eventstudy_benegits_old_2', SUFFIX, '.pdf')),
        height = 3, width = 4)
-ggsave(list_plots_old[['old_[0,1]']], filename = paste0('output/G/G4_eventstudy_benegits_old_3', SUFFIX, '.pdf'),
+ggsave(list_plots_old[['old_[0,1]']], filename = file.path(PATHS$output_G, paste0('G4_eventstudy_benegits_old_3', SUFFIX, '.pdf')),
        height = 3, width = 4)
-ggsave(list_plots_old[['old_[2,6]']], filename = paste0('output/G/G4_eventstudy_benegits_old_4', SUFFIX, '.pdf'),
+ggsave(list_plots_old[['old_[2,6]']], filename = file.path(PATHS$output_G, paste0('G4_eventstudy_benegits_old_4', SUFFIX, '.pdf')),
        height = 3, width = 4)
-ggsave(list_plots_old[['old_[7,15]']], filename = paste0('output/G/G4_eventstudy_benegits_old_5', SUFFIX, '.pdf'),
+ggsave(list_plots_old[['old_[7,15]']], filename = file.path(PATHS$output_G, paste0('G4_eventstudy_benegits_old_5', SUFFIX, '.pdf')),
        height = 3, width = 4)

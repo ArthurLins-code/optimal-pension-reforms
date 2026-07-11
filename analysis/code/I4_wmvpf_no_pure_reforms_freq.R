@@ -124,9 +124,9 @@ cf_counts <- fread(file.path(PATHS$output_F, paste0('new_counterfactual_claim_co
 setnames(cf_counts, "t", "dist_reform")
 setnames(cf_counts, "p", "points_norm")
 
-results_selection <- fread(file.path(PATHS$output_G, 'G4_table_results.csv'))
+results_selection <- fread(file.path(PATHS$prereq_root, 'G', 'G4_table_results.csv'))
 
-results_taxes <- fread(file.path(PATHS$output_H, 'H2_table_results.csv'))
+results_taxes <- fread(file.path(PATHS$prereq_root, 'H', 'H2_table_results.csv'))
 
 # Benefit changes
 # change: dt_gab for panel

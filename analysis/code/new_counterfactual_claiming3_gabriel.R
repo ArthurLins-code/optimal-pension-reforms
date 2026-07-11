@@ -69,7 +69,7 @@ sum(dt_inflow$inflow)
 
 # Using all periods
 
-results <- fread(file.path(PATHS$output_F, "F5_table_results.csv")) %>%
+results <- fread(file.path(PATHS$prereq_root, "F", "F5_table_results.csv")) %>%
   left_join(dt_claim, by = c('dist_reform_quarters', 'points_norm')) %>% 
   left_join(dt_elig, by = c('dist_reform_quarters', 'points_norm')) %>% 
   left_join(dt_inflow, by = c('dist_reform_quarters', 'points_norm')) %>% 
@@ -175,7 +175,7 @@ plot_count_2014 <- ggarrange(list_plots_count[['-5']],list_plots_count[['-4']],
 
 # Only for post reform period
 
-results <- fread(file.path(PATHS$output_F, "F5_table_results.csv")) %>%
+results <- fread(file.path(PATHS$prereq_root, "F", "F5_table_results.csv")) %>%
   left_join(dt_claim, by = c('dist_reform_quarters', 'points_norm')) %>%
   left_join(dt_elig, by = c('dist_reform_quarters', 'points_norm')) %>%
   left_join(dt_inflow, by = c('dist_reform_quarters', 'points_norm')) %>%

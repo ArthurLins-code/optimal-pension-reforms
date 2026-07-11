@@ -15,9 +15,8 @@ run <- function(cmd) {
   if (status != 0) stop("build_deck.R: command failed (status ", status, "): ", cmd)
 }
 
-# 1) collect pipeline figures into figures_central_folder/from_code/ (newest of {sample,repo} wins)
-run(paste(shQuote(py), shQuote(file.path(fig_dir, "collector.py")),
-          "--sample-root", shQuote(PATHS$sample_root)))
+# 1) collect pipeline figures into figures_central_folder/from_code/ (from the in-repo analysis/output)
+run(paste(shQuote(py), shQuote(file.path(fig_dir, "collector.py"))))
 # 2) compile the English deck (-cd: latexmk chdirs into the .tex's own dir; no setwd here)
 run(paste("latexmk -cd -g -pdf -interaction=nonstopmode", shQuote(deck_tex)))
 # 3) verify every \includegraphics resolves under from_code/ + static/

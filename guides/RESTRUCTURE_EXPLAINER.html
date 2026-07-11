@@ -357,7 +357,11 @@
     <h2><span class="n">5</span> The portability layer — <span class="mono" style="font-size:18px">config/paths.R</span></h2>
     <p>This single file is the most important fix. It finds the project root with no <code>setwd</code> (via a <code>.here</code>
     sentinel), resolves the data environment <b>loudly</b> (an explicit error if no data root is found — never a silent wrong path),
-    and exposes one <code>PATHS</code> list that every stage uses. A folder move now changes <i>this file</i>, not forty scripts.</p>
+    and exposes one <code>PATHS</code> list that every stage uses. A folder move now changes <i>this file</i>, not forty scripts.
+    Under the 2026-07-09 outputs-in-repo change, the write keys (<code>output_E</code>–<code>I</code>, <code>new_counter</code>,
+    <code>analysis_temp</code>) resolve to the repo-internal, gitignored <code>analysis/output</code> and <code>analysis/temp</code>
+    in <b>both</b> modes, while inputs — the sample CSVs, the full-data build intermediates, and the <code>F5</code> + full-data
+    <code>G4</code>/<code>H2</code> prereq tables (via <code>PATHS$prereq_root</code>) — stay external.</p>
     <pre><span class="cm"># config/paths.R  (abridged)</span>
 PROJECT_ROOT &lt;- rprojroot::find_root(rprojroot::has_file(".here"))   <span class="cm"># no setwd, ever</span>
 
@@ -369,9 +373,10 @@ else stop("could not resolve DATA_MODE — no recognised data root")   <span cla
 
 PATHS &lt;- list(
   data_root   = DATA_ROOT,          sample_data = file.path(SAMPLE_ROOT, "data"),
-  output_F    = file.path(DATA_ROOT,"output","F"),   analysis_temp = file.path(DATA_ROOT,"tmp"),
+  output_F    = file.path(PROJECT_ROOT,"analysis","output","F"),  analysis_temp = file.path(PROJECT_ROOT,"analysis","temp"),
+  prereq_root = file.path(DATA_ROOT,"output"),      <span class="cm"># external INPUT tables: F5 + full-data G4/H2</span>
   figures_from_code = file.path(PROJECT_ROOT,"presentation","figures_central_folder","from_code"),
-  ... )                              <span class="cm"># one list, every root + dir</span>
+  ... )                              <span class="cm"># outputs land in-repo (gitignored); only prereqs read external</span>
 
 run_stage(file)   <span class="cm"># source a stage, timed + logged, variables don't leak</span>
 clear_dirs(...)   <span class="cm"># wipe temp before a build (G–S "clear before you build")</span></pre>
@@ -669,7 +674,7 @@ Rscript presentation/build_deck.R</pre>
       <thead><tr><th>Variable</th><th>What it does</th><th>Default</th></tr></thead>
       <tbody>
         <tr><td class="mono">PENSION_DATA_MODE</td><td>Force <code>full</code> or <code>sample</code> (skip auto-detection)</td><td>auto-detect by which root exists</td></tr>
-        <tr><td class="mono">PENSION_SAMPLE_ROOT</td><td>5% sample dir (holds <code>data/</code> + <code>output/</code>)</td><td class="mono">…/OneDrive/…/transfer_may_retirement</td></tr>
+        <tr><td class="mono">PENSION_SAMPLE_ROOT</td><td>5% sample dir — <b>inputs only</b>: <code>data/</code> CSVs + the <code>output/</code> prereq tables (F5, full-data G4/H2, read via <code>prereq_root</code>). Pipeline outputs now land in-repo.</td><td class="mono">…/OneDrive/…/transfer_may_retirement</td></tr>
         <tr><td class="mono">PENSION_FULL_ROOT</td><td>Full-data <b>analysis</b> root (server)</td><td class="mono">F:/…/directory_2025</td></tr>
         <tr><td class="mono">PENSION_FULL_BUILD_ROOT</td><td>Full-data <b>build</b> root (the U:/-vs-F:/ split — flag O11)</td><td class="mono">U:/Documents/Paper/directory_2025</td></tr>
         <tr><td class="mono">PENSION_R_LIBPATH</td><td>R library path (full mode only)</td><td class="mono">F:/docs/R-library</td></tr>
@@ -679,8 +684,10 @@ Rscript presentation/build_deck.R</pre>
     <div class="callout"><b>The mode resolves loudly.</b> <code>config/paths.R</code> uses <code>PENSION_DATA_MODE</code> if set;
     otherwise it picks <code>sample</code> / <code>full</code> by which data root exists; if none is found it <b><code>stop()</code>s</b>
     listing the roots it looked for — never a silent wrong path. The analysis master also runs a <b>prerequisite check</b> and stops
-    if the tables it consumes (legacy <code>F5</code>, siblings <code>G4</code>/<code>H2</code>) are missing, rather than producing a
-    wrong number.</div>
+    if the external <b>input</b> tables it consumes (legacy <code>F5</code> + the full-data <code>G4</code>/<code>H2</code>, read via
+    <code>PATHS$prereq_root</code>) are missing, rather than producing a wrong number. Everything the pipeline <i>writes</i> — figures,
+    tables, temp — now lands in the repo-internal, gitignored <code>analysis/output</code> (both modes), and the figure collector reads
+    from there, so the deck builds entirely from inside the repo.</div>
   </section>
 
   <!-- ===================== OPEN ===================== -->

@@ -30,7 +30,7 @@ optimal-pension-reforms/
 │   ├── code/                       #   E1-E4, new_counterfactual_claiming{2,3_gabriel,3_pure},
 │   │                               #     G1-G5, H1-H3, I1-I4, I6, I7, I7b, new_counterfactual2
 │   ├── input/                      #   link to build/output (the panel) — .gitkept, gitignored
-│   ├── output/                     #   figures/tables/estimates — .gitkept, gitignored
+│   ├── output/                     #   figures/tables/estimates — in-repo write target (BOTH modes), .gitkept, gitignored
 │   ├── temp/                       #   intermediates incl. former /tmp hand-off — .gitkept, gitignored
 │   └── analysis_all.R              #   master: E4 → gabriel → pure → G5 → I4 → I6 (sample-runnable)
 │
@@ -85,10 +85,13 @@ source(here::here("config", "constants.R"))  # economic primitives
 - Data roots are env-overridable and defined here **only**: `PENSION_SAMPLE_ROOT`, `PENSION_FULL_ROOT`
   (analysis), `PENSION_FULL_BUILD_ROOT` (build) (paths.R:26-34). Open issue **O11** (U:/ build root vs
   F:/ analysis root) is surfaced in a comment, kept separate, **not silently merged**.
-- One `PATHS` list (paths.R:62-100). Keys: `project_root, data_mode, data_root, sample_data,
+- One `PATHS` list (paths.R:62-100). Keys: `project_root, data_mode, data_root, prereq_root, sample_data,
   build_working, extra, analysis_output, output_E/F/G/H/I, output_new_counter, analysis_temp,
   build_output, build_temp, sample_root, full_analysis_root, full_build_root, figures_central,
-  figures_from_code, figures_static, deck_dir, build_code, analysis_code`.
+  figures_from_code, figures_static, deck_dir, build_code, analysis_code`. The `analysis_output`/
+  `output_*`/`analysis_temp` **write** keys now resolve **in-repo** (`analysis/output`, `analysis/temp` —
+  gitignored, regenerable, **both modes**); the new `prereq_root = DATA_ROOT/output` reads the external,
+  read-only prereq tables (F5 + the full-data no-suffix G4/H2) as **inputs**.
 - Helpers: `run_stage(file, code_dir, echo, fresh)` — sources one stage timed + logged, `local=TRUE`
   ("shy functions"), optional fresh R process via `callr` (paths.R:106-120). `clear_dirs(...)` — wipe +
   recreate (paths.R:125-131), with a safety note never to clear a dir holding pre-supplied inputs.
@@ -112,40 +115,44 @@ Net: every script the masters actually run is `setwd`-free and resolves paths th
 ```
 E4 ─(terminal: claiming figures)
 gabriel ──► pure ──► G5 ──► I4 ──► I6
+G4, H2 ──► {G4,H2}_table_results_sample.csv ──► (prereqs consumed by I4/I6)
    (F counterfactual: claim counts → pure L/S schedules → DD on avg benefits → WMVPF → WMVPF+pure decomp)
 ```
-- **Sample-runnable:** E4, gabriel, pure, G5, I4, I6.
+- **Sample-runnable:** E4, gabriel, pure, G5, G4, H2, I4, I6 (G4/H2 regenerate the `_sample` prereq tables in-repo).
 - **Full-only (excluded from the sample master):** A4-D4 (build); **H3** (no sample branch — flag
   `h3-nosample`). I7/I7b are diagnostics, run manually.
 
 **Three masters + front door (verified):**
 - **`build/build_all.R`** — `source` config; `stop()` unless `DATA_MODE=='full'`;
   `clear_dirs(build_temp, build_output)`; `run_stage(A4, B4, C6, D4, code_dir=build_code)`.
-- **`analysis/analysis_all.R`** — `source` config; `clear_dirs(analysis_temp)` **only** (does NOT wipe
-  `analysis_output` — in sample mode it holds pre-supplied prereq tables F5/G4/H2); a **loud prereq
-  check** that `stop()`s if `F5/G4/H2` tables are missing (flags `g-f5`, `i4-g4h2`); then
-  `run_stage(E4, gabriel, pure, G5, I4, I6)`. H3 explicitly excluded; I7/I7b manual.
-- **`presentation/build_deck.R`** — `source` config; (1) `collector.py --sample-root <SAMPLE_ROOT>`,
-  (2) `latexmk -cd -g -pdf` on `deck_dir/_main.tex` (the `-cd` chdir replaces any `setwd`),
-  (3) `verify_deck.py`. Emits `_main.pdf`.
+- **`analysis/analysis_all.R`** — `source` config; `clear_dirs(analysis_temp)` **only** (never wipes the
+  in-repo `analysis_output`); a **loud prereq check** that `stop()`s if the external read-only tables
+  (F5 + the full-data no-suffix G4/H2) are missing from `PATHS$prereq_root` (flags `g-f5`, `i4-g4h2`);
+  then `run_stage(E4, gabriel, pure, G5, G4, H2, I4, I6)` — **G4/H2 added** so their `_sample` tables
+  regenerate in-repo before I4/I6. Outputs land in the in-repo `analysis/output` (gitignored, both
+  modes). H3 explicitly excluded; I7/I7b manual.
+- **`presentation/build_deck.R`** — `source` config; (1) `collector.py` (**no `--sample-root`** — with
+  outputs in-repo the collector reads `analysis/output` directly), (2) `latexmk -cd -g -pdf` on
+  `deck_dir/_main.tex` (the `-cd` chdir replaces any `setwd`), (3) `verify_deck.py`. Emits `_main.pdf`.
 - **`RUN.R`** — non-destructive signpost; documents the three `source(here::here(...))` lines and
   points to README "How to run". Running it does nothing but print guidance.
 
 > Deviation from §6 draft (intentional refinement): the draft `analysis_all.R` cleared
-> `analysis_output` and ran H3. The realized master clears only `analysis_temp` (the §8.2 safety note —
-> `analysis_output` holds pre-supplied tables in sample mode) and excludes H3 (full-only). This is the
-> safer, correct behavior, not a regression.
+> `analysis_output` and ran H3. The realized master clears only `analysis_temp` and excludes H3
+> (full-only). `analysis_output` is now the in-repo output folder (gitignored, both modes) the deck later
+> collects from; the F5 + full-data G4/H2 prereqs are read from the external `PATHS$prereq_root`, not from
+> `analysis_output`. This is the safer, correct behavior, not a regression.
 
 ---
 
 ## 4. Figure → deck flow
 
 ```
-analysis stages (E4, pure, G5, I6, …) ──ggsave──► external analysis output/ (PATHS$output_*, outside repo)
+analysis stages (E4, pure, G5, G4, H2, I6, …) ──ggsave/write──► in-repo analysis/output/ (PATHS$output_*, gitignored, both modes)
         │
         ▼
-presentation/figures_central_folder/collector.py --sample-root <SAMPLE_ROOT>
-        │   reads manifest.csv; for each row resolves the output as the NEWEST of {sample-root, repo}
+presentation/figures_central_folder/collector.py       (no --sample-root)
+        │   reads manifest.csv; for each row resolves the output under the in-repo analysis/output/
         ▼
 presentation/figures_central_folder/from_code/      (gitignored — regeneratable, 5%-sample-derived)
         │   + static/ (tracked: irreproducible manual assets, e.g. ELSI.jpg, frequenciesLQ*.pdf)
@@ -181,9 +188,14 @@ PENSION_DATA_MODE=full Rscript build/build_all.R
 
 Environment overrides (resolved in `config/paths.R`):
 - `PENSION_DATA_MODE` = `full` | `sample` — force the data mode (else auto-detected by root existence).
-- `PENSION_SAMPLE_ROOT` — path to the 5% sample tree (default OneDrive `transfer_may_retirement`).
-- `PENSION_FULL_ROOT` (analysis, F:/) and `PENSION_FULL_BUILD_ROOT` (build, U:/) — full-data roots.
+- `PENSION_SAMPLE_ROOT` — path to the 5% sample **input** tree (default OneDrive `transfer_may_retirement`);
+  it is also the base of `PATHS$prereq_root = DATA_ROOT/output`, from which F5 + the full-data G4/H2 tables are read.
+- `PENSION_FULL_ROOT` (analysis, F:/) and `PENSION_FULL_BUILD_ROOT` (build, U:/) — full-data **input** roots.
 - `PENSION_PYTHON` (build_deck.R) and `PENSION_R_LIBPATH` (server `.libPaths`) — tool overrides.
+
+These data roots are now **inputs only** — pipeline outputs write to the in-repo `analysis/output`
+(gitignored, regenerable) in **both** modes, and the deck collects from there, so `build_deck.R` no longer
+passes `--sample-root`.
 
 `RUN.R` is a signpost only; `source()` the master you want, or run the `Rscript` commands above.
 
@@ -239,8 +251,9 @@ Per-element conformance:
    MAP_before keeping siblings as live-or-noted dependencies; canonical purity is preserved at the
    master level.
 2. `analysis_all.R` clears only `temp/` (not `output/`) and **excludes H3** — diverging from the §6.2
-   draft snippet but correctly honoring the §8.2 safety note (pre-supplied prereq tables) and the
-   `h3-nosample` flag. Refinement, not regression.
+   draft snippet. `output/` is now the in-repo, gitignored output folder the deck collects from (the F5 +
+   full-data G4/H2 prereqs are read from the external `PATHS$prereq_root`, not from `output/`); H3 stays
+   out per the `h3-nosample` flag. Refinement, not regression.
 3. `trans_retirement/` still exists at root as the pre-move namespace (vestigial). Not part of the §4
    target tree; candidate for removal in a later cleanup, but harmless (masters never reference it).
 

@@ -14,14 +14,14 @@ Writes (under baseline/):
                         (path = BARE filename, to join 1:1 vs baseline_manifest.csv)
   stage3_numbers.csv    header: quantity,value,source_file,note
 
-Key numbers re-extracted from the EXTERNAL sample output dir.
+Key numbers re-extracted from the in-repo analysis/output dir (outputs relocated there).
 """
 from __future__ import annotations
 import csv, hashlib, sys
 from pathlib import Path
 
 ROOT = Path("C:/Users/tuca1/Projects/optimal-pension-reforms")
-EXT  = Path("C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement")
+EXT  = ROOT / "analysis"   # outputs relocated in-repo; EXT/"output"/... now == repo analysis/output
 
 FROM_CODE = ROOT / "presentation" / "figures_central_folder" / "from_code"
 MAIN_PDF  = ROOT / "presentation" / "latex" / "presentation" / "_main.pdf"

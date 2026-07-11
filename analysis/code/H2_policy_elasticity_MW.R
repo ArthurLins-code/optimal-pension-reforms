@@ -12,24 +12,13 @@ pkgs <- c('scales','zoo','binsreg','ggpubr','readstata13','purrr','readxl','did'
           'lubridate','stringi','foreign','haven','ggplot2','knitr','grid','broom',
           'RColorBrewer')
 
-# --- Environment detection ---------------------------------------------------
-if (dir.exists("F:/Users/tucalins/Documents/transf_11_11/directory_2025")) {
-  dir <- "F:/Users/tucalins/Documents/transf_11_11/directory_2025"
-  DATA_MODE <- "full"
-  .libPaths('F:/docs/R-library')
-} else if (dir.exists("U:/Documents/Paper/directory_2025")) {
-  dir <- "U:/Documents/Paper/directory_2025"
-  DATA_MODE <- "full"
-  .libPaths('F:/docs/R-library')
-} else if (dir.exists("C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement")) {
-  dir <- "C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement"
-  DATA_MODE <- "sample"
-} else {
-  stop("No recognized data directory found. Set 'dir' manually.")
-}
-setwd(dir)
-message("H2 running in ", DATA_MODE, " mode from: ", dir)
+# --- Config layer (paths + constants) ---------------------------------------  # restructure: config wiring
+source(here::here("config", "paths.R"))
+source(here::here("config", "constants.R"))
+dir <- PATHS$data_root
+if (DATA_MODE == "full") .libPaths(Sys.getenv("PENSION_R_LIBPATH", unset = "F:/docs/R-library"))
 SUFFIX <- if (DATA_MODE == "sample") "_sample" else ""
+message("H2 running in ", DATA_MODE, " mode from: ", dir)
 
 for (pkg in pkgs) library(pkg, character.only = TRUE)
 
@@ -40,9 +29,9 @@ set.seed(123)
 # ******************************************************************************
 
 if (DATA_MODE == "full") {
-  dt <- fread('working/D1_cross_section.csv.gz')
+  dt <- fread(file.path(PATHS$build_working, 'D1_cross_section.csv.gz'))
 
-  panel <- fread('working/D2_panel.csv.gz')
+  panel <- fread(file.path(PATHS$build_working, 'D2_panel.csv.gz'))
 
   # New variables: Normalized Points
   dt[, points_d := floor(points_claim)] %>%
@@ -479,14 +468,16 @@ plot_dd
 # SAVING ---------------------------------------------------------
 # ******************************************************************************
 
-fwrite(results, file = paste0('output/H/H2_table_results', SUFFIX, '.csv'))
+dir.create(PATHS$output_H, recursive = TRUE, showWarnings = FALSE)
 
-ggsave(plot1, filename = paste0('output/H/H2_trends_tax_collection', SUFFIX, '.pdf'),
+fwrite(results, file = file.path(PATHS$output_H, paste0('H2_table_results', SUFFIX, '.csv')))
+
+ggsave(plot1, filename = file.path(PATHS$output_H, paste0('H2_trends_tax_collection', SUFFIX, '.pdf')),
        height = 3, width = 8)
-ggsave(plot_dd, filename = paste0('output/H/H2_dd_tax_collection', SUFFIX, '.pdf'),
+ggsave(plot_dd, filename = file.path(PATHS$output_H, paste0('H2_dd_tax_collection', SUFFIX, '.pdf')),
        height = 3, width = 8)
 
-ggsave(plot_dd_1, filename = paste0('output/H/H2_dd_tax_collection_1', SUFFIX, '.pdf'),
+ggsave(plot_dd_1, filename = file.path(PATHS$output_H, paste0('H2_dd_tax_collection_1', SUFFIX, '.pdf')),
        height = 3, width = 4)
-ggsave(plot_dd_2, filename = paste0('output/H/H2_dd_tax_collection_2', SUFFIX, '.pdf'),
+ggsave(plot_dd_2, filename = file.path(PATHS$output_H, paste0('H2_dd_tax_collection_2', SUFFIX, '.pdf')),
        height = 3, width = 4)

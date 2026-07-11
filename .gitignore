@@ -169,6 +169,9 @@ quality_reports/preregistrations/*
 !quality_reports/checkpoints/.gitkeep
 !quality_reports/preregistrations/.gitkeep
 
+# Relocation before/after decks — heavy regenerable binaries; track the README, ignore the PDFs
+quality_reports/relocation_check/*.pdf
+
 # R analysis outputs (generated artifacts; keep scripts, ignore outputs)
 scripts/R/_outputs/
 

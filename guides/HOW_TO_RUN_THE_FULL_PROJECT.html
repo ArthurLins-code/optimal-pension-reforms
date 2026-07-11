@@ -199,7 +199,7 @@ source(here::here("config","constants.R"))  <span class="cm"># gamma, eta, repla
       <thead><tr><th>Variable</th><th>What it does</th><th>Default</th></tr></thead>
       <tbody>
         <tr><td class="mono">PENSION_DATA_MODE</td><td>force <code>full</code> / <code>sample</code></td><td>auto-detect by which root exists</td></tr>
-        <tr><td class="mono">PENSION_SAMPLE_ROOT</td><td>5% sample dir (holds <code>data/</code> + <code>output/</code>)</td><td class="mono">…/OneDrive/…/transfer_may_retirement</td></tr>
+        <tr><td class="mono">PENSION_SAMPLE_ROOT</td><td>5% sample <b>input</b> dir (holds <code>data/</code> + the prereq <code>output/</code> tables, read as inputs)</td><td class="mono">…/OneDrive/…/transfer_may_retirement</td></tr>
         <tr><td class="mono">PENSION_FULL_ROOT</td><td>full-data <b>analysis</b> root</td><td class="mono">F:/…/directory_2025</td></tr>
         <tr><td class="mono">PENSION_FULL_BUILD_ROOT</td><td>full-data <b>build</b> root</td><td class="mono">U:/Documents/Paper/directory_2025</td></tr>
         <tr><td class="mono">PENSION_R_LIBPATH</td><td>R library path (full mode)</td><td class="mono">F:/docs/R-library</td></tr>
@@ -217,7 +217,7 @@ source(here::here("config","constants.R"))  <span class="cm"># gamma, eta, repla
     <ol class="steps">
       <li><b>Confirm the sample root exists</b> (or point <code>PENSION_SAMPLE_ROOT</code> at it). It must contain
       <code>data/dt_sampled_anon.csv</code> + <code>data/panel_sampled_anon.csv</code> and an <code>output/</code> dir holding the
-      prerequisite tables (see the callout).</li>
+      prerequisite <b>input</b> tables (see the callout).</li>
       <li><b>Run the analysis master</b> — either way works:
         <pre><span class="cm"># R / RStudio (open at the repo root):</span>
 source("RUN.R")                                   <span class="cm"># optional: prints the entry points</span>
@@ -226,13 +226,15 @@ source(here::here("analysis","analysis_all.R"))
 <span class="cm"># …or terminal:</span>
 Rscript analysis/analysis_all.R</pre>
         It runs <code>E4 → gabriel → pure → G5 → I4 → I6</code> in order (≈2–3 min of compute on the 928 MB panel),
-        writing figures + tables to the sample root's <code>output/</code>.</li>
+        writing figures + tables to the repo-internal <code>analysis/output/</code> (gitignored, regenerable).</li>
       <li><b>Build the deck</b> (§6): <code>Rscript presentation/build_deck.R</code>.</li>
     </ol>
-    <div class="callout"><b>Prerequisite tables.</b> The analysis master runs a check and <code>stop()</code>s if the tables it
-    consumes are missing: <code>output/F/F5_table_results.csv</code> (legacy F5, read by gabriel) and
-    <code>output/G/G4_table_results.csv</code> + <code>output/H/H2_table_results.csv</code> (and their <code>_sample</code>
-    variants, read by I4/I6). On the standard sample root these are already present.</div>
+    <div class="callout"><b>Prerequisite tables (external inputs).</b> The analysis master runs a check and <code>stop()</code>s if the
+    input tables it consumes are missing. These are read from the <b>external root</b>, not regenerated on the sample:
+    <code>output/F/F5_table_results.csv</code> (legacy F5, read by gabriel) and the full-data
+    <code>output/G/G4_table_results.csv</code> + <code>output/H/H2_table_results.csv</code> (read by I4). Their <code>_sample</code>
+    variants are <i>no longer shipped</i> — the run now regenerates them (G4/H2 run before I4/I6) into the repo-internal
+    <code>analysis/output/</code>. On the standard sample root the three external inputs are already present.</div>
   </section>
 
   <!-- SERVER -->
@@ -265,7 +267,7 @@ Rscript presentation/build_deck.R</pre>
     <h2><span class="n">6</span> Build the slide deck</h2>
     <p><code>presentation/build_deck.R</code> wraps three steps; run it after the analysis master:</p>
     <ol class="steps">
-      <li><code>collector.py</code> gathers each stage's figures (newest of the sample vs repo locations) into
+      <li><code>collector.py</code> gathers each stage's figures from the repo-internal <code>analysis/output/</code> into
       <code>presentation/figures_central_folder/from_code/</code>.</li>
       <li><code>latexmk -cd -g -pdf</code> compiles <code>presentation/latex/presentation/_main.tex</code> →
       <code>_main.pdf</code> (≈142 pages on the sample).</li>
@@ -284,9 +286,9 @@ Rscript presentation/build_deck.R</pre>
     <table>
       <thead><tr><th>Output</th><th>Where</th></tr></thead>
       <tbody>
-        <tr><td>Figures (claiming, event-study, frequencies, WMVPF plots)</td><td>the data root's <code>output/{E,F,G,H,I,new_counter_claiming}/</code> → collected into <code>presentation/figures_central_folder/from_code/</code></td></tr>
-        <tr><td>Estimate tables (G5, I4, I6 …)</td><td>the data root's <code>output/{G,I}/…csv</code></td></tr>
-        <tr><td><b>Headline numbers</b> — WMVPF (actual), WMVPF_bL/bS, η</td><td><code>output/I/I6_summary&lt;SUFFIX&gt;.csv</code> (sample: <code>WMVPF_actual = 0.2126</code>, <code>η = 0.8281</code>)</td></tr>
+        <tr><td>Figures (claiming, event-study, frequencies, WMVPF plots)</td><td><code>analysis/output/{E,F,G,H,I,new_counter_claiming}/</code> (repo-internal, gitignored) → collected into <code>presentation/figures_central_folder/from_code/</code></td></tr>
+        <tr><td>Estimate tables (G5, I4, I6 …)</td><td><code>analysis/output/{G,I}/…csv</code> (repo-internal, gitignored)</td></tr>
+        <tr><td><b>Headline numbers</b> — WMVPF (actual), WMVPF_bL/bS, η</td><td><code>analysis/output/I/I6_summary&lt;SUFFIX&gt;.csv</code> (sample: <code>WMVPF_actual = 0.2126</code>, <code>η = 0.8281</code>)</td></tr>
         <tr><td>Compiled deck</td><td><code>presentation/latex/presentation/_main.pdf</code></td></tr>
       </tbody>
     </table>
@@ -299,7 +301,7 @@ Rscript presentation/build_deck.R</pre>
       <thead><tr><th>Symptom</th><th>Cause &amp; fix</th></tr></thead>
       <tbody>
         <tr><td><code>could not resolve DATA_MODE …</code></td><td>No data root found. Set <code>PENSION_DATA_MODE</code> and/or <code>PENSION_SAMPLE_ROOT</code>/<code>PENSION_FULL_ROOT</code> to a path that exists.</td></tr>
-        <tr><td><code>missing prerequisite table(s) …</code> (from analysis_all.R)</td><td>The legacy/sibling tables (F5, G4, H2) aren't in <code>output/</code>. On the sample they ship with the root; on the server run the producers first.</td></tr>
+        <tr><td><code>missing prerequisite table(s) …</code> (from analysis_all.R)</td><td>The external <b>input</b> tables (F5, and the full-data no-suffix G4/H2) aren't in the external root's <code>output/</code>. On the sample they ship with that root; on the server run the producers first.</td></tr>
         <tr><td><code>build_all.R needs the full server data</code></td><td>You ran the build master in sample mode — it's full-only by design. The panel is an input on the sample; skip straight to <code>analysis_all.R</code>.</td></tr>
         <tr><td><code>there is no package called '…'</code></td><td>Install it: <code>install.packages("…")</code>. On the server, set <code>PENSION_R_LIBPATH</code>.</td></tr>
         <tr><td>Deck build fails / missing figure</td><td>Run <code>analysis_all.R</code> first so the figures exist, then <code>build_deck.R</code>. Check <code>verify_deck.py</code> output for the unresolved name.</td></tr>
@@ -339,7 +341,7 @@ Rscript presentation/build_deck.R</pre>
         <p class="muted" style="margin-bottom:0">A raw rebuild needs the A1–D3 lineage first (see <code>build/code/README.md</code>).</p>
       </div>
     </div>
-    <div class="callout"><b>Headline numbers</b> land in <code>&lt;data-root&gt;/output/I/I6_summary&lt;SUFFIX&gt;.csv</code> —
+    <div class="callout"><b>Headline numbers</b> land in <code>analysis/output/I/I6_summary&lt;SUFFIX&gt;.csv</code> (repo-internal, gitignored) —
     WMVPF_actual, WMVPF_bL/bS, η. <code>RUN.R</code> is a signpost listing the three masters.</div>
     <p class="muted" style="margin-top:14px;font-size:12.5px">optimal-pension-reforms · run guide · paths resolve through <code>config/paths.R</code> (no setwd). Why the repo is shaped this way: <code>guides/RESTRUCTURE_EXPLAINER.html</code>.</p>
   </section>
