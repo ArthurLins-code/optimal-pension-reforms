@@ -7,7 +7,7 @@ Calibration data for the `/review-paper --peer [journal]` simulated peer-review 
 
 **How this file is used.** The `editor` agent reads this file before each `--peer` run, picks the requested `[journal]`, and uses its Referee-pool weights + Typical concerns to select two referees with different dispositions and to seed their pet-peeve priors.
 
-**Customizing for your field.** This file ships with **five top-5 econ journals** as a concrete example. To use `--peer` for a different field (finance, political science, biology, CS, etc.), copy `templates/journal-profile-template.md` into a new section below, fill in the schema, and reference it by the short name you define. See the [Field adaptation](#field-adaptation) section at the bottom.
+**Customizing for your field.** This file ships with **five top-5 econ journals** as a concrete example. To use `--peer` for a different field (finance, political science, biology, CS, etc.), copy `_docs/pedro_hc_santanna_templates_for_projects/journal-profile-template.md` into a new section below, fill in the schema, and reference it by the short name you define. See the [Field adaptation](#field-adaptation) section at the bottom.
 
 ---
 
@@ -316,7 +316,7 @@ The five profiles above are econ-specific. The **pipeline is field-agnostic** �
 
 **To adapt for a different field:**
 
-1. Copy `templates/journal-profile-template.md` into a new section below (use `### Journal Name (SHORT)`).
+1. Copy `_docs/pedro_hc_santanna_templates_for_projects/journal-profile-template.md` into a new section below (use `### Journal Name (SHORT)`).
 2. Fill each schema field:
    - **Focus** — what the journal publishes (look at the last 6 months of TOC).
    - **Bar** — acceptance rate + one sentence on what the editor is looking for.
@@ -343,4 +343,4 @@ The five profiles above are econ-specific. The **pipeline is field-agnostic** �
 - `.claude/agents/domain-referee.md` — applies domain-referee adjustments.
 - `.claude/agents/methods-referee.md` — applies methods-referee adjustments.
 - `.claude/skills/review-paper/SKILL.md` — `--peer [journal]` mode entry point.
-- `templates/journal-profile-template.md` — skeleton for adding your own.
+- `_docs/pedro_hc_santanna_templates_for_projects/journal-profile-template.md` — skeleton for adding your own.

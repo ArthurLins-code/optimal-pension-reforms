@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Server Workflow — full data, build to deck (optimal-pension-reforms)</title>
+<style>
+  :root{
+    --bg:#f6f8fc; --panel:#ffffff; --ink:#1e293b; --muted:#64748b; --line:#e2e8f0;
+    --build:#2563eb; --analysis:#16a34a; --present:#9333ea; --config:#d97706; --legacy:#dc2626;
+    --pass:#16a34a; --warn:#d97706; --bad:#dc2626; --accent:#4f46e5;
+    --code:#0f172a; --codetext:#e2e8f0;
+    --shadow:0 1px 3px rgba(15,23,42,.08),0 8px 24px rgba(15,23,42,.06);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+       color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased}
+  .wrap{display:grid;grid-template-columns:248px 1fr;max-width:1280px;margin:0 auto;gap:0}
+  /* ---- header ---- */
+  header.top{grid-column:1/-1;background:linear-gradient(120deg,#0b1220 0%,#1e293b 45%,#3730a3 100%);
+       color:#fff;padding:42px 40px 36px;border-bottom:4px solid var(--accent)}
+  header.top .kicker{letter-spacing:.18em;text-transform:uppercase;font-size:12px;color:#a5b4fc;font-weight:700}
+  header.top h1{margin:.25em 0 .15em;font-size:30px;line-height:1.15}
+  header.top p{margin:.2em 0;color:#cbd5e1;max-width:70ch}
+  header.top .branch{display:inline-block;font-family:ui-monospace,Menlo,Consolas,monospace;background:rgba(255,255,255,.12);
+       border:1px solid rgba(255,255,255,.18);border-radius:6px;padding:2px 8px;color:#e0e7ff;font-size:13px}
+  .badges{margin-top:16px;display:flex;flex-wrap:wrap;gap:10px}
+  .badge{background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.16);border-radius:999px;
+       padding:6px 13px;font-size:13px;color:#eef2ff}
+  .badge b{color:#fff}
+  .badge.pass{background:rgba(22,163,74,.22);border-color:rgba(22,163,74,.5)}
+  /* ---- nav ---- */
+  nav{position:sticky;top:0;align-self:start;height:100vh;overflow:auto;padding:24px 16px 40px;
+      border-right:1px solid var(--line);background:#fbfcfe}
+  nav h4{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:18px 8px 8px}
+  nav a{display:block;color:#334155;text-decoration:none;font-size:13.5px;padding:6px 10px;border-radius:7px;border-left:2px solid transparent}
+  nav a:hover{background:#eef2ff;color:#3730a3;border-left-color:var(--accent)}
+  /* ---- main ---- */
+  main{padding:36px 44px 80px;min-width:0}
+  section{margin:0 0 44px;scroll-margin-top:20px}
+  h2{font-size:23px;margin:0 0 6px;padding-bottom:8px;border-bottom:2px solid var(--line);display:flex;align-items:center;gap:10px}
+  h2 .n{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:8px;background:var(--accent);color:#fff;font-size:15px;font-weight:700}
+  h3{font-size:17px;margin:24px 0 6px;color:#0f172a}
+  p{margin:.5em 0}
+  .lead{font-size:17px;color:#334155}
+  code{font-family:ui-monospace,Menlo,Consolas,monospace;background:#eef1f7;border:1px solid #e2e8f0;border-radius:5px;padding:.5px 5px;font-size:.86em;overflow-wrap:anywhere}
+  pre{background:var(--code);color:var(--codetext);border-radius:10px;padding:16px 18px;overflow:auto;font-size:13px;line-height:1.55;box-shadow:var(--shadow)}
+  pre .c{color:#7dd3fc}.pre .k{color:#c4b5fd}
+  pre .cm{color:#64748b;font-style:italic}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px 22px;box-shadow:var(--shadow);margin:14px 0}
+  .grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+  .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+  .grid2>*,.grid3>*{min-width:0}
+  pre{max-width:100%;overflow-x:auto}
+  .callout{border-left:4px solid var(--accent);background:#f5f3ff;border-radius:0 10px 10px 0;padding:12px 16px;margin:14px 0}
+  .callout.warn{border-color:var(--warn);background:#fffbeb}
+  .callout.bad{border-color:var(--bad);background:#fef2f2}
+  .callout.good{border-color:var(--pass);background:#f0fdf4}
+  table{border-collapse:collapse;width:100%;font-size:13.5px;margin:12px 0;background:#fff;border-radius:10px;overflow:hidden;box-shadow:var(--shadow)}
+  th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:#f1f5f9;font-size:12px;letter-spacing:.03em;text-transform:uppercase;color:#475569}
+  tr:last-child td{border-bottom:none}
+  .tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;white-space:nowrap}
+  .t-build{background:#dbeafe;color:#1e40af}.t-analysis{background:#dcfce7;color:#166534}
+  .t-present{background:#f3e8ff;color:#6b21a8}.t-config{background:#fef3c7;color:#92400e}
+  .t-legacy{background:#fee2e2;color:#991b1b}.t-pass{background:#dcfce7;color:#166534}
+  .t-flag{background:#ffedd5;color:#9a3412}.t-false{background:#e2e8f0;color:#334155}
+  .metric{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:16px 0}
+  .metric .m{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;text-align:center;box-shadow:var(--shadow)}
+  .metric .m .v{font-size:26px;font-weight:800;color:#0f172a;line-height:1}
+  .metric .m .l{font-size:12px;color:var(--muted);margin-top:6px}
+  .fig{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;box-shadow:var(--shadow);margin:16px 0;overflow:auto}
+  .fig figcaption{font-size:12.5px;color:var(--muted);margin-top:8px;text-align:center}
+  .muted{color:var(--muted)} .mono{font-family:ui-monospace,Menlo,Consolas,monospace;overflow-wrap:anywhere}
+  .pillrow{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+  ul.tight{margin:.4em 0;padding-left:1.25em} ul.tight li{margin:.2em 0}
+  .sep{height:1px;background:var(--line);margin:30px 0}
+  @media(max-width:900px){.wrap{grid-template-columns:1fr}nav{display:none}main{padding:24px}.grid2,.grid3,.metric{grid-template-columns:1fr}table{display:block;overflow-x:auto;max-width:100%}pre{overflow-x:auto}}
+  /* ---- extensions for this guide ---- */
+  .legend{display:flex;flex-wrap:wrap;gap:16px;margin:12px 0}
+  .legend .item{display:flex;align-items:center;gap:8px;font-size:13px;color:#334155}
+  .sw{width:18px;height:18px;border-radius:5px;border:1px solid rgba(15,23,42,.14);display:inline-block;flex:0 0 auto}
+  .io{margin:.35em 0;font-size:14px}
+  .io b.k{display:inline-block;min-width:78px;color:#475569;font-weight:700}
+  .arw{color:var(--accent);font-weight:700}
+  .star{color:#b45309;font-weight:700}
+  .stepbox{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 18px;box-shadow:var(--shadow);margin:12px 0}
+  .stepbox h4{margin:.1em 0 .4em;font-size:14px;color:#0f172a}
+  .stepbox .sn{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:6px;background:var(--accent);color:#fff;font-size:12px;font-weight:700;margin-right:8px}
+  table.mini{font-size:12.5px;margin:8px 0}
+  table.mini th,table.mini td{padding:6px 10px}
+  .ok{color:var(--pass);font-weight:700}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="kicker">RA Onboarding · Full-data pipeline · restricted server</div>
+    <h1>The Server Workflow — full data, build to deck</h1>
+    <p><b>Project:</b> <i>optimal-pension-reforms</i> — the MVPF/WMVPF of Brazil's 2015 pension reform (Lei 13.183/2015). Gonzaga &amp; Rios (PUC-Rio), Lemos (MIT Sloan); RA: Arthur.</p>
+    <p>This guide walks a <b>brand-new RA</b> through the <i>complete</i> pipeline as it runs on the confidential restricted-access server: from the raw government microdata (SUIBE + RAIS), through the <b>build</b> that constructs the analysis-ready datasets, through the <b>analysis</b> that estimates the headline welfare number, to the compiled <b>slide deck</b>. It also shows where the 5% laptop sample comes from.</p>
+    <div class="badges">
+      <span class="badge">Mode <b>DATA_MODE=full</b></span>
+      <span class="badge">Build root <b>U:/</b></span>
+      <span class="badge">Analysis root <b>F:/</b></span>
+      <span class="badge">3 masters: <b>build → analysis → deck</b></span>
+      <span class="badge pass"><b>142</b>-page deck</span>
+      <span class="branch">branch: code-and-data</span>
+    </div>
+  </header>
+
+  <nav>
+    <h4>Contents</h4>
+    <a href="#what">0 · What this is</a>
+    <a href="#legend">1 · How to read this</a>
+    <a href="#big">2 · The whole pipeline</a>
+    <a href="#vocab">3 · Vocabulary</a>
+    <a href="#build">4 · Build stages (A–D)</a>
+    <a href="#seam">5 · The build → analysis seam</a>
+    <a href="#sample">6 · Deriving the 5% sample</a>
+    <a href="#analysis">7 · Analysis stages (E–I)</a>
+    <a href="#deck">8 · Presentation (the deck)</a>
+    <a href="#toy1">9 · Toy example — counterfactual &amp; bunching</a>
+    <a href="#toy2">10 · Toy example — the WMVPF</a>
+    <a href="#vs">11 · Sample vs Server</a>
+    <a href="#run">12 · Run it · gotchas</a>
+  </nav>
+
+  <main>
+  <!-- ===================== WHAT ===================== -->
+  <section id="what">
+    <h2><span class="n">0</span> What this is, and who it's for</h2>
+    <p class="lead">The paper asks a single question: <b>is Brazil's 2015 pension reform worth what it costs?</b> The answer is a
+    number — the <b>WMVPF</b> — and this pipeline is the machine that computes it from raw administrative data. If you have just
+    joined the project and have server access, read this to understand what runs, in what order, and why.</p>
+    <p>Two Brazilian government datasets go in the front door. <b>SUIBE</b> is the pension-claim registry: who claimed a
+    retirement benefit, when, and how large it was (2012–2019). <b>RAIS</b> is the formal-employment census: everyone's job
+    history — wages, hours, sector, firm (1995–2020). The <b>build</b> phase links them person-by-person and reshapes them into two
+    analysis-ready tables. The <b>analysis</b> phase estimates behaviour and welfare. The <b>presentation</b> phase turns the results
+    into the canonical slide deck. On the server all of this runs on the <i>full</i>, confidential data; the 5% sample that runs on
+    your laptop is <i>carved out of the build output</i> — see <a href="#sample">§6</a>.</p>
+    <div class="callout"><b>The one-line mental model.</b>
+    <span class="mono">raw SUIBE + RAIS → build (A–D) → the panel → analysis (E–I) → WMVPF → deck</span>.
+    The <b>panel file is the seam</b> between build and analysis; everything upstream of it is server-only, everything downstream also
+    runs on the sample.</div>
+  </section>
+
+  <!-- ===================== LEGEND ===================== -->
+  <section id="legend">
+    <h2><span class="n">1</span> How to read the diagrams</h2>
+    <p>Every box is a step; its <b>colour</b> tells you which layer it belongs to. Every <b>arrow</b> is a file (or a quantity)
+    flowing from the step that <i>produces</i> it to the step that <i>consumes</i> it — the arrow's label names that artifact.</p>
+    <div class="card">
+      <div class="legend">
+        <span class="item"><span class="sw" style="background:#f1f5f9"></span> <b>Inputs</b> — raw/confidential data &amp; aux tables</span>
+        <span class="item"><span class="sw" style="background:#eff6ff;border-color:#93c5fd"></span> <b>Build</b> (A–D) — server-only, root <span class="mono">U:/</span></span>
+        <span class="item"><span class="sw" style="background:#f0fdf4;border-color:#86efac"></span> <b>Analysis</b> (E–I) — root <span class="mono">F:/</span></span>
+        <span class="item"><span class="sw" style="background:#faf5ff;border-color:#d8b4fe"></span> <b>Presentation</b> — the deck</span>
+        <span class="item"><span class="sw" style="background:#fef3c7;border-color:#fcd34d"></span> <b>Sample side-branch</b> / flagged seam</span>
+      </div>
+      <p class="muted" style="margin:.6em 0 0">A solid arrow = a real file dependency. A <b>dashed amber</b> arrow = a dependency that is
+      also a <i>known flag</i> for the professors (e.g. the <code>U:/</code>→<code>F:/</code> split; the old <code>i4-g4h2</code> quirk is now <b>fixed</b>).
+      The ★ marks <b>I6</b>, which produces the headline numbers.</p>
+    </div>
+  </section>
+
+  <!-- ===================== BIG DIAGRAM ===================== -->
+  <section id="big">
+    <h2><span class="n">2</span> The whole pipeline, on one page</h2>
+    <p>Read it top to bottom. Raw admin data enters the <b>build</b>; the build writes the panel; the panel is the <b>seam</b> that
+    both feeds <b>analysis</b> and (via a 5% draw) becomes the laptop sample; analysis writes figures and tables; the
+    <b>presentation</b> master collects and compiles the deck.</p>
+    <figure class="fig">
+      <svg viewBox="0 0 1120 1170" width="100%" role="img" aria-label="The full server pipeline from raw data to the compiled deck">
+        <defs>
+          <marker id="ah" markerWidth="10" markerHeight="10" refX="8.5" refY="3" orient="auto"><path d="M0,0 L9,3 L0,6 Z" fill="#94a3b8"/></marker>
+          <marker id="ahA" markerWidth="10" markerHeight="10" refX="8.5" refY="3" orient="auto"><path d="M0,0 L9,3 L0,6 Z" fill="#d97706"/></marker>
+          <style>
+            .gt{font:700 13px ui-monospace,Menlo,Consolas,monospace;fill:#0f172a}
+            .gs{font:12px -apple-system,"Segoe UI",sans-serif;fill:#475569}
+            .gl{font:12px -apple-system,"Segoe UI",sans-serif;fill:#475569}
+            .glA{font:700 12px -apple-system,"Segoe UI",sans-serif;fill:#b45309}
+            .ghd{font:700 13px -apple-system,"Segoe UI",sans-serif;fill:#fff}
+            .gband{font:700 13px -apple-system,"Segoe UI",sans-serif;fill:#334155}
+            .gedge{stroke:#94a3b8;stroke-width:1.7;fill:none}
+            .gedgeA{stroke:#d97706;stroke-width:1.7;fill:none;stroke-dasharray:5 4}
+          </style>
+        </defs>
+
+        <!-- ============ BAND 0 : INPUTS ============ -->
+        <text x="30" y="26" class="gband">① RAW ADMIN DATA — confidential, restricted-access server</text>
+        <rect x="40" y="40" width="330" height="60" rx="10" fill="#f1f5f9" stroke="#cbd5e1"/>
+        <text x="56" y="64" class="gt">raw SUIBE .xlsx</text>
+        <text x="56" y="84" class="gs">pension claims · 2012–2019</text>
+        <rect x="395" y="40" width="330" height="60" rx="10" fill="#f1f5f9" stroke="#cbd5e1"/>
+        <text x="411" y="64" class="gt">raw RAIS .dta</text>
+        <text x="411" y="84" class="gs">employment census · 1995–2020</text>
+        <rect x="750" y="40" width="330" height="60" rx="10" fill="#f1f5f9" stroke="#cbd5e1"/>
+        <text x="766" y="64" class="gt">IBGE life tables · INPC</text>
+        <text x="766" y="84" class="gs">CNAE / CBO crosswalks (aux)</text>
+        <path class="gedge" d="M205,100 V146" marker-end="url(#ah)"/>
+        <path class="gedge" d="M560,100 V146" marker-end="url(#ah)"/>
+        <path class="gedge" d="M915,100 V146" marker-end="url(#ah)"/>
+        <text x="572" y="120" class="gl">raw files read by the build</text>
+
+        <!-- ============ BAND 1 : BUILD ============ -->
+        <rect x="30" y="150" width="1060" height="252" rx="12" fill="#eff6ff" stroke="#93c5fd"/>
+        <rect x="30" y="150" width="1060" height="28" rx="12" fill="#2563eb"/>
+        <rect x="30" y="164" width="1060" height="14" fill="#2563eb"/>
+        <text x="46" y="169" class="ghd">② BUILD — Rscript build/build_all.R · DATA_MODE=full · root U:/…/directory_2025/working  (server only)</text>
+        <!-- A -->
+        <rect x="48" y="192" width="300" height="84" rx="9" fill="#fff" stroke="#93c5fd"/>
+        <text x="62" y="214" class="gt">A · clean + merge SUIBE</text>
+        <text x="62" y="234" class="gs">A1→A3 stack 2012–19 streams</text>
+        <text x="62" y="252" class="gs">+ life expectancy · keys for merge</text>
+        <text x="62" y="270" class="gs" style="fill:#b91c1c">A4 balance-check = dead-end</text>
+        <!-- B -->
+        <rect x="48" y="296" width="300" height="84" rx="9" fill="#fff" stroke="#93c5fd"/>
+        <text x="62" y="318" class="gt">B · RAIS features</text>
+        <text x="62" y="338" class="gs">B1→B3 Stata .do · born ≤ 1973</text>
+        <text x="62" y="356" class="gs">B4 ~16 modeled features / person</text>
+        <text x="62" y="374" class="gs">modal sector · empl. prob · wages</text>
+        <!-- C -->
+        <rect x="400" y="234" width="300" height="112" rx="9" fill="#fff" stroke="#93c5fd"/>
+        <text x="414" y="256" class="gt">C · link · restrict · impute</text>
+        <text x="414" y="276" class="gs">C1 probabilistic logit link</text>
+        <text x="414" y="294" class="gs">cutoff 0.4953 · ~4% false-match</text>
+        <text x="414" y="312" class="gs">C4 stats → C5 restrict (~1.08M)</text>
+        <text x="414" y="330" class="gs">C6 impute continuous contrib.</text>
+        <!-- D -->
+        <rect x="752" y="234" width="316" height="112" rx="9" fill="#dbeafe" stroke="#2563eb"/>
+        <text x="766" y="256" class="gt">D · analysis-ready datasets</text>
+        <text x="766" y="276" class="gs">D1→D3 cross-section (one row/person)</text>
+        <text x="766" y="294" class="gs">points · cutoff distance · fp_est</text>
+        <text x="766" y="312" class="gs">D4 quarterly panel ×2</text>
+        <text x="766" y="330" class="gs">reform-clock &amp; claim-clock · wages→taxes</text>
+        <!-- build edges -->
+        <path class="gedge" d="M348,232 C378,232 372,262 398,264" marker-end="url(#ah)"/>
+        <text x="356" y="228" class="gl">A3_merged_suibe</text>
+        <path class="gedge" d="M348,336 C378,336 372,312 398,310" marker-end="url(#ah)"/>
+        <text x="356" y="356" class="gl">B4 candidate features</text>
+        <path class="gedge" d="M700,290 H750" marker-end="url(#ah)"/>
+        <text x="706" y="282" class="gl">linked persons</text>
+
+        <!-- build → seam -->
+        <path class="gedge" d="M910,346 V414 H530 V426" marker-end="url(#ah)"/>
+        <text x="720" y="408" class="gl" text-anchor="middle">D3_cross_section.csv.gz · D4_panel_reform.csv.gz  →  working/ (U:/)</text>
+
+        <!-- ============ BAND 2 : SEAM ============ -->
+        <rect x="250" y="430" width="560" height="66" rx="12" fill="#fffbeb" stroke="#fcd34d"/>
+        <text x="530" y="452" class="gband" text-anchor="middle" style="fill:#92400e">③ THE BUILD → ANALYSIS SEAM — the panel file IS the handoff</text>
+        <text x="530" y="470" class="gs" text-anchor="middle">the two D-stage files are the only bridge between the phases</text>
+        <text x="530" y="486" class="glA" text-anchor="middle">analysis reads them from F:/  —  crosses U:/ → F:/  (flag O11)</text>
+
+        <!-- seam → analysis -->
+        <path class="gedge" d="M530,496 V658" marker-end="url(#ah)"/>
+        <text x="540" y="560" class="gl">panel + cross-section → F:/ analysis root</text>
+
+        <!-- seam → sample side branch -->
+        <path class="gedgeA" d="M810,455 H848" marker-end="url(#ahA)"/>
+        <text x="828" y="447" class="glA" text-anchor="middle">5%</text>
+        <rect x="850" y="430" width="240" height="66" rx="10" fill="#fef3c7" stroke="#fcd34d"/>
+        <text x="866" y="452" class="gt" style="fill:#92400e">④ derive the 5% sample</text>
+        <text x="866" y="470" class="gs">draw 5% of CPFs · anonymize</text>
+        <text x="866" y="486" class="gs">indiv → id_0000001 · freeze cols</text>
+        <path class="gedgeA" d="M970,496 V516" marker-end="url(#ahA)"/>
+        <rect x="850" y="518" width="240" height="56" rx="10" fill="#fff" stroke="#fcd34d"/>
+        <text x="866" y="540" class="gt">dt_sampled_anon.csv</text>
+        <text x="866" y="560" class="gt">panel_sampled_anon.csv</text>
+        <path class="gedgeA" d="M970,574 V596" marker-end="url(#ahA)"/>
+        <a href="WORKFLOW_GUIDE_SAMPLE.html">
+          <rect x="850" y="598" width="240" height="40" rx="10" fill="#fffbeb" stroke="#d97706"/>
+          <text x="970" y="623" class="glA" text-anchor="middle" style="text-decoration:underline">→ WORKFLOW_GUIDE_SAMPLE.html</text>
+        </a>
+
+        <!-- ============ BAND 3 : ANALYSIS ============ -->
+        <rect x="30" y="660" width="1060" height="270" rx="12" fill="#f0fdf4" stroke="#86efac"/>
+        <rect x="30" y="660" width="1060" height="28" rx="12" fill="#16a34a"/>
+        <rect x="30" y="674" width="1060" height="14" fill="#16a34a"/>
+        <text x="46" y="679" class="ghd">⑤ ANALYSIS — Rscript analysis/analysis_all.R · full mode · root F:/ · the SAME E–I estimation runs on sample or full</text>
+        <!-- prereq -->
+        <rect x="44" y="708" width="104" height="150" rx="9" fill="#fff" stroke="#fcd34d"/>
+        <text x="58" y="728" class="gt" style="font-size:12px">prereq_root</text>
+        <text x="58" y="748" class="gs">F:/…/output</text>
+        <text x="58" y="770" class="gs">F5 table</text>
+        <text x="58" y="790" class="gs">(G4·H2 in-repo)</text>
+        <text x="58" y="810" class="gs">IBGE life tbl</text>
+        <text x="58" y="840" class="glA">inputs, not</text>
+        <text x="58" y="854" class="glA">outputs</text>
+        <!-- E4 -->
+        <rect x="165" y="760" width="92" height="56" rx="9" fill="#fff" stroke="#86efac"/>
+        <text x="180" y="784" class="gt" style="fill:#166534">E4</text>
+        <text x="180" y="802" class="gs">figures</text>
+        <!-- gabriel / pure -->
+        <rect x="296" y="708" width="108" height="56" rx="9" fill="#fff" stroke="#86efac"/>
+        <text x="310" y="730" class="gt" style="fill:#166534">gabriel (F)</text>
+        <text x="310" y="750" class="gs">counterfactual</text>
+        <rect x="296" y="824" width="108" height="56" rx="9" fill="#fff" stroke="#86efac"/>
+        <text x="310" y="846" class="gt" style="fill:#166534">pure (F)</text>
+        <text x="310" y="866" class="gs">bL / bS schedules</text>
+        <!-- G4 / G5 -->
+        <rect x="448" y="708" width="104" height="56" rx="9" fill="#fff" stroke="#86efac"/>
+        <text x="462" y="730" class="gt" style="fill:#166534">G4</text>
+        <text x="462" y="750" class="gs">DD benefits</text>
+        <rect x="448" y="824" width="104" height="56" rx="9" fill="#fff" stroke="#86efac"/>
+        <text x="462" y="846" class="gt" style="fill:#166534">G5</text>
+        <text x="462" y="866" class="gs">bL / bS DD</text>
+        <!-- H2 -->
+        <rect x="588" y="766" width="104" height="56" rx="9" fill="#fff" stroke="#86efac"/>
+        <text x="602" y="788" class="gt" style="fill:#166534">H2</text>
+        <text x="602" y="808" class="gs">tax elasticity</text>
+        <!-- I4 / I6 -->
+        <rect x="740" y="708" width="160" height="56" rx="9" fill="#fff" stroke="#86efac"/>
+        <text x="754" y="730" class="gt" style="fill:#166534">I4 — WMVPF</text>
+        <text x="754" y="750" class="gs">actual reform</text>
+        <rect x="740" y="824" width="160" height="56" rx="9" fill="#dcfce7" stroke="#16a34a"/>
+        <text x="754" y="846" class="gt" style="fill:#166534">I6 — WMVPF + bL/bS <tspan class="star">★</tspan></text>
+        <text x="754" y="866" class="gs">the headline numbers</text>
+        <!-- analysis edges -->
+        <path class="gedge" d="M148,736 H294" marker-end="url(#ah)"/>
+        <text x="156" y="728" class="gl">F5 table</text>
+        <path class="gedgeA" d="M96,708 V698 H820 V706" marker-end="url(#ahA)"/>
+        <text x="430" y="700" class="glA" text-anchor="middle">G4 · H2 produced in-repo → I4 reads them suffix-aware, like I6   ·   i4-g4h2 fixed</text>
+        <path class="gedge" d="M350,764 V824" marker-end="url(#ah)"/>
+        <text x="356" y="798" class="gl">handoff .csv</text>
+        <path class="gedge" d="M404,736 H446" marker-end="url(#ah)"/>
+        <text x="360" y="728" class="gl" style="fill:#166534">Nᵃ, Nᶜ</text>
+        <path class="gedge" d="M404,852 H446" marker-end="url(#ah)"/>
+        <text x="360" y="844" class="gl" style="fill:#166534">Nᴸ, Nˢ</text>
+        <path class="gedge" d="M552,736 H738" marker-end="url(#ah)"/>
+        <text x="576" y="728" class="gl">G4 avg benefits</text>
+        <path class="gedge" d="M552,852 H738" marker-end="url(#ah)"/>
+        <text x="576" y="844" class="gl">G5 contrafactual (bL/bS)</text>
+        <path class="gedge" d="M660,766 C700,752 712,742 740,742" marker-end="url(#ah)"/>
+        <text x="662" y="748" class="gl">H2 tax</text>
+
+        <!-- analysis → presentation -->
+        <path class="gedge" d="M560,930 V964" marker-end="url(#ah)"/>
+        <text x="570" y="950" class="gl">figures + WMVPF tables → analysis/output/**</text>
+
+        <!-- ============ BAND 4 : PRESENTATION ============ -->
+        <rect x="30" y="968" width="1060" height="176" rx="12" fill="#faf5ff" stroke="#d8b4fe"/>
+        <rect x="30" y="968" width="1060" height="28" rx="12" fill="#9333ea"/>
+        <rect x="30" y="982" width="1060" height="14" fill="#9333ea"/>
+        <text x="46" y="987" class="ghd">⑥ PRESENTATION — Rscript presentation/build_deck.R</text>
+        <rect x="64" y="1030" width="210" height="84" rx="9" fill="#fff" stroke="#d8b4fe"/>
+        <text x="80" y="1052" class="gt" style="fill:#6b21a8">collector.py</text>
+        <text x="80" y="1072" class="gs">reads manifest.csv</text>
+        <text x="80" y="1090" class="gs">routes+renames → from_code/</text>
+        <rect x="326" y="1030" width="220" height="84" rx="9" fill="#fff" stroke="#d8b4fe"/>
+        <text x="342" y="1052" class="gt" style="fill:#6b21a8">latexmk _main.tex</text>
+        <text x="342" y="1072" class="gs">graphicspath:</text>
+        <text x="342" y="1090" class="gs">from_code/ + static/</text>
+        <rect x="598" y="1030" width="170" height="84" rx="9" fill="#ede9fe" stroke="#a78bfa"/>
+        <text x="614" y="1052" class="gt" style="fill:#5b21b6">_main.pdf</text>
+        <text x="614" y="1072" class="gs">142 pages</text>
+        <text x="614" y="1090" class="gs">the deck</text>
+        <rect x="820" y="1030" width="210" height="84" rx="9" fill="#fff" stroke="#d8b4fe"/>
+        <text x="836" y="1052" class="gt" style="fill:#6b21a8">verify_deck.py</text>
+        <text x="836" y="1072" class="gs">every \includegraphics</text>
+        <text x="836" y="1090" class="gs">resolves?</text>
+        <path class="gedge" d="M274,1072 H324" marker-end="url(#ah)"/>
+        <text x="280" y="1064" class="gl">figures</text>
+        <path class="gedge" d="M546,1072 H596" marker-end="url(#ah)"/>
+        <text x="552" y="1064" class="gl">compile</text>
+        <path class="gedge" d="M768,1072 H818" marker-end="url(#ah)"/>
+        <text x="774" y="1064" class="gl">check</text>
+      </svg>
+      <figcaption>The full server pipeline. Blue = build (server-only, <span class="mono">U:/</span>); green = analysis (<span class="mono">F:/</span>);
+      purple = the deck; amber = the sample side-branch and the flagged seams. The panel file is the single bridge between build and analysis.</figcaption>
+    </figure>
+  </section>
+
+  <!-- ===================== VOCAB ===================== -->
+  <section id="vocab">
+    <h2><span class="n">3</span> Vocabulary — the jargon, in plain words</h2>
+    <p>These terms recur everywhere below. Skim now; refer back as needed.</p>
+    <table>
+      <thead><tr><th>Term</th><th>Plain meaning</th></tr></thead>
+      <tbody>
+        <tr><td><b>Points</b> (<code>p</code>, <code>points_norm</code>)</td><td>Brazil's eligibility metric = <b>age + years of contribution</b>. The running variable is centred on the threshold: <code>p = points − 85</code> (women) or <code>− 95</code> (men). <code>p&lt;0</code> = below the sweet spot; <code>p=0</code> = exactly at it; <code>p&gt;0</code> = past it. Points accrue at <b>0.5 per quarter</b>.</td></tr>
+        <tr><td><b>Fator previdenciário</b> (<code>fp</code>)</td><td>An actuarial factor that <i>shrinks</i> your benefit if you claim "too early." <code>fp&lt;1</code> = a penalty; <code>fp≥1</code> = no penalty. Crossing the points threshold makes the penalty vanish — which is why people cluster there.</td></tr>
+        <tr><td><b>Claiming hazard</b></td><td>Among people who are <i>eligible but have not yet claimed</i>, the fraction that claims <i>this</i> quarter. A "hazard" is a conditional exit rate.</td></tr>
+        <tr><td><b>Counterfactual</b></td><td>"What would have happened without the reform." The F-stage <i>constructs</i> the no-reform world quarter by quarter, because it cannot be observed.</td></tr>
+        <tr><td><b>Bunching / postponement</b></td><td><b>Bunching</b> = a pile-up of claims just past the threshold. <b>Postponement</b> = people just below the threshold waiting to cross it. The reform pushed people to postpone, then bunch.</td></tr>
+        <tr><td><b>DD</b> (difference-in-differences) / event study</td><td>Compare the change over time in a treated group vs. a control group. An <i>event study</i> reports one DD coefficient per quarter-relative-to-the-reform, normalised to a reference quarter.</td></tr>
+        <tr><td><b>Selection correction</b></td><td>After the reform, <i>different people</i> claim in a given cell, so the raw average benefit moves even if the formula didn't. Subtracting the DD "composition" coefficient (<code>delta_ben = avg_benefits_pv − point_estimate</code>) removes that and leaves the <b>mechanical</b> benefit.</td></tr>
+        <tr><td><b>PDV</b> (present discounted value)</td><td>A monthly benefit converted to a <i>lifetime</i> value in today's R$: <code>3 · benefit · annuity_factor</code> (×3 = months per quarter; annuity factor discounts the stream over remaining life at 6%/yr).</td></tr>
+        <tr><td><b>MVPF / WMVPF</b></td><td><b>W</b>eighted <b>M</b>arginal <b>V</b>alue of <b>P</b>ublic <b>F</b>unds = (welfare delivered to beneficiaries) ÷ (net fiscal cost). A value in <b>(0,1)</b> means each R$1 spent buys less than R$1 of welfare.</td></tr>
+        <tr><td><b>ME / FE / TC</b></td><td><b>Mechanical Effect</b> = cost of the new formula with behaviour frozen. <b>Fiscal Externality</b> = extra cost purely from behaviour changing. <b>Total Cost</b> = ME + FE.</td></tr>
+        <tr><td><b>η (ETA)</b></td><td>The welfare weight on a real given to a beneficiary: <code>1 − γ·(c_INSS − c_POP)/c_POP ≈ 0.828</code> (γ=4). Below 1 because beneficiaries consume slightly more than the average citizen.</td></tr>
+        <tr><td><b>IPW</b> (inverse-probability weighting)</td><td>Reweight treated/control groups by <code>1/propensity</code> so their observable characteristics line up — used in H2 to make the tax comparison quasi-random.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ===================== BUILD ===================== -->
+  <section id="build">
+    <h2><span class="n">4</span> Build stages A–D — raw data becomes the panel</h2>
+    <p>The build runs <b>only on the server</b> (<code>build/build_all.R</code> <code>stop()</code>s unless <code>DATA_MODE=full</code>).
+    The master runs four <b>canonical heads</b> — <code>A4 → B4 → C6 → D4</code> — but a from-scratch rebuild needs the
+    <b>upstream lineage</b> first (A1–A3, B1–B3, C1–C5, D1–D3) to fill the <code>working/</code> intermediates the heads consume. The
+    real data spine is <span class="mono">A1→A3 · B4 → C1 → C4/C5 → C6 → D3 → D4</span>; <b>A4 is a dead-end diagnostic</b> that feeds nobody.</p>
+
+    <div class="card" style="border-left:4px solid var(--build)">
+      <h3 style="margin-top:0"><span class="tag t-build">Stage A</span> &nbsp;Clean &amp; merge SUIBE (the claim registry)</h3>
+      <p class="io"><b class="k">Inputs <span class="arw">→</span></b> raw SUIBE Excels (2012–19; only 2012/2013 carry a full CPF), IBGE life-expectancy table.</p>
+      <p class="io"><b class="k">Does</b> A1–A2 parse and clean the "semi-identified" and unidentified SUIBE streams (birth date, sex, claim/issue dates, <code>fator_prev</code>); A3 stacks them into one claimant table and attaches life expectancy. <b>A4 is a balance check</b>, not construction.</p>
+      <p class="io"><b class="k">Outputs <span class="arw">→</span></b> <code>working/A3_merged_suibe.csv.gz</code>; A4 → <code>A/A4_balance_check.csv/.tex</code>.</p>
+      <div class="callout warn"><b>Obscure part — what "balance check" means.</b> A4 builds <code>d_unique</code> (a row is "unique" only if its
+      claim-date/issue-date/birth-date/male tuple appears exactly once, via a double <code>duplicated()</code>), then regresses ~18
+      covariates on it. The question it answers: <i>are the people we can pin down demographically the same kind of people as the ones
+      we can't?</i> If yes, the record-linkage model (C1) trained on the pin-down-able people generalises to everyone.</div>
+    </div>
+
+    <div class="card" style="border-left:4px solid var(--build)">
+      <h3 style="margin-top:0"><span class="tag t-build">Stage B</span> &nbsp;Build the RAIS feature cross-section (the match candidates)</h3>
+      <p class="io"><b class="k">Inputs <span class="arw">→</span></b> raw RAIS yearly <code>.dta</code>, <code>A3_merged_suibe</code>, INPC price index, CNAE/CBO crosswalks, IBGE municipality map.</p>
+      <p class="io"><b class="k">Does</b> B1–B3 (Stata) keep people born ≤1973, denoise each person's ID (mode of CPF across years → <code>CPF_mode</code>), and write RAIS history per year. <b>B4</b> turns that history into ~16 <b>modeled features per person</b> for each claim-year 2010–2019, using only the 15 years before the claim.</p>
+      <p class="io"><b class="k">Outputs <span class="arw">→</span></b> <code>working/B4_clean_candidates_cross/B4_&lt;year&gt;.csv.gz</code>.</p>
+      <div class="callout warn"><b>Obscure part — the "modal category" idiom &amp; employment probability.</b> A terse data.table one-liner
+      (<code>…[,.(freq=.N),by=.(CPF_mode,cat)]…mult='last'</code>) appears a dozen times; it just means <i>take the mode</i> — the most
+      frequent category per person. And <code>prob_empl_15</code> expands each contract into 12 monthly employed/not flags and divides
+      by 180 — i.e. <i>"what fraction of the last 15 years was this person formally employed."</i></div>
+    </div>
+
+    <div class="card" style="border-left:4px solid var(--build)">
+      <h3 style="margin-top:0"><span class="tag t-build">Stage C</span> &nbsp;Record linkage · restriction · contribution imputation (the intellectual core)</h3>
+      <p class="io"><b class="k">Inputs <span class="arw">→</span></b> <code>A3_merged_suibe</code> + the B4 candidate features; later, IBGE life expectancy.</p>
+      <p class="io"><b class="k">Does</b> <b>C1</b> is the crown jewel: only ~19% of SUIBE claimants carry a full CPF, so for the other 81% a <b>logit model decides which RAIS worker is the same human</b>. C4 adds race/earnings/<code>salario de beneficio</code>; <b>C5</b> restricts to the study population (claimed ≥2012; women ≥30 / men ≥35 contribution years; <code>prob_empl_15 ≥ 0.4</code>) → <b>~1,086,742 individuals</b>; <b>C6</b> imputes the <i>continuous</i> contribution time (SUIBE only reports whole-year bins).</p>
+      <p class="io"><b class="k">Outputs <span class="arw">→</span></b> <code>working/C1_merged_suibe_rais.csv.gz</code>, <code>C5_restricted_sample.csv.gz</code>, <code>C6_estimated_contrib_time.csv.gz</code>.</p>
+      <div class="callout warn"><b>Obscure part — C1's five-step probabilistic match.</b> (1) exact-merge the 19% with full CPF = ground truth;
+      (2) build a fuzzy blocking key <code>fake_id</code> (sex + birthdate + 3 CPF digits) to generate candidate pairs; (3) train a logit
+      on the ground truth to predict "same person?" from agreement features (same region at 2/5/8/10/15-yr horizons, salary-vs-benefit
+      quartile, …); (4) keep only <b>mutually best-ranked</b> pairs (one-to-one); (5) accept above a cutoff of <b>0.4953</b>, chosen so the
+      <b>false-match rate ≈ 4%</b>. <i>Type-I</i> = "declared a wrong match"; <i>Type-II</i> = "missed a real match." They tuned for few wrong
+      matches (~4%) at the cost of missing ~16% of true ones.</div>
+    </div>
+
+    <div class="card" style="border-left:4px solid var(--build)">
+      <h3 style="margin-top:0"><span class="tag t-build">Stage D</span> &nbsp;The two analysis-ready datasets</h3>
+      <p class="io"><b class="k">Inputs <span class="arw">→</span></b> <code>C5_restricted_sample</code> + <code>C6_estimated_contrib_time</code> + IBGE life expectancy; D4 also reads the filtered RAIS (C3), INPC, crosswalks.</p>
+      <p class="io"><b class="k">Does</b> <b>D3</b> derives every reform-relevant variable per person: <code>points_claim = age + contr_time_est</code>, the signed <b>distance to the 85/95 (or 86/96 in 2019) thresholds</b>, the post-reform dummy (<code>claim ≥ 2015-06-17</code>), and the estimated fator <code>fp_est</code>. <b>D4</b> reconstructs monthly earnings from RAIS, computes monthly <b>tax = payroll (20%) + SS contribution + income tax</b> (the government-revenue side of the MVPF), and builds a balanced <b>quarterly panel on two clocks</b> — a reform clock and a claim clock — plus the claiming hazard.</p>
+      <p class="io"><b class="k">Outputs <span class="arw">→</span></b> <code>working/D3_cross_section.csv.gz</code>, <code>working/D4_panel_reform.csv.gz</code>, <code>working/D4_panel_claim.csv.gz</code>. <b>These are the seam.</b></p>
+      <div class="callout warn"><b>Obscure parts.</b> (a) A silent <code>num == 3</code> filter drops any quarter missing a month — person-quarters vanish
+      with no comment. (b) <b>Two panels, not one:</b> "reform" and "claim" are the same data aligned to two different time-zeros;
+      downstream DD picks whichever clock it needs. (c) The identifier is <code>indiv</code> (D3 renames <code>CPF_mode → indiv</code>).</div>
+    </div>
+  </section>
+
+  <!-- ===================== SEAM ===================== -->
+  <section id="seam">
+    <h2><span class="n">5</span> The build → analysis seam (and the U:/ vs F:/ split)</h2>
+    <p>Build and analysis meet at exactly <b>two files</b>: <code>D3_cross_section.csv.gz</code> and <code>D4_panel_reform.csv.gz</code>.
+    Everything the analysis needs about a person — points, cutoff distances, <code>fp_est</code>, quarterly earnings, taxes, benefits,
+    hazards — is already baked into these two tables. Nothing upstream is re-derived downstream.</p>
+    <div class="callout bad"><b>The crossed-drive trap (open issue O11).</b> The full-data <b>build</b> writes its <code>working/</code>
+    intermediates under <code>U:/Documents/Paper/directory_2025</code>, but the full-data <b>analysis</b> scripts are rooted under
+    <code>F:/Users/tucalins/…/directory_2025</code>. <code>config/paths.R</code> centralises these as two named roots
+    (<code>FULL_BUILD_ROOT</code> vs <code>FULL_ANALYSIS_ROOT</code>) but <b>deliberately does not merge them</b> — it is flagged for the
+    professors to reconcile on the server. Practical consequence: on the server the D-stage outputs on <code>U:/</code> must be
+    <i>visible</i> to analysis code rooted on <code>F:/</code>. This cross-drive seam is the single most likely thing to break a naive
+    full-data rerun — which is exactly why the everyday workflow is the two-CSV sample instead.</div>
+  </section>
+
+  <!-- ===================== SAMPLE ===================== -->
+  <section id="sample">
+    <h2><span class="n">6</span> Where the 5% sample comes from</h2>
+    <p>There is <b>no sample-drawing script in this repo.</b> The sample is created <b>off-repo, on the server</b>, directly from the
+    build output, in four steps:</p>
+    <ol class="tight">
+      <li><b>Draw 5% of the CPFs</b> from the D-stage outputs.</li>
+      <li><b>Anonymize the identifier</b> — the <code>indiv</code>/<code>CPF_mode</code> value is replaced by a sequential surrogate
+      <code>id_0000001, id_0000002, …</code> (the column keeps the name <code>indiv</code>).</li>
+      <li><b>Bake in every derived column</b> (points, distances, <code>fp_est</code>, quarterly earnings, taxes, benefits, hazards) so
+      nothing needs re-deriving and nothing confidential survives.</li>
+      <li><b>Export two flat CSVs:</b> <code>dt_sampled_anon.csv</code> (the 5% cross-section, analog of D3) and
+      <code>panel_sampled_anon.csv</code> (the 5% quarterly panel, analog of D4).</li>
+    </ol>
+    <p>Those two files live in the external sample root and are <b>never committed</b>. Because they already <i>are</i> the D-stage
+    output, the analysis pipeline reads them directly and <b>skips A–D entirely</b> in sample mode — which is why
+    <code>build_all.R</code> and every build head <code>stop()</code> when <code>DATA_MODE ≠ full</code>. The build block and the
+    analysis block meet only at these two CSVs. See the sibling <a href="WORKFLOW_GUIDE_SAMPLE.html">laptop-sample guide</a>.</p>
+    <div class="callout"><b>Honest caveat.</b> The sample is a <i>validation harness, not a replication.</i> Its headline numbers differ from
+    the paper by design (5% actual counts get mixed with full-data counterfactual frequencies) — the sample can even yield a negative
+    WMVPF. That is expected sampling noise, not a bug.</div>
+  </section>
+
+  <!-- ===================== ANALYSIS ===================== -->
+  <section id="analysis">
+    <h2><span class="n">7</span> Analysis stages E–I — behaviour, benefits, and the WMVPF</h2>
+    <p>On the server, <code>analysis/analysis_all.R</code> runs in full mode and executes <b>eight</b> stages in order:
+    <span class="mono">E4 → gabriel → pure → G4 → G5 → H2 → I4 → I6</span> (plus <b>H3</b>, which becomes runnable only on full data).
+    It reads the build's panel from <code>F:/</code>, plus the pre-supplied prereq table (<code>F5</code> only — <code>G4</code>/<code>H2</code> are now produced in-repo by the G4/H2 stages) and IBGE life tables.</p>
+
+    <div class="card" style="border-left:4px solid var(--analysis)">
+      <h3 style="margin-top:0"><span class="tag t-analysis">E4</span> &nbsp;Claiming-distribution diagnostics</h3>
+      <p class="io"><b class="k">Inputs <span class="arw">→</span></b> the panel + cross-section.</p>
+      <p class="io"><b class="k">Does</b> draws diagnostic figures of how claims distribute around the threshold. No estimation.</p>
+      <p class="io"><b class="k">Outputs <span class="arw">→</span></b> figures into <code>analysis/output/E/</code>.</p>
+    </div>
+
+    <div class="card" style="border-left:4px solid var(--analysis)">
+      <h3 style="margin-top:0"><span class="tag t-analysis">F · gabriel</span> &nbsp;Build actual vs counterfactual claim counts</h3>
+      <p class="io"><b class="k">Inputs <span class="arw">→</span></b> <code>F5_table_results.csv</code> (empirical claiming hazards + the DD-estimated reform effect per cell), the panel.</p>
+      <p class="io"><b class="k">Does</b> counts actual claims <b>Nᵃ</b> per <code>(p,t)</code> cell; strips the reform's hazard boost to get the no-reform hazard <code>ch_c = ch·(1−effect)</code>; then <b>walks each diagonal cohort forward</b>, carrying the surplus at-risk pool that the reform's early claiming left behind, to produce counterfactual claims <b>Nᶜ</b>.</p>
+      <p class="io"><b class="k">Outputs <span class="arw">→</span></b> <code>new_counterfactual_claim_counts.csv</code> (Nᵃ, Nᶜ; read by I4/I6/G5) and the handoff <code>claims_actual_counterfactual_t_p.csv</code> that <b>pure</b> reads.</p>
+      <div class="callout warn"><b>Obscure part — the eligible-pool recursion.</b> The counterfactual is <i>not</i> just "apply the no-reform hazard to the
+      observed pool." Because the reform made people claim <i>early</i>, in the no-reform world more people are still waiting later. The
+      recursion carries that surplus forward: <code>elig_c[i] = elig[i] + (claims[i-1] − claims_c[i-1]) − (elig[i-1] − elig_c[i-1])</code>.
+      Also note <code>F5</code> is a <b>legacy-produced</b> table (flag <code>g-f5</code>) but is the accepted live input.</div>
+    </div>
+
+    <div class="card" style="border-left:4px solid var(--analysis)">
+      <h3 style="margin-top:0"><span class="tag t-analysis">F · pure</span> &nbsp;Pure-Level (bL) and pure-Slope (bS) reform frequencies</h3>
+      <p class="io"><b class="k">Inputs <span class="arw">→</span></b> gabriel's <code>claims_actual_counterfactual_t_p.csv</code> (Nᵃ, Nᶜ per cell).</p>
+      <p class="io"><b class="k">Does</b> the 2015 reform bundled two levers (a higher benefit <i>level</i> and a flatter <i>slope</i>). Pure manufactures two clean one-lever worlds. It finds each person's arrival quarter (<code>t_arrival = t − 2p</code>), sums the <b>postponers</b> below the cutoff into arrival cohorts, distributes them across the bunching window using an empirical claim-share profile <code>g</code> (which sums to 1), and lays the resulting bunching mass <b>PB</b> onto the counterfactual.</p>
+      <p class="io"><b class="k">Outputs <span class="arw">→</span></b> <code>new_counterfactual_claim_counts_with_pure_schedules_3.csv</code> (Nᴸ, Nˢ; read by G5 and I6).</p>
+      <div class="callout warn"><b>Obscure part — the mirror identity.</b> <b>Nᴸ</b> keeps <i>actual</i> behaviour below the cutoff and lays bunchers on the
+      <i>counterfactual</i> just above it; <b>Nˢ</b> is the mirror. In every cell <b>Nᴸ + Nˢ = Nᵃ + Nᶜ</b> — the decomposition conserves
+      mass. Worked out step by step in <a href="#toy1">§9</a>.</div>
+    </div>
+
+    <div class="card" style="border-left:4px solid var(--analysis)">
+      <h3 style="margin-top:0"><span class="tag t-analysis">G4</span> &nbsp;Selection-corrected average benefits</h3>
+      <p class="io"><b class="k">Inputs <span class="arw">→</span></b> <code>D1_cross_section</code> (full mode) + IBGE life expectancy.</p>
+      <p class="io"><b class="k">Does</b> reconstructs both benefit schedules per claimant (old vs new, via <code>fp_est</code>), turns them into lifetime PDVs, collapses to cell means, and runs an event-study DD (reference quarter −2) with the far-below <code>[-15,-7]</code> window as control. Emits the raw cell mean <i>and</i> the DD coefficient side by side so consumers can compute <code>delta_ben = avg_benefits_pv − point_estimate</code>.</p>
+      <p class="io"><b class="k">Outputs <span class="arw">→</span></b> <code>output/G/G4_table_results.csv</code> — the key input for I4.</p>
+      <div class="callout warn"><b>Obscure part — why subtract the DD coefficient.</b> A cell's average benefit moves after the reform for two reasons: the
+      <i>formula</i> changed (mechanical) and <i>different people</i> now claim there (composition). The DD, measured against a control group
+      that has no incentive to re-time, isolates the composition shift; subtracting it leaves the <b>mechanical</b> benefit that I4/I6
+      multiply by claim counts.</div>
+    </div>
+
+    <div class="card" style="border-left:4px solid var(--analysis)">
+      <h3 style="margin-top:0"><span class="tag t-analysis">G5</span> &nbsp;DD on benefits + pure-reform schedules (bL / bS)</h3>
+      <p class="io"><b class="k">Inputs <span class="arw">→</span></b> the same cross-section + life table, <b>plus</b> pure's <code>…with_pure_schedules_3.csv</code>.</p>
+      <p class="io"><b class="k">Does</b> a superset of G4: it also builds the two pure-reform benefit schedules (a linear replacement-rate approximation — bL raises the intercept, bS flattens the slope), runs a second-round DD on each, splits the effect into postponement vs anticipation, and assembles quarterly mechanical/behavioral flows.</p>
+      <p class="io"><b class="k">Outputs <span class="arw">→</span></b> <code>output/G/G5_table_results_contrafactual_reforms_and_benefits_freq.csv</code> — I6's pure-reform input.</p>
+      <div class="callout warn"><b>Obscure part / flag.</b> The bL/bS ratio formula divides by the pre-reform replacement rate — the code's own comment calls
+      this a <i>"potentially problematic assumption; verify against the canonical deck appendix."</i> Treat it as an approximation. Also
+      note G5 still reads <code>D1</code> while its canonical peers read <code>D3</code> (flag <code>g5-d1</code>).</div>
+    </div>
+
+    <div class="card" style="border-left:4px solid var(--analysis)">
+      <h3 style="margin-top:0"><span class="tag t-analysis">H2</span> &nbsp;Tax/revenue policy elasticity (the fiscal term)</h3>
+      <p class="io"><b class="k">Inputs <span class="arw">→</span></b> <code>D1_cross_section</code> + <code>D2_panel</code> (full mode).</p>
+      <p class="io"><b class="k">Does</b> asks how much government <i>contribution revenue</i> moves when the reform changes retirement timing. Treatment = exposure to the fator (benefit salary not <code>&lt;1.25MW</code>); <b>IPW</b> reweights treated/control to common support; the outcome is the year-over-year <i>change</i> in contributions; an event-study DD (reference −1) gives the elasticity, reported both plain and IPW-weighted.</p>
+      <p class="io"><b class="k">Outputs <span class="arw">→</span></b> <code>output/H/H2_table_results.csv</code> — the revenue term for I4/I6.</p>
+      <div class="callout warn"><b>Obscure part / flag.</b> The treatment cutoff is about the <i>fator</i>, not income — <code>&lt;1.25MW</code> is the group whose benefit
+      was <i>least</i> reduced (hence least incentivised to re-time); getting this backwards flips the sign. And note <b>CLAUDE.md calls H3
+      canonical, but H2 is the file that actually runs</b> and feeds I4/I6 (flag <code>h2-vs-h3</code>). H3 is full-data-only, figures-only,
+      on no master.</div>
+    </div>
+
+    <div class="card" style="border-left:4px solid var(--analysis)">
+      <h3 style="margin-top:0"><span class="tag t-analysis">I4</span> &nbsp;WMVPF of the actual reform</h3>
+      <p class="io"><b class="k">Inputs <span class="arw">→</span></b> the panel; F-stage claim counts (with <code>_sample</code> suffix); <b>G4 &amp; H2 tables read suffix-aware from the in-repo <code>output/</code></b> — now consistent with I6, so <code>F5</code> is the only external input (the old <code>i4-g4h2</code> quirk is fixed).</p>
+      <p class="io"><b class="k">Does</b> builds three worlds — <code>b(x)</code> counterfactual (old formula, old choices), <code>b'(x)</code> mechanical (new formula, old choices), <code>b'(x')</code> actual (new formula, new choices) — as cumulative PDVs per quarter. Then <code>net_cost = b'(x')−b(x)</code>, <code>welfare = 0.995<sup>3t</sup>·η·(b'(x)−b(x))</code>, and <b>wmvpf = Σ welfare / Σ net_cost</b>.</p>
+      <p class="io"><b class="k">Outputs <span class="arw">→</span></b> <code>output/I/I4_table_wmvpf.csv</code>, <code>I4_plot_results.pdf</code>.</p>
+      <div class="callout warn"><b>Obscure parts / flags.</b> (a) <b>Two data routes:</b> <code>b'(x')</code> is summed from <i>individuals</i> in the panel;
+      <code>b(x)</code>/<code>b'(x)</code> are rebuilt from <i>cell means × counterfactual counts</i> (those people/claim-times don't exist to
+      sum). (b) The <b><code>i4-g4h2</code> quirk — now FIXED:</b> G4/H2 <i>used</i> to be read full-data even in sample mode; I4 now reads them
+      suffix-aware from the in-repo <code>output/</code>, exactly like I6, leaving <code>F5</code> as the only external input. This moved I4's
+      sample <code>WMVPF_actual</code> 0.2126 → 0.2106 (still in (0,1); I6 unchanged at 0.2126) — the econometric change is pending professor review.
+      (c) The <b>tax term is computed but commented out</b> of <code>net_cost</code> —
+      the current WMVPF is benefit-side only. (d) Cost vs welfare discounts (<code>1.005³</code> vs <code>0.995³</code>) are <i>not</i> exact
+      reciprocals — a flagged, unharmonised seam.</div>
+    </div>
+
+    <div class="card" style="border-left:4px solid var(--analysis)">
+      <h3 style="margin-top:0"><span class="tag t-analysis">I6</span> &nbsp;WMVPF + pure L/S decomposition <span class="star">★ the headline</span></h3>
+      <p class="io"><b class="k">Inputs <span class="arw">→</span></b> everything I4 uses (but suffix-aware G4/H2, fixing the quirk), <b>plus</b> G5's contrafactual table.</p>
+      <p class="io"><b class="k">Does</b> Part 1 replicates I4's actual-reform WMVPF with two fixes (horizon extended to t=13; suffix-aware tables). Part 2 asks the policy question: <i>of the two levers, which delivers more welfare per real?</i> It simulates the pure-Level (bL) and pure-Slope (bS) reforms in expenditure space, physically reallocating postponers from origin cells to bunching cells via the claiming probability <code>g_pta</code>, and computes a WMVPF for each.</p>
+      <p class="io"><b class="k">Outputs <span class="arw">→</span></b> <code>I6_wmvpf_actual.csv</code>, <code>I6_wmvpf_pure_L.csv</code>, <code>I6_wmvpf_pure_S.csv</code>, <code>I6_summary.csv</code>, plots.</p>
+      <div class="callout good"><b>Headline results (full data).</b> All three WMVPFs land in <b>(0,1)</b> — the reform costs the government more than
+      beneficiaries' willingness-to-pay. <b>WMVPF<sub>bS</sub> &gt; WMVPF<sub>bL</sub></b> — the <i>slope</i> lever is more welfare-efficient.
+      The budget-neutral improving move is therefore <b>raise bS, lower bL</b> — the opposite of what the 2015 reform actually did.</div>
+      <div class="callout warn"><b>Obscure part — the bL vs bS sign seam.</b> Both pure reforms use the <i>same</i> postponement-reallocation box; they differ only in
+      assembly: <b>Eᴸ = Eᶜ + Eᴾ</b> (add postponement onto the counterfactual) but <b>Eˢ = Eᵃ − Eᴾ</b> (subtract it from the actual). The code
+      itself says "verify carefully." Also: <code>TC&lt;0</code> at <code>t=0</code> is <i>expected</i>, not a bug (postponement front-loads apparent savings).</div>
+    </div>
+  </section>
+
+  <!-- ===================== DECK ===================== -->
+  <section id="deck">
+    <h2><span class="n">8</span> Presentation — collecting figures and compiling the deck</h2>
+    <p>After analysis, <code>presentation/build_deck.R</code> runs three shell steps in sequence (any nonzero exit → <code>stop()</code>):</p>
+    <div class="grid3">
+      <div class="card"><h3 style="margin-top:0;font-size:15px">1 · collect</h3>
+        <p class="muted" style="margin:0"><code>collector.py</code> reads <code>manifest.csv</code> (72 figures) and, for each, resolves the
+        source across search roots (taking the <b>newest</b> by mtime), then copies + <b>renames</b> the long code-output name to the short
+        name the deck expects, into <code>from_code/</code>.</p></div>
+      <div class="card"><h3 style="margin-top:0;font-size:15px">2 · compile</h3>
+        <p class="muted" style="margin:0"><code>latexmk -cd -g -pdf … _main.tex</code> compiles the Beamer deck. The <code>\graphicspath</code>
+        searches <code>from_code/</code> first, then <code>static/</code> (hand-made / external assets).</p></div>
+      <div class="card"><h3 style="margin-top:0;font-size:15px">3 · verify</h3>
+        <p class="muted" style="margin:0"><code>verify_deck.py</code> regex-scans <code>_main.tex</code> and confirms every
+        <code>\includegraphics</code> resolves under <code>from_code/</code> or <code>static/</code>. Result: <b>_main.pdf, 142 pages.</b></p></div>
+    </div>
+    <div class="callout warn"><b>The fragile coupling.</b> The manifest's <code>code_output_name</code> must stay <b>byte-identical</b> to the filenames
+    the R stages actually <code>ggsave()</code> — there is no fuzzy matching. If someone renames a plot in <code>pure.R</code> or <code>G5</code>,
+    the collector silently reports it MISSING and the deck figure goes stale. (This is why the misspelled <code>benegits</code> in some G5
+    filenames is left as-is — it must match.)</div>
+  </section>
+
+  <!-- ===================== TOY 1 ===================== -->
+  <section id="toy1">
+    <h2><span class="n">9</span> Toy example — the counterfactual &amp; bunching (F-stage)</h2>
+    <p>Meet two workers. <b><code>id_0000001</code></b> sits just <i>below</i> the cutoff (<code>p&lt;0</code>) in an early quarter; the
+    reform makes them wait — a <b>postponer</b>. <b><code>id_0000002</code></b> has already crossed the cutoff; they claim in the
+    <b>bunching band</b> (<code>p≥0</code>). On the full data each <code>(p,t)</code> cell holds <i>thousands</i> of such people; here we
+    use tiny round counts so the arithmetic is visible. We follow one <b>arrival cohort</b> <code>a = 4</code> — everyone who reaches
+    <code>p=0</code> in quarter <code>t=4</code>. All cells on that diagonal satisfy <code>t = a + 2p</code> (points accrue 0.5/quarter).</p>
+
+    <div class="stepbox">
+      <h4><span class="sn">1</span> Postponers below the cutoff — where the arrivals come from (<code>p&lt;0</code>, arrival cohort 4)</h4>
+      <table class="mini">
+        <thead><tr><th>cell (p, t)</th><th>who</th><th>Nᵃ (actual)</th><th>Nᶜ (counterfactual)</th><th>postponers = max(Nᶜ−Nᵃ, 0)</th></tr></thead>
+        <tbody>
+          <tr><td>(p=−2, t=0)</td><td><code>id_0000001</code> &amp; peers</td><td>100</td><td>130</td><td><b>30</b></td></tr>
+          <tr><td>(p=−1, t=2)</td><td>peers</td><td>120</td><td>140</td><td><b>20</b></td></tr>
+        </tbody>
+      </table>
+      <p style="margin:.3em 0 0">Postponement arrivals: <b>PA<sub>a=4</sub> = 30 + 20 = 50</b> — the mass that will reach the cutoff in quarter 4.</p>
+    </div>
+
+    <div class="stepbox">
+      <h4><span class="sn">2</span> The bunching band above the cutoff — the claim-share profile (<code>p≥0</code>, arrival cohort 4)</h4>
+      <table class="mini">
+        <thead><tr><th>cell (p, t)</th><th>who</th><th>Nᵃ (actual)</th><th>Nᶜ</th><th>g = Nᵃ / Σ Nᵃ</th></tr></thead>
+        <tbody>
+          <tr><td>(p=0, t=4)</td><td><code>id_0000002</code> &amp; peers</td><td>200</td><td>180</td><td>200/400 = <b>0.50</b></td></tr>
+          <tr><td>(p=1, t=6)</td><td>peers</td><td>100</td><td>90</td><td>100/400 = <b>0.25</b></td></tr>
+          <tr><td>(p=2, t=8)</td><td>peers</td><td>100</td><td>95</td><td>100/400 = <b>0.25</b></td></tr>
+        </tbody>
+      </table>
+      <p style="margin:.3em 0 0">Denominator = 200+100+100 = 400. The shares <b>g sum to 1</b> ✓ — this is the "proportional mixing" assumption:
+      postponers bunch in the same proportions as observed actual claimers.</p>
+    </div>
+
+    <div class="stepbox">
+      <h4><span class="sn">3</span> Distribute the arrivals across the band — postponement bunching PB = g · PA</h4>
+      <p style="margin:.2em 0">PB₀ = 0.50·50 = <b>25</b> &nbsp;·&nbsp; PB₁ = 0.25·50 = <b>12.5</b> &nbsp;·&nbsp; PB₂ = 0.25·50 = <b>12.5</b>
+      &nbsp;→&nbsp; Σ PB = 50 = PA ✓ <span class="muted">(mass conserved)</span></p>
+    </div>
+
+    <div class="stepbox">
+      <h4><span class="sn">4</span> The two pure-reform frequencies — and the conservation check</h4>
+      <p style="margin:.2em 0">Rule: below the cutoff <b>Nᴸ = Nᵃ, Nˢ = Nᶜ</b>; inside the band <b>Nᴸ = Nᶜ + PB, Nˢ = Nᵃ − PB</b>.</p>
+      <table class="mini">
+        <thead><tr><th>cell (p, t)</th><th>branch</th><th>Nᴸ (pure LEVEL / bL)</th><th>Nˢ (pure SLOPE / bS)</th><th>Nᴸ+Nˢ = Nᵃ+Nᶜ ?</th></tr></thead>
+        <tbody>
+          <tr><td>(−2, 0)</td><td>p&lt;0</td><td>Nᵃ = 100</td><td>Nᶜ = 130</td><td>230 = 100+130 <span class="ok">✓</span></td></tr>
+          <tr><td>(−1, 2)</td><td>p&lt;0</td><td>120</td><td>140</td><td>260 = 120+140 <span class="ok">✓</span></td></tr>
+          <tr><td>(0, 4)</td><td>0≤p&lt;4</td><td>180 + 25 = <b>205</b></td><td>200 − 25 = <b>175</b></td><td>380 = 200+180 <span class="ok">✓</span></td></tr>
+          <tr><td>(1, 6)</td><td>0≤p&lt;4</td><td>90 + 12.5 = <b>102.5</b></td><td>100 − 12.5 = <b>87.5</b></td><td>190 = 100+90 <span class="ok">✓</span></td></tr>
+          <tr><td>(2, 8)</td><td>0≤p&lt;4</td><td>95 + 12.5 = <b>107.5</b></td><td>100 − 12.5 = <b>87.5</b></td><td>195 = 100+95 <span class="ok">✓</span></td></tr>
+        </tbody>
+      </table>
+      <p style="margin:.4em 0 0"><b>Reading it:</b> the 50 postponers (<code>id_0000001</code>'s crowd) re-emerge as 50 units of bunching mass,
+      split 0.50/0.25/0.25. The <b>LEVEL</b> world adds that bunching on top of the <i>counterfactual</i> just past the cutoff and keeps
+      <i>actual</i> behaviour below it; the <b>SLOPE</b> world removes the same bunching from the <i>actual</i> and reverts to the
+      <i>counterfactual</i> below. The two always sum back to actual + counterfactual.</p>
+    </div>
+  </section>
+
+  <!-- ===================== TOY 2 ===================== -->
+  <section id="toy2">
+    <h2><span class="n">10</span> Toy example — the WMVPF (I-stage)</h2>
+    <p><code>id_0000001</code> and <code>id_0000002</code> are two retirees whose lifetime PDV benefits accumulate into the cumulative
+    <code>b</code>-values below. On full data these are sums over ~1.08M people, each in the hundreds of thousands of R$; here we use
+    R$ millions, round, over just two quarters. Recall the three worlds:
+    <b>b(x)</b> = old formula/old choices, <b>b'(x)</b> = new formula/old choices (mechanical), <b>b'(x')</b> = new formula/new choices (actual).
+    Constants: <b>η = 0.828</b>, cost factor <b>1.005³ = 1.015075</b>, welfare factor <b>0.995³ = 0.985075</b>.</p>
+
+    <div class="stepbox">
+      <h4><span class="sn">1</span> The inputs (cumulative PDV, R$M)</h4>
+      <table class="mini">
+        <thead><tr><th>t</th><th>b(x)</th><th>b'(x) mechanical</th><th>b'(x') actual</th></tr></thead>
+        <tbody>
+          <tr><td>0</td><td>90</td><td>96</td><td>100</td></tr>
+          <tr><td>1</td><td>200</td><td>212</td><td>220</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="stepbox">
+      <h4><span class="sn">2</span> Net cost = (b'(x') − b(x)) / 1.015075<sup>t</sup></h4>
+      <p style="margin:.2em 0">t=0: (100 − 90)/1 = <b>10.00</b> &nbsp;·&nbsp; t=1: (220 − 200)/1.015075 = 20/1.015075 = <b>19.70</b>
+      &nbsp;→&nbsp; <b>Σ net_cost = 29.70</b></p>
+    </div>
+
+    <div class="stepbox">
+      <h4><span class="sn">3</span> Mechanical gain (what beneficiaries value) = b'(x) − b(x)</h4>
+      <p style="margin:.2em 0">t=0: 96 − 90 = <b>6</b> &nbsp;·&nbsp; t=1: 212 − 200 = <b>12</b></p>
+    </div>
+
+    <div class="stepbox">
+      <h4><span class="sn">4</span> Welfare = 0.985075<sup>t</sup> · 0.828 · (mechanical gain)</h4>
+      <p style="margin:.2em 0">t=0: 1 · 0.828 · 6 = <b>4.968</b> &nbsp;·&nbsp; t=1: 0.985075 · 0.828 · 12 = <b>9.788</b>
+      &nbsp;→&nbsp; <b>Σ welfare = 14.756</b></p>
+    </div>
+
+    <div class="stepbox" style="border-left:4px solid var(--pass)">
+      <h4><span class="sn">5</span> WMVPF = Σ welfare / Σ net_cost</h4>
+      <p style="margin:.2em 0;font-size:16px"><b>WMVPF = 14.756 / 29.70 = 0.497</b> &nbsp; <span class="ok">∈ (0,1) ✓</span></p>
+      <p style="margin:.4em 0 0"><b>Reading it:</b> this reform delivers ~50 cents of welfare per real of net fiscal cost. It is below 1 for two
+      reasons: <b>η &lt; 1</b> (a real to a beneficiary is worth 0.828 of a real to the average citizen), and the <b>fiscal externality</b> —
+      the gap between <code>b'(x')</code> and <code>b'(x)</code> (people re-timing) adds cost without adding beneficiary welfare. Remove the
+      externality (set <code>b'(x') = b'(x)</code>) and the ratio climbs toward η.</p>
+    </div>
+    <div class="callout"><b>Full-data note.</b> These are toy magnitudes. On the real reform the <code>b</code>-values are lifetime PDVs summed over
+    ~1.08M restricted-sample individuals, and the headline I6 WMVPFs all land in (0,1) with <b>bS &gt; bL</b>. The 5% sample reproduces the
+    <i>mechanics</i> exactly but not the magnitudes — see <a href="#vs">§11</a>.</div>
+  </section>
+
+  <!-- ===================== SAMPLE VS SERVER ===================== -->
+  <section id="vs">
+    <h2><span class="n">11</span> Sample vs Server — what changes</h2>
+    <p>This guide covers the <b>server / full-data</b> path. The everyday laptop path is the <b>5% sample</b>, documented in the sibling
+    guide <a href="WORKFLOW_GUIDE_SAMPLE.html"><b>WORKFLOW_GUIDE_SAMPLE.html</b></a>. The estimation code (E–I) is <i>identical</i> in both;
+    only the data source, the build step, and a few flags differ.</p>
+    <table>
+      <thead><tr><th>Aspect</th><th>SAMPLE (laptop)</th><th>SERVER (full)</th></tr></thead>
+      <tbody>
+        <tr><td>Build A–D</td><td><b>Skipped</b> — the panel is a pre-supplied input (<code>panel_sampled_anon.csv</code>)</td><td><b>Run</b> — rebuilds the panel from raw SUIBE/RAIS</td></tr>
+        <tr><td>Masters run</td><td><code>analysis_all.R</code> only</td><td><code>build_all.R</code> <b>first</b>, then <code>analysis_all.R</code>, then <code>build_deck.R</code></td></tr>
+        <tr><td>Data root</td><td>OneDrive <code>transfer_may_retirement</code></td><td><code>F:/</code> analysis; build overrides to <code>U:/</code></td></tr>
+        <tr><td>H3 elasticity</td><td>Skipped (no sample branch)</td><td>Runnable (full-data only)</td></tr>
+        <tr><td>Figure/table suffix</td><td><code>_sample</code> — collector warns "do not ship"</td><td>no suffix — final figures</td></tr>
+        <tr><td>Numbers</td><td>Sampling noise vs paper is <b>expected</b> — even a negative WMVPF</td><td>Replication values (WMVPF in (0,1), bS &gt; bL)</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ===================== RUN ===================== -->
+  <section id="run">
+    <h2><span class="n">12</span> Running it on the server, and the gotchas</h2>
+    <p>Set the mode once, then run the three masters <b>in order</b>. <code>config/paths.R</code> finds the repo root via the
+    <code>.here</code> sentinel — <b>no <code>setwd</code>, no path editing</b>.</p>
+    <div class="grid2">
+      <div class="card" style="border-left:4px solid var(--build)">
+        <h3 style="margin-top:0;color:var(--build)">Shell / batch job</h3>
+        <pre>export PENSION_DATA_MODE=full
+Rscript build/build_all.R         <span class="cm"># raw SUIBE/RAIS → panel (U:/); stops unless full</span>
+Rscript analysis/analysis_all.R   <span class="cm"># panel → figures, tables, WMVPF (F:/)</span>
+Rscript presentation/build_deck.R <span class="cm"># figures → _main.pdf (142 pages)</span></pre>
+        <p class="muted" style="margin:.5em 0 0"><b>From scratch:</b> <code>build_all.R</code> runs the canonical heads A4/B4/C6/D4; run
+        the upstream lineage (A1–A3, B1–B3, C1–C5, D1–D3) first. Stata steps: <code>stata-mp -b do build/code/&lt;file&gt;.do</code>.</p>
+      </div>
+      <div class="card" style="border-left:4px solid var(--analysis)">
+        <h3 style="margin-top:0;color:var(--analysis)">From R / RStudio</h3>
+        <pre>Sys.setenv(PENSION_DATA_MODE = "full")
+source(here::here("build","build_all.R"))
+source(here::here("analysis","analysis_all.R"))
+source(here::here("presentation","build_deck.R"))</pre>
+        <p class="muted" style="margin:.5em 0 0"><code>RUN.R</code> at the repo root is the front-door signpost listing the three masters.</p>
+      </div>
+    </div>
+
+    <h3>The traps a newcomer will hit</h3>
+    <table>
+      <thead><tr><th>Flag</th><th>Where</th><th>What to know</th></tr></thead>
+      <tbody>
+        <tr><td><span class="tag t-flag">O11</span></td><td class="mono">config/paths.R:28-34</td><td><code>U:/</code> (build) vs <code>F:/</code> (analysis) full roots are <b>not merged</b> — the D-stage <code>working/</code> on U:/ must be visible to F:/-rooted analysis.</td></tr>
+        <tr><td><span class="tag t-false">i4-g4h2</span></td><td class="mono">I4:130,132</td><td><b>FIXED (2026-07-11).</b> I4 now reads G4/H2 suffix-aware from the in-repo <code>output/</code>, exactly like I6 — <code>F5</code> is the only external input. Moved I4's sample <code>WMVPF_actual</code> 0.2126 → 0.2106 (I6 unchanged); pending professor sign-off since it shifts the number.</td></tr>
+        <tr><td><span class="tag t-flag">i4-discount</span></td><td class="mono">constants.R:48-52</td><td>Cost <code>(1.005³)ᵗ</code> vs welfare <code>0.995³ᵗ</code> are not exact reciprocals — left verbatim for the professors.</td></tr>
+        <tr><td><span class="tag t-flag">g-f5</span></td><td class="mono">gabriel</td><td>The canonical new-F producer reads a <b>legacy</b> <code>F5_table_results.csv</code> — accepted input, not re-fixed here.</td></tr>
+        <tr><td><span class="tag t-flag">h2-vs-h3</span></td><td class="mono">H2 vs H3</td><td>CLAUDE.md labels H3 canonical, but <b>H2</b> is the live producer feeding I4/I6 and the deck.</td></tr>
+        <tr><td><span class="tag t-flag">prereq</span></td><td class="mono">analysis_all.R:18-28</td><td><code>prereq_root/…/output/</code> is named "output" but holds an <b>input</b> — now just <b>F5</b> (G4/H2 are produced in-repo). The master's prereq gate checks <b>F5 only</b> (was F5 + G4 + H2); deleting it to "clean up" breaks the run — the master hard-fails if F5 is missing.</td></tr>
+        <tr><td><span class="tag t-false">num==3</span></td><td class="mono">D4</td><td>Silently drops any quarter missing a month — person-quarters vanish without comment. Not a bug.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <div class="sep"></div>
+  <p class="muted" style="font-size:12.5px">Server-workflow guide for <i>optimal-pension-reforms</i> · branch <code>code-and-data</code> · full-data build → analysis → deck.
+  Sibling: <a href="WORKFLOW_GUIDE_SAMPLE.html">WORKFLOW_GUIDE_SAMPLE.html</a> (the 5% laptop path). Estimation logic per the canonical deck; numbers vary by data/specification.</p>
+  </main>
+</div>
+</body>
+</html>

@@ -12,27 +12,38 @@ Research assistance: Arthur (PUC-Rio)
 
 ## Repository Structure
 
-```
-trans_retirement/
-  code/               # R and Stata scripts for the full pipeline
-    A1..A4            # Data cleaning (SUIBE)
-    B1..B4            # RAIS cross-sections and candidate panels
-    C1..C6            # Merge SUIBE–RAIS, sample restrictions
-    D1..D4            # Cross-section and panel construction
-    E1..E4            # Claiming distribution plots, frictions
-    F1..F7            # Counterfactual claiming hazards and bunching
-    G1..G6            # Benefit calculations, welfare costs
-    H1..H3            # Heterogeneity analysis
-    I1..I5            # MVPF and WMVPF estimation
-    new_counterfactual_claiming*.R   # Pure-reform counterfactuals
-    aux_codes_RAIS/   # RAIS helper scripts and CBO mappings
+Functional layout (Gentzkow–Shapiro; restructured 2026-06-23). Full map: `_docs/restructure/MAP_after.md`.
 
-Surrogate Indices/    # Surrogate index approach (Athey et al.) — in progress
-
-_docs/                # Project documentation and memory files
-  CLAUDE.md           # Working-memory entry point
-  memory/             # Detailed context files (pipeline, math, conventions, etc.)
 ```
+config/              # paths.R (one PATHS list + DATA_MODE; NO setwd) + constants.R (economic primitives)
+build/               # DATA CONSTRUCTION — full-data / server only
+  code/              #   A1-A4, B1-B4, C1-C6, D1-D4, aux_codes_RAIS/
+  build_all.R        #   master:  A4 -> B4 -> C6 -> D4
+analysis/            # ESTIMATION & RESULTS — runs on the 5% sample
+  code/              #   E1-E4, new_counterfactual_claiming3_{gabriel,pure}.R, G1-G5, H1-H3, I1-I4, I6, I7
+  analysis_all.R     #   master:  E4 -> gabriel -> pure -> G5 -> I4 -> I6
+presentation/        # RESULTS -> DECK
+  figures_central_folder/  # collector/update/verify/deck_compare + manifest.csv + from_code/ + static/
+  latex/                   # presentation/ (EN, live build) + apresentacao/ (PT)
+  build_deck.R             # master:  collect figures -> compile latex/presentation/_main.tex -> PDF
+legacy/              # quarantined: F1-F7, G6, I5, old/B1-B2 — each guarded by stop()
+RUN.R                # root front door: dispatches to the three masters
+_docs/  quality_reports/  Surrogate Indices/  paper/
+```
+
+## How to run
+
+The pipeline auto-detects the data environment via `config/paths.R` (override with `PENSION_DATA_MODE` ∈ {full, sample}
+and `PENSION_SAMPLE_ROOT` / `PENSION_FULL_ROOT`). From the repo root:
+
+```bash
+Rscript analysis/analysis_all.R       # 5% sample: panel -> figures, tables, WMVPF
+Rscript presentation/build_deck.R     # figures -> compiled English deck (presentation/latex/presentation/_main.pdf)
+Rscript build/build_all.R             # full-data build (server only; DATA_MODE=full)
+```
+
+`RUN.R` is a signpost listing these. There is **no `setwd` and no hardcoded path in stage code** — every path resolves
+through `config/paths.R`; legacy files are guarded and never run.
 
 ## Data
 

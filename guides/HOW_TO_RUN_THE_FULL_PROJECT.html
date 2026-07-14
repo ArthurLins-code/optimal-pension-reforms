@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How to run the full project — optimal-pension-reforms</title>
+<style>
+  :root{
+    --bg:#f6f8fc; --panel:#ffffff; --ink:#1e293b; --muted:#64748b; --line:#e2e8f0;
+    --sample:#16a34a; --server:#2563eb; --present:#9333ea; --config:#d97706; --bad:#dc2626; --accent:#0d9488;
+    --code:#0f172a; --codetext:#e2e8f0;
+    --shadow:0 1px 3px rgba(15,23,42,.08),0 8px 24px rgba(15,23,42,.06);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased}
+  .wrap{display:grid;grid-template-columns:248px 1fr;max-width:1280px;margin:0 auto}
+  header.top{grid-column:1/-1;background:linear-gradient(120deg,#0b1220 0%,#134e4a 55%,#0d9488 100%);color:#fff;padding:42px 40px 34px;border-bottom:4px solid var(--accent)}
+  header.top .kicker{letter-spacing:.18em;text-transform:uppercase;font-size:12px;color:#99f6e4;font-weight:700}
+  header.top h1{margin:.25em 0 .15em;font-size:30px;line-height:1.15}
+  header.top p{margin:.2em 0;color:#cbd5e1;max-width:74ch}
+  header.top code{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);border-radius:5px;padding:1px 6px;color:#e0f2f1;font-size:.9em}
+  .badges{margin-top:16px;display:flex;flex-wrap:wrap;gap:10px}
+  .badge{background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:6px 13px;font-size:13px;color:#eef2ff}
+  .badge b{color:#fff}
+  nav{position:sticky;top:0;align-self:start;height:100vh;overflow:auto;padding:24px 16px 40px;border-right:1px solid var(--line);background:#fbfcfe}
+  nav h4{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:18px 8px 8px}
+  nav a{display:block;color:#334155;text-decoration:none;font-size:13.5px;padding:6px 10px;border-radius:7px;border-left:2px solid transparent}
+  nav a:hover{background:#ecfdf5;color:#0f766e;border-left-color:var(--accent)}
+  main{padding:34px 44px 80px;min-width:0}
+  section{margin:0 0 42px;scroll-margin-top:18px}
+  h2{font-size:22px;margin:0 0 8px;padding-bottom:8px;border-bottom:2px solid var(--line);display:flex;align-items:center;gap:10px}
+  h2 .n{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:8px;background:var(--accent);color:#fff;font-size:15px;font-weight:700}
+  h3{font-size:16px;margin:22px 0 6px;color:#0f172a}
+  p{margin:.5em 0}
+  .lead{font-size:17px;color:#334155}
+  code{font-family:ui-monospace,Menlo,Consolas,monospace;background:#eef1f7;border:1px solid #e2e8f0;border-radius:5px;padding:.5px 5px;font-size:.86em}
+  pre{background:var(--code);color:var(--codetext);border-radius:10px;padding:15px 18px;overflow:auto;font-size:13px;line-height:1.6;box-shadow:var(--shadow)}
+  pre .cm{color:#64748b;font-style:italic}
+  pre .k{color:#5eead4}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px;box-shadow:var(--shadow);margin:14px 0}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .callout{border-left:4px solid var(--accent);background:#f0fdfa;border-radius:0 10px 10px 0;padding:12px 16px;margin:14px 0}
+  .callout.warn{border-color:var(--config);background:#fffbeb}
+  .callout.bad{border-color:var(--bad);background:#fef2f2}
+  table{border-collapse:collapse;width:100%;font-size:13.5px;margin:12px 0;background:#fff;border-radius:10px;overflow:hidden;box-shadow:var(--shadow)}
+  th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:#f1f5f9;font-size:12px;letter-spacing:.03em;text-transform:uppercase;color:#475569}
+  tr:last-child td{border-bottom:none}
+  .mono{font-family:ui-monospace,Menlo,Consolas,monospace} .muted{color:var(--muted)}
+  ul.tight{margin:.4em 0;padding-left:1.25em} ul.tight li{margin:.25em 0}
+  ol.steps{margin:.4em 0;padding-left:1.3em} ol.steps li{margin:.5em 0}
+  .pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:999px}
+  .p-sample{background:#dcfce7;color:#166534}.p-server{background:#dbeafe;color:#1e40af}
+  kbd{background:#1e293b;color:#fff;border-radius:4px;padding:1px 6px;font-size:.8em;font-family:ui-monospace,monospace}
+  .fig{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;box-shadow:var(--shadow);margin:16px 0;overflow:auto}
+  .fig figcaption{font-size:12.5px;color:var(--muted);margin-top:8px;text-align:center}
+  @media(max-width:900px){.wrap{grid-template-columns:1fr}nav{display:none}main{padding:24px}.grid2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="kicker">Run Guide</div>
+    <h1>How to run the full project</h1>
+    <p><i>optimal-pension-reforms</i> — MVPF/WMVPF of Brazil's 2015 pension reform. This guide takes you from a fresh
+    checkout to figures, tables, the WMVPF numbers, and the compiled slide deck — on the 5% sample <b>or</b> the full server data.</p>
+    <div class="badges">
+      <span class="badge">Two paths: <b>sample</b> · <b>server</b></span>
+      <span class="badge">No <b>setwd</b>, no path editing</span>
+      <span class="badge">One command per phase</span>
+    </div>
+    <p style="margin-top:14px;font-size:13.5px;color:#99f6e4">Companion: <code>guides/RESTRUCTURE_EXPLAINER.html</code> explains <i>why</i> the repo is shaped this way.</p>
+  </header>
+
+  <nav>
+    <h4>Contents</h4>
+    <a href="#quick">0 · Quick start</a>
+    <a href="#pipeline">1 · What it runs</a>
+    <a href="#prereq">2 · Prerequisites</a>
+    <a href="#config">3 · Environment &amp; config</a>
+    <a href="#sample">4 · Run on the sample</a>
+    <a href="#server">5 · Run on the server</a>
+    <a href="#deck">6 · Build the deck</a>
+    <a href="#outputs">7 · What you get</a>
+    <a href="#trouble">8 · Troubleshooting</a>
+    <a href="#cheat">9 · Cheat sheet</a>
+  </nav>
+
+  <main>
+  <!-- QUICK -->
+  <section id="quick">
+    <h2><span class="n">0</span> Quick start</h2>
+    <p class="lead">Open R (or a terminal) <b>at the repo root</b> and run one master per phase. The environment
+    (<span class="pill p-sample">sample</span> vs <span class="pill p-server">server</span>) is detected automatically.</p>
+    <div class="grid2">
+      <div class="card" style="border-left:4px solid var(--sample)">
+        <h3 style="margin-top:0;color:var(--sample)">🟢 5% sample (your laptop)</h3>
+        <pre><span class="cm"># terminal, at repo root</span>
+Rscript analysis/analysis_all.R
+Rscript presentation/build_deck.R</pre>
+        <p class="muted" style="margin-bottom:0">Build is skipped — the panel is pre-supplied. ~3–4 min total.</p>
+      </div>
+      <div class="card" style="border-left:4px solid var(--server)">
+        <h3 style="margin-top:0;color:var(--server)">🔵 Full data (server)</h3>
+        <pre><span class="cm"># terminal, on the restricted server</span>
+export PENSION_DATA_MODE=full
+Rscript build/build_all.R
+Rscript analysis/analysis_all.R
+Rscript presentation/build_deck.R</pre>
+        <p class="muted" style="margin-bottom:0">Rebuilds the panel from raw SUIBE/RAIS first.</p>
+      </div>
+    </div>
+    <div class="callout">Prefer scripts to the terminal? Open R/RStudio at the repo root and
+    <code>source(here::here("analysis","analysis_all.R"))</code> — see §4/§5. <code>RUN.R</code> is a signpost that lists the entry points.</div>
+  </section>
+
+  <!-- PIPELINE -->
+  <section id="pipeline">
+    <h2><span class="n">1</span> What it runs — the pipeline</h2>
+    <p>The project moves administrative records → an eligible-worker panel → claiming counterfactuals → DiD on benefits →
+    the policy elasticity → the MVPF/WMVPF welfare numbers → the slide deck. Three <b>master scripts</b> orchestrate it.</p>
+    <figure class="fig">
+      <svg viewBox="0 0 940 168" width="100%" role="img" aria-label="Pipeline phases">
+        <style>.bx{rx:10}.bt{font:700 12px sans-serif;fill:#0f172a}.bs{font:10.5px sans-serif;fill:#64748b}.bm{font:10px ui-monospace,monospace;fill:#475569}</style>
+        <defs><marker id="ar" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#94a3b8"/></marker></defs>
+        <rect x="14"  y="44" width="150" height="74" class="bx" fill="#eff6ff" stroke="#93c5fd"/>
+        <text x="89"  y="66" text-anchor="middle" class="bt" style="fill:#1e40af">build/</text>
+        <text x="89"  y="84" text-anchor="middle" class="bs">A4·B4·C6·D4</text>
+        <text x="89"  y="100" text-anchor="middle" class="bm">build_all.R</text>
+        <text x="89"  y="114" text-anchor="middle" class="bs" style="fill:#b91c1c">server only</text>
+        <rect x="220" y="44" width="180" height="74" class="bx" fill="#f0fdf4" stroke="#86efac"/>
+        <text x="310" y="66" text-anchor="middle" class="bt" style="fill:#166534">analysis/</text>
+        <text x="310" y="84" text-anchor="middle" class="bs">E4·gabriel·pure·G5·I4·I6</text>
+        <text x="310" y="100" text-anchor="middle" class="bm">analysis_all.R</text>
+        <text x="310" y="114" text-anchor="middle" class="bs" style="fill:#15803d">runs on the sample</text>
+        <rect x="456" y="44" width="170" height="74" class="bx" fill="#faf5ff" stroke="#d8b4fe"/>
+        <text x="541" y="66" text-anchor="middle" class="bt" style="fill:#6b21a8">presentation/</text>
+        <text x="541" y="84" text-anchor="middle" class="bs">collect → compile deck</text>
+        <text x="541" y="100" text-anchor="middle" class="bm">build_deck.R</text>
+        <text x="541" y="114" text-anchor="middle" class="bs">_main.pdf</text>
+        <rect x="682" y="52" width="244" height="58" class="bx" fill="#f8fafc" stroke="#cbd5e1"/>
+        <text x="804" y="74" text-anchor="middle" class="bt">outputs</text>
+        <text x="804" y="92" text-anchor="middle" class="bs">figures · tables · WMVPF · 142-page deck</text>
+        <path d="M164,81 H218" stroke="#94a3b8" marker-end="url(#ar)"/>
+        <path d="M400,81 H454" stroke="#94a3b8" marker-end="url(#ar)"/>
+        <path d="M626,81 H680" stroke="#94a3b8" marker-end="url(#ar)"/>
+        <text x="20" y="150" class="bs">On the 5% sample the panel is pre-supplied, so you start at <tspan font-weight="700">analysis/</tspan>. On the server you run all three, in order.</text>
+      </svg>
+    </figure>
+    <p>The analysis chain in detail: <code>E4</code> (claiming figures) · <code>gabriel</code>→<code>pure</code>
+    (counterfactual claim counts &amp; pure L/S schedules) · <code>G5</code> (DiD on average benefits) ·
+    <code>I4</code> (WMVPF, actual reform) · <code>I6</code> (WMVPF + pure decomposition + η — the headline numbers).</p>
+  </section>
+
+  <!-- PREREQ -->
+  <section id="prereq">
+    <h2><span class="n">2</span> Prerequisites</h2>
+    <h3>Software</h3>
+    <table>
+      <thead><tr><th>Tool</th><th>Used for</th><th>Known-good</th></tr></thead>
+      <tbody>
+        <tr><td><b>R</b></td><td>the whole pipeline</td><td>4.6.0</td></tr>
+        <tr><td>R packages</td><td>see below</td><td><code>here</code>, <code>rprojroot</code>, <code>callr</code>, <code>data.table</code>, <code>fixest</code>, <code>ggplot2</code>, <code>dplyr</code>, <code>lubridate</code>, <code>haven</code>, <code>readxl</code>, <code>readstata13</code>, <code>did</code>, <code>fixest</code>, <code>MatchIt</code>, <code>binsreg</code>, <code>stargazer</code>, <code>tidyr</code>, <code>stringr</code>, <code>zoo</code>, <code>ggpubr</code>, …</td></tr>
+        <tr><td><b>Python</b> 3</td><td>figure collector + deck verifier</td><td>3.12 + <code>PyMuPDF</code> (<code>import fitz</code>)</td></tr>
+        <tr><td><b>TeX Live</b></td><td>compile the slide deck</td><td>2026 (<code>latexmk</code> + <code>pdflatex</code>)</td></tr>
+        <tr><td><b>Stata</b></td><td>full-data build steps B1–B3, C3 only</td><td><code>stata-mp</code> (server)</td></tr>
+      </tbody>
+    </table>
+    <p class="muted">Each stage script lists its own packages at the top; install any that are missing with
+    <code>install.packages(c("here","data.table","fixest", …))</code>.</p>
+    <h3>Data</h3>
+    <ul class="tight">
+      <li><span class="pill p-sample">sample</span> — a 5% anonymized extract: <code>data/dt_sampled_anon.csv</code> (31 MB) +
+      <code>data/panel_sampled_anon.csv</code> (928 MB), under the external <b>sample root</b> (an OneDrive folder).
+      <b>Validation only</b> — not the paper's numbers.</li>
+      <li><span class="pill p-server">server</span> — the confidential SUIBE 2012–2019 + RAIS 1995–2020 on the restricted-access server.</li>
+    </ul>
+    <div class="callout warn"><b>Confidential data never enters the repo.</b> The sample/full data live <i>outside</i> the
+    repo and are gitignored; <code>config/paths.R</code> points at them. Never commit a CPF-bearing file.</div>
+  </section>
+
+  <!-- CONFIG -->
+  <section id="config">
+    <h2><span class="n">3</span> Environment &amp; config — how the data root is chosen</h2>
+    <p>Every script begins with two lines and then uses one <code>PATHS</code> list — there is <b>no <code>setwd</code></b> and no
+    hardcoded path anywhere in stage code:</p>
+    <pre>source(here::here("config","paths.R"))      <span class="cm"># PROJECT_ROOT, DATA_MODE, PATHS, run_stage(), clear_dirs()</span>
+source(here::here("config","constants.R"))  <span class="cm"># gamma, eta, replacement-rate schedules, thresholds</span></pre>
+    <p><code>config/paths.R</code> finds the repo root via the <code>.here</code> sentinel and resolves <code>DATA_MODE</code>
+    <b>loudly</b>:</p>
+    <ol class="steps">
+      <li>If <code>PENSION_DATA_MODE</code> is set to <code>full</code> or <code>sample</code> → use it.</li>
+      <li>Else, auto-detect: if the sample root exists → <code>sample</code>; else if a full root exists → <code>full</code>.</li>
+      <li>Else → <b><code>stop()</code></b> listing the roots it looked for. <i>Never a silent wrong path.</i></li>
+    </ol>
+    <h3>Environment variables (override the defaults in <code>config/paths.R</code>)</h3>
+    <table>
+      <thead><tr><th>Variable</th><th>What it does</th><th>Default</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">PENSION_DATA_MODE</td><td>force <code>full</code> / <code>sample</code></td><td>auto-detect by which root exists</td></tr>
+        <tr><td class="mono">PENSION_SAMPLE_ROOT</td><td>5% sample <b>input</b> dir (holds <code>data/</code> + the prereq <code>output/</code> tables, read as inputs)</td><td class="mono">…/OneDrive/…/transfer_may_retirement</td></tr>
+        <tr><td class="mono">PENSION_FULL_ROOT</td><td>full-data <b>analysis</b> root</td><td class="mono">F:/…/directory_2025</td></tr>
+        <tr><td class="mono">PENSION_FULL_BUILD_ROOT</td><td>full-data <b>build</b> root</td><td class="mono">U:/Documents/Paper/directory_2025</td></tr>
+        <tr><td class="mono">PENSION_R_LIBPATH</td><td>R library path (full mode)</td><td class="mono">F:/docs/R-library</td></tr>
+      </tbody>
+    </table>
+    <p class="muted">Set a variable in R with <code>Sys.setenv(PENSION_DATA_MODE="full")</code>, or in a shell with
+    <code>export PENSION_DATA_MODE=full</code> (PowerShell: <code>$env:PENSION_DATA_MODE="full"</code>).</p>
+  </section>
+
+  <!-- SAMPLE -->
+  <section id="sample">
+    <h2><span class="n">4</span> Run on the 5% sample <span class="pill p-sample" style="font-size:12px">local</span></h2>
+    <p>The common path — validation on your machine. The panel is pre-supplied, so the <b>build stage is skipped</b>
+    (<code>build/build_all.R</code> deliberately <code>stop()</code>s in sample mode).</p>
+    <ol class="steps">
+      <li><b>Confirm the sample root exists</b> (or point <code>PENSION_SAMPLE_ROOT</code> at it). It must contain
+      <code>data/dt_sampled_anon.csv</code> + <code>data/panel_sampled_anon.csv</code> and an <code>output/</code> dir holding the
+      prerequisite <b>input</b> tables (see the callout).</li>
+      <li><b>Run the analysis master</b> — either way works:
+        <pre><span class="cm"># R / RStudio (open at the repo root):</span>
+source("RUN.R")                                   <span class="cm"># optional: prints the entry points</span>
+source(here::here("analysis","analysis_all.R"))
+
+<span class="cm"># …or terminal:</span>
+Rscript analysis/analysis_all.R</pre>
+        It runs <code>E4 → gabriel → pure → G5 → I4 → I6</code> in order (≈2–3 min of compute on the 928 MB panel),
+        writing figures + tables to the repo-internal <code>analysis/output/</code> (gitignored, regenerable).</li>
+      <li><b>Build the deck</b> (§6): <code>Rscript presentation/build_deck.R</code>.</li>
+    </ol>
+    <div class="callout"><b>Prerequisite tables (external inputs).</b> The analysis master runs a check and <code>stop()</code>s if the
+    input tables it consumes are missing. These are read from the <b>external root</b>, not regenerated on the sample:
+    <code>output/F/F5_table_results.csv</code> (legacy F5, read by gabriel) and the full-data
+    <code>output/G/G4_table_results.csv</code> + <code>output/H/H2_table_results.csv</code> (read by I4). Their <code>_sample</code>
+    variants are <i>no longer shipped</i> — the run now regenerates them (G4/H2 run before I4/I6) into the repo-internal
+    <code>analysis/output/</code>. On the standard sample root the three external inputs are already present.</div>
+  </section>
+
+  <!-- SERVER -->
+  <section id="server">
+    <h2><span class="n">5</span> Run on the server <span class="pill p-server" style="font-size:12px">full data</span></h2>
+    <p>The real pipeline. Here you <b>also rebuild the panel</b> from raw SUIBE/RAIS before estimating. Set the mode once, then
+    run all three masters in order.</p>
+    <pre><span class="cm"># R / RStudio on the server, at the repo root:</span>
+Sys.setenv(PENSION_DATA_MODE = "full")
+source(here::here("build","build_all.R"))         <span class="cm"># raw SUIBE/RAIS → analysis-ready panel</span>
+source(here::here("analysis","analysis_all.R"))   <span class="cm"># panel → estimates, figures, WMVPF</span>
+source(here::here("presentation","build_deck.R")) <span class="cm"># figures → deck</span>
+
+<span class="cm"># …or as a shell / batch job:</span>
+export PENSION_DATA_MODE=full
+Rscript build/build_all.R
+Rscript analysis/analysis_all.R
+Rscript presentation/build_deck.R</pre>
+    <div class="callout warn"><b>From-scratch rebuild.</b> <code>build_all.R</code> runs the canonical heads
+    <code>A4 · B4 · C6 · D4</code>. A true raw rebuild also needs the upstream lineage that fills <code>working/</code> —
+    <code>A1–A3</code>, the Stata <code>B1–B3</code>, <code>C1–C5</code>, <code>D1–D3</code> — run first. The Stata steps go via
+    <code>stata-mp -b do build/code/&lt;file&gt;.do</code>. See <code>build/code/README.md</code> for the order and which files are
+    canonical vs. upstream-lineage.</div>
+    <p class="muted">Note: the build root (<code>U:/…</code>) and the analysis root (<code>F:/…</code>) differ on the server —
+    both are centralized in <code>config/paths.R</code> (flagged as <code>O11</code> in <code>quality_reports/restructure_findings.md</code>).</p>
+  </section>
+
+  <!-- DECK -->
+  <section id="deck">
+    <h2><span class="n">6</span> Build the slide deck</h2>
+    <p><code>presentation/build_deck.R</code> wraps three steps; run it after the analysis master:</p>
+    <ol class="steps">
+      <li><code>collector.py</code> gathers each stage's figures from the repo-internal <code>analysis/output/</code> into
+      <code>presentation/figures_central_folder/from_code/</code>.</li>
+      <li><code>latexmk -cd -g -pdf</code> compiles <code>presentation/latex/presentation/_main.tex</code> →
+      <code>_main.pdf</code> (≈142 pages on the sample).</li>
+      <li><code>verify_deck.py</code> confirms every <code>\includegraphics</code> resolves.</li>
+    </ol>
+    <pre>Rscript presentation/build_deck.R        <span class="cm"># collect → compile → verify</span>
+<span class="cm"># open the result:</span>
+<span class="cm"># presentation/latex/presentation/_main.pdf</span></pre>
+    <p class="muted">The English deck is the live build (<code>presentation/latex/presentation/</code>); the Portuguese
+    <code>apresentacao/</code> deck is separate and off the collector pipeline.</p>
+  </section>
+
+  <!-- OUTPUTS -->
+  <section id="outputs">
+    <h2><span class="n">7</span> What you get</h2>
+    <table>
+      <thead><tr><th>Output</th><th>Where</th></tr></thead>
+      <tbody>
+        <tr><td>Figures (claiming, event-study, frequencies, WMVPF plots)</td><td><code>analysis/output/{E,F,G,H,I,new_counter_claiming}/</code> (repo-internal, gitignored) → collected into <code>presentation/figures_central_folder/from_code/</code></td></tr>
+        <tr><td>Estimate tables (G5, I4, I6 …)</td><td><code>analysis/output/{G,I}/…csv</code> (repo-internal, gitignored)</td></tr>
+        <tr><td><b>Headline numbers</b> — WMVPF (actual), WMVPF_bL/bS, η</td><td><code>analysis/output/I/I6_summary&lt;SUFFIX&gt;.csv</code> (sample: <code>WMVPF_actual = 0.2126</code>, <code>η = 0.8281</code>)</td></tr>
+        <tr><td>Compiled deck</td><td><code>presentation/latex/presentation/_main.pdf</code></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- TROUBLE -->
+  <section id="trouble">
+    <h2><span class="n">8</span> Troubleshooting</h2>
+    <table>
+      <thead><tr><th>Symptom</th><th>Cause &amp; fix</th></tr></thead>
+      <tbody>
+        <tr><td><code>could not resolve DATA_MODE …</code></td><td>No data root found. Set <code>PENSION_DATA_MODE</code> and/or <code>PENSION_SAMPLE_ROOT</code>/<code>PENSION_FULL_ROOT</code> to a path that exists.</td></tr>
+        <tr><td><code>missing prerequisite table(s) …</code> (from analysis_all.R)</td><td>The external <b>input</b> tables (F5, and the full-data no-suffix G4/H2) aren't in the external root's <code>output/</code>. On the sample they ship with that root; on the server run the producers first.</td></tr>
+        <tr><td><code>build_all.R needs the full server data</code></td><td>You ran the build master in sample mode — it's full-only by design. The panel is an input on the sample; skip straight to <code>analysis_all.R</code>.</td></tr>
+        <tr><td><code>there is no package called '…'</code></td><td>Install it: <code>install.packages("…")</code>. On the server, set <code>PENSION_R_LIBPATH</code>.</td></tr>
+        <tr><td>Deck build fails / missing figure</td><td>Run <code>analysis_all.R</code> first so the figures exist, then <code>build_deck.R</code>. Check <code>verify_deck.py</code> output for the unresolved name.</td></tr>
+        <tr><td>A stage errors on <code>setwd</code> / a <code>U:/</code> path</td><td>You're likely running a non-canonical or full-only file (e.g. <code>H3</code>) on the sample. Use the masters; canonical sample stages have no <code>setwd</code>.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- CHEAT -->
+  <section id="cheat">
+    <h2><span class="n">9</span> Cheat sheet</h2>
+    <p>Each environment, two ways — pick whichever you prefer.</p>
+    <div class="grid2">
+      <div class="card" style="border-left:4px solid var(--sample)">
+        <h3 style="margin-top:0;color:var(--sample)">🟢 Sample (laptop) — no env var needed</h3>
+        <p style="margin:.5em 0 .2em"><b>R / RStudio</b> — source the script:</p>
+        <pre>source(here::here("analysis","analysis_all.R"))
+source(here::here("presentation","build_deck.R"))</pre>
+        <p style="margin:.5em 0 .2em"><b>Command line / PowerShell</b> — Rscript:</p>
+        <pre>Rscript analysis/analysis_all.R
+Rscript presentation/build_deck.R</pre>
+        <p class="muted" style="margin-bottom:0">Mode auto-detects as <code>sample</code>; build is skipped.</p>
+      </div>
+      <div class="card" style="border-left:4px solid var(--server)">
+        <h3 style="margin-top:0;color:var(--server)">🔵 Server (full data) — set the mode first</h3>
+        <p style="margin:.5em 0 .2em"><b>R / RStudio</b> — source the script:</p>
+        <pre>Sys.setenv(PENSION_DATA_MODE = "full")
+source(here::here("build","build_all.R"))
+source(here::here("analysis","analysis_all.R"))
+source(here::here("presentation","build_deck.R"))</pre>
+        <p style="margin:.5em 0 .2em"><b>Command line / PowerShell</b> — Rscript:</p>
+        <pre><span class="cm"># bash:</span>        export PENSION_DATA_MODE=full
+<span class="cm"># PowerShell:</span>  $env:PENSION_DATA_MODE="full"
+Rscript build/build_all.R
+Rscript analysis/analysis_all.R
+Rscript presentation/build_deck.R</pre>
+        <p class="muted" style="margin-bottom:0">A raw rebuild needs the A1–D3 lineage first (see <code>build/code/README.md</code>).</p>
+      </div>
+    </div>
+    <div class="callout"><b>Headline numbers</b> land in <code>analysis/output/I/I6_summary&lt;SUFFIX&gt;.csv</code> (repo-internal, gitignored) —
+    WMVPF_actual, WMVPF_bL/bS, η. <code>RUN.R</code> is a signpost listing the three masters.</div>
+    <p class="muted" style="margin-top:14px;font-size:12.5px">optimal-pension-reforms · run guide · paths resolve through <code>config/paths.R</code> (no setwd). Why the repo is shaped this way: <code>guides/RESTRUCTURE_EXPLAINER.html</code>.</p>
+  </section>
+  </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,30 @@
+file,line,literal
+figures_central_folder/collector.py,33,HERE = Path(__file__).resolve().parent
+figures_central_folder/collector.py,34,ROOT = HERE.parent
+figures_central_folder/collector.py,35,FROM_CODE = HERE / "from_code"
+figures_central_folder/collector.py,36,STATIC = HERE / "static"
+figures_central_folder/collector.py,37,DIFFS = HERE / "_diffs"
+figures_central_folder/collector.py,38,MANIFEST = HERE / "manifest.csv"
+figures_central_folder/collector.py,39,"LATEX_FIGURES = ROOT / ""latex"" / ""figures"""
+figures_central_folder/collector.py,82,import fitz  # PyMuPDF (lazy)
+figures_central_folder/collector.py,187,"shutil.copy2(src, FROM_CODE / deck)"
+figures_central_folder/collector.py,207,import fitz  # noqa (lazy)
+figures_central_folder/update_deck.py,28,ROOT = Path(__file__).resolve().parent.parent
+figures_central_folder/update_deck.py,29,"CODE = ROOT / ""trans_retirement"" / ""code"""
+figures_central_folder/update_deck.py,30,"DECK_DIR = ROOT / ""latex"" / ""presentation"""
+figures_central_folder/update_deck.py,44,"C:/Users/tuca1/OneDrive/Documentos/Pesquisa/transfer_may_retirement"
+figures_central_folder/update_deck.py,83,"run([""Rscript"", str(script)], cwd=ROOT)"
+figures_central_folder/update_deck.py,103,"run([""latexmk"", ""-g"", ""-pdf"", ""-interaction=nonstopmode"", ""_main.tex""], cwd=DECK_DIR)"
+figures_central_folder/update_deck.py,105,log = DECK_DIR / "_main.log"
+figures_central_folder/verify_deck.py,13,ROOT = Path(__file__).resolve().parent.parent
+figures_central_folder/verify_deck.py,14,"DECK = ROOT / ""latex"" / ""presentation"" / ""_main.tex"""
+figures_central_folder/verify_deck.py,15,"FROM_CODE = ROOT / ""figures_central_folder"" / ""from_code"""
+figures_central_folder/verify_deck.py,16,"STATIC = ROOT / ""figures_central_folder"" / ""static"""
+figures_central_folder/deck_compare.py,19,import fitz  # PyMuPDF (hard import at module top)
+figures_central_folder/deck_compare.py,56,"pg.insert_text label ""OLD (latex/figures)"""
+figures_central_folder/deck_compare.py,57,"pg.insert_text label ""NEW (figures_central_folder)"""
+figures_central_folder/deck_compare.py,67,"old_pdf, new_pdf, outdir = Path(sys.argv[1]), Path(sys.argv[2]), Path(sys.argv[3])"
+latex/presentation/_main.tex,1,\input{_preamble.tex}
+latex/presentation/_main.tex,3,\graphicspath{{../../figures_central_folder/from_code/}{../../figures_central_folder/static/}}
+latex/apresentacao/_main.tex,1,\input{_preamble.tex}
+latex/apresentacao/_main.tex,3,\graphicspath{{../figures/}}

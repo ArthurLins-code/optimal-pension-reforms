@@ -25,13 +25,13 @@ explorations/
 
 ## Lifecycle
 
-1. **Create** -- `mkdir -p explorations/[name]/{R,scripts,output}` + README from `templates/exploration-readme.md`
+1. **Create** -- `mkdir -p explorations/[name]/{R,scripts,output}` + README from `_docs/pedro_hc_santanna_templates_for_projects/exploration-readme.md`
 2. **Develop** -- work entirely within the exploration folder
 3. **Decide:**
 
    - **Graduate to production** -- copy to `R/`, `scripts/`; requires quality >= 80, tests pass, code clear. Move to `ARCHIVE/completed_[project]/`
    - **Keep exploring** -- document next steps in README
-   - **Abandon** -- move to `ARCHIVE/abandoned_[project]/` with explanation (use `templates/archive-readme.md`)
+   - **Abandon** -- move to `ARCHIVE/abandoned_[project]/` with explanation (use `_docs/pedro_hc_santanna_templates_for_projects/archive-readme.md`)
 
 ## Graduate Checklist
 

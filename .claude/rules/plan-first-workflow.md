@@ -28,7 +28,7 @@
 
 **Protocol:**
 1. Use AskUserQuestion to clarify ambiguities (max 3-5 questions)
-2. Create `quality_reports/specs/YYYY-MM-DD_description.md` using `templates/requirements-spec.md`
+2. Create `quality_reports/specs/YYYY-MM-DD_description.md` using `_docs/pedro_hc_santanna_templates_for_projects/requirements-spec.md`
 3. Mark each requirement:
    - **MUST** (non-negotiable)
    - **SHOULD** (preferred)
@@ -40,7 +40,7 @@
 5. Get user approval on spec
 6. THEN proceed to Step 4 (draft the plan) with spec as input
 
-**Template:** `templates/requirements-spec.md`
+**Template:** `_docs/pedro_hc_santanna_templates_for_projects/requirements-spec.md`
 
 **Why this helps:** Catches ambiguity BEFORE planning. Reduces mid-plan pivots by 30-50%.
 

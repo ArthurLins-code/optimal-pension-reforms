@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Sample Workflow — end to end on the 5% sample (optimal-pension-reforms)</title>
+<style>
+  :root{
+    --bg:#f6f8fc; --panel:#ffffff; --ink:#1e293b; --muted:#64748b; --line:#e2e8f0;
+    --build:#2563eb; --analysis:#16a34a; --present:#9333ea; --config:#d97706; --legacy:#dc2626;
+    --pass:#16a34a; --warn:#d97706; --bad:#dc2626; --accent:#4f46e5;
+    --code:#0f172a; --codetext:#e2e8f0;
+    --shadow:0 1px 3px rgba(15,23,42,.08),0 8px 24px rgba(15,23,42,.06);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+       color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased}
+  .wrap{display:grid;grid-template-columns:248px 1fr;max-width:1280px;margin:0 auto;gap:0}
+  /* ---- header ---- */
+  header.top{grid-column:1/-1;background:linear-gradient(120deg,#0b1220 0%,#1e293b 45%,#3730a3 100%);
+       color:#fff;padding:42px 40px 36px;border-bottom:4px solid var(--accent)}
+  header.top .kicker{letter-spacing:.18em;text-transform:uppercase;font-size:12px;color:#a5b4fc;font-weight:700}
+  header.top h1{margin:.25em 0 .15em;font-size:30px;line-height:1.15}
+  header.top p{margin:.2em 0;color:#cbd5e1;max-width:70ch}
+  header.top .branch{display:inline-block;font-family:ui-monospace,Menlo,Consolas,monospace;background:rgba(255,255,255,.12);
+       border:1px solid rgba(255,255,255,.18);border-radius:6px;padding:2px 8px;color:#e0e7ff;font-size:13px}
+  header.top a{color:#c7d2fe}
+  .badges{margin-top:16px;display:flex;flex-wrap:wrap;gap:10px}
+  .badge{background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.16);border-radius:999px;
+       padding:6px 13px;font-size:13px;color:#eef2ff}
+  .badge b{color:#fff}
+  .badge.pass{background:rgba(22,163,74,.22);border-color:rgba(22,163,74,.5)}
+  /* ---- nav ---- */
+  nav{position:sticky;top:0;align-self:start;height:100vh;overflow:auto;padding:24px 16px 40px;
+      border-right:1px solid var(--line);background:#fbfcfe}
+  nav h4{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:18px 8px 8px}
+  nav a{display:block;color:#334155;text-decoration:none;font-size:13.5px;padding:6px 10px;border-radius:7px;border-left:2px solid transparent}
+  nav a:hover{background:#eef2ff;color:#3730a3;border-left-color:var(--accent)}
+  /* ---- main ---- */
+  main{padding:36px 44px 80px;min-width:0}
+  section{margin:0 0 44px;scroll-margin-top:20px}
+  h2{font-size:23px;margin:0 0 6px;padding-bottom:8px;border-bottom:2px solid var(--line);display:flex;align-items:center;gap:10px}
+  h2 .n{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:8px;background:var(--accent);color:#fff;font-size:15px;font-weight:700}
+  h3{font-size:17px;margin:24px 0 6px;color:#0f172a}
+  p{margin:.5em 0}
+  .lead{font-size:17px;color:#334155}
+  code{font-family:ui-monospace,Menlo,Consolas,monospace;background:#eef1f7;border:1px solid #e2e8f0;border-radius:5px;padding:.5px 5px;font-size:.86em;overflow-wrap:anywhere}
+  pre{background:var(--code);color:var(--codetext);border-radius:10px;padding:16px 18px;overflow:auto;font-size:13px;line-height:1.55;box-shadow:var(--shadow)}
+  pre .c{color:#7dd3fc}.pre .k{color:#c4b5fd}
+  pre .cm{color:#64748b;font-style:italic}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px 22px;box-shadow:var(--shadow);margin:14px 0}
+  .grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+  .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+  .grid2>*,.grid3>*{min-width:0}
+  pre{max-width:100%;overflow-x:auto}
+  .callout{border-left:4px solid var(--accent);background:#f5f3ff;border-radius:0 10px 10px 0;padding:12px 16px;margin:14px 0}
+  .callout.warn{border-color:var(--warn);background:#fffbeb}
+  .callout.bad{border-color:var(--bad);background:#fef2f2}
+  .callout.good{border-color:var(--pass);background:#f0fdf4}
+  table{border-collapse:collapse;width:100%;font-size:13.5px;margin:12px 0;background:#fff;border-radius:10px;overflow:hidden;box-shadow:var(--shadow)}
+  th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:#f1f5f9;font-size:12px;letter-spacing:.03em;text-transform:uppercase;color:#475569}
+  tr:last-child td{border-bottom:none}
+  .tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;white-space:nowrap}
+  .t-build{background:#dbeafe;color:#1e40af}.t-analysis{background:#dcfce7;color:#166534}
+  .t-present{background:#f3e8ff;color:#6b21a8}.t-config{background:#fef3c7;color:#92400e}
+  .t-legacy{background:#fee2e2;color:#991b1b}.t-pass{background:#dcfce7;color:#166534}
+  .t-flag{background:#ffedd5;color:#9a3412}.t-false{background:#e2e8f0;color:#334155}
+  .metric{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:16px 0}
+  .metric .m{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;text-align:center;box-shadow:var(--shadow)}
+  .metric .m .v{font-size:26px;font-weight:800;color:#0f172a;line-height:1}
+  .metric .m .l{font-size:12px;color:var(--muted);margin-top:6px}
+  .fig{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;box-shadow:var(--shadow);margin:16px 0;overflow:auto}
+  .fig figcaption{font-size:12.5px;color:var(--muted);margin-top:8px;text-align:center}
+  .muted{color:var(--muted)} .mono{font-family:ui-monospace,Menlo,Consolas,monospace;overflow-wrap:anywhere}
+  .pillrow{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+  ul.tight{margin:.4em 0;padding-left:1.25em} ul.tight li{margin:.2em 0}
+  .sep{height:1px;background:var(--line);margin:30px 0}
+  @media(max-width:900px){.wrap{grid-template-columns:1fr}nav{display:none}main{padding:24px}.grid2,.grid3,.metric{grid-template-columns:1fr}}
+  /* ---- extensions for this guide (minimal) ---- */
+  .notrun{opacity:.85;border-style:dashed !important;border-color:#cbd5e1 !important;background:#f8fafc}
+  .stagecard{border-left:4px solid var(--analysis)}
+  .stagehdr{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:4px}
+  .stbadge{display:inline-grid;place-items:center;min-width:78px;height:28px;padding:0 12px;border-radius:8px;
+           background:var(--analysis);color:#fff;font-weight:700;font-size:14px}
+  .stbadge.star{background:#15803d;box-shadow:0 0 0 3px #bbf7d0}
+  .io{display:grid;grid-template-columns:96px minmax(0,1fr);gap:7px 14px;margin:12px 0;font-size:13.5px}
+  .io .k{font-weight:700;color:var(--muted);text-transform:uppercase;font-size:10.5px;letter-spacing:.05em;padding-top:3px}
+  .io .in{color:#166534;font-weight:700}.io .out{color:#6b21a8;font-weight:700}
+  .io code{font-size:.82em}
+  .eq{background:#0f172a;color:#e2e8f0;border-radius:8px;padding:11px 15px;font-family:ui-monospace,Menlo,Consolas,monospace;
+      font-size:13px;line-height:1.7;overflow:auto;margin:9px 0}
+  .eq .r{color:#fca5a5}.eq .g2{color:#86efac}.eq .b2{color:#7dd3fc}.eq .y{color:#fcd34d}.eq .cm{color:#64748b}
+  .step{border-left:3px solid var(--accent);padding:2px 0 2px 16px;margin:16px 0}
+  .step h4{margin:0 0 5px;font-size:14.5px;color:#0f172a}
+  table.toy{font-size:13px}
+  table.toy td.num,table.toy th.num{font-family:ui-monospace,Menlo,Consolas,monospace;text-align:right}
+  table.toy td.ok{color:#166534;font-weight:700}
+  .gloss{display:grid;grid-template-columns:repeat(2,1fr);gap:2px 24px;font-size:13.5px;margin-top:6px}
+  .gloss div{padding:6px 0;border-bottom:1px dashed var(--line)}
+  .gloss b{color:var(--accent)}
+  .legend{display:grid;grid-template-columns:repeat(2,1fr);gap:10px 22px;font-size:13.5px;margin-top:4px}
+  .legend .sw{display:inline-block;width:26px;height:15px;border-radius:4px;vertical-align:middle;margin-right:8px;border:1px solid rgba(0,0,0,.12)}
+  @media(max-width:700px){.io{grid-template-columns:1fr}.gloss,.legend{grid-template-columns:1fr}table{display:block;overflow-x:auto;max-width:100%}pre{overflow-x:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="kicker">Field Guide · How the pipeline runs on a laptop</div>
+    <h1>The Sample Workflow — end to end on the 5% sample</h1>
+    <p><b>Project:</b> <i>optimal-pension-reforms</i> — the welfare value (MVPF / WMVPF) of Brazil's 2015 pension reform, Lei 13.183/2015. Gonzaga &amp; Rios (PUC-Rio), Lemos (MIT Sloan); RA: Arthur.</p>
+    <p>This is the everyday path: one dataset, <b>two commands</b>, on your own machine. Running the confidential full data on the server instead? See the sibling guide <a href="WORKFLOW_GUIDE_SERVER.html">WORKFLOW_GUIDE_SERVER.html</a>.</p>
+    <div class="badges">
+      <span class="badge"><b>2</b> commands, front to back</span>
+      <span class="badge"><b>8</b> analysis stages</span>
+      <span class="badge">928&nbsp;MB panel, <b>pre-built</b></span>
+      <span class="badge pass"><b>A–D build</b> — skipped here</span>
+      <span class="badge"><b>142</b>-page deck out the other end</span>
+    </div>
+  </header>
+
+  <nav>
+    <h4>Contents</h4>
+    <a href="#start">0 · Start here</a>
+    <a href="#jargon">1 · Jargon in 60 seconds</a>
+    <a href="#legend">2 · How to read the diagram</a>
+    <a href="#bigpic">3 · The whole pipeline</a>
+    <a href="#run">4 · The two commands</a>
+    <a href="#stages">5 · Stage by stage</a>
+    <a href="#toyF">6 · Toy example — F / bunching</a>
+    <a href="#toyI">7 · Toy example — I / WMVPF</a>
+    <a href="#vs">8 · Sample vs Server</a>
+  </nav>
+
+  <main>
+  <!-- ============ START ============ -->
+  <section id="start">
+    <h2><span class="n">0</span> Start here — what this is, who it's for</h2>
+    <p class="lead">This guide walks a <b>brand-new RA</b> through exactly what happens when you estimate the paper's headline
+    number on your laptop, using the 5% anonymized sample. No prior knowledge of the codebase is assumed. By the end you will
+    know which files run, in what order, what flows between them, and what the two hardest steps (the F-stage "bunching"
+    counterfactual and the I-stage WMVPF) are actually computing — with worked arithmetic.</p>
+
+    <div class="callout good"><b>The single most important thing to understand first.</b> The heavy data-construction stages
+    <b>A → B → C → D</b> (linking two government datasets, cleaning them, imputing contribution time, building the panel) are
+    <b>NOT run on the sample</b>. Those run only on the confidential server. <b>The sample <i>is</i> the finished product of
+    A–D</b>: someone on the server took the final datasets, drew 5% of the people, replaced their national IDs with fake ones
+    (<code>id_0000001</code>, <code>id_0000002</code>, …), baked in every derived column, and froze it as two flat CSV files.
+    So on your laptop the pipeline starts at stage <b>E</b>, reading those two CSVs directly.</p></div>
+
+    <div class="grid2">
+      <div class="card">
+        <h3 style="margin-top:0">What you feed in</h3>
+        <ul class="tight" style="margin-bottom:0">
+          <li><b>The sample data</b> (external, read-only): <code>dt_sampled_anon.csv</code> (one row per retiree) and
+          <code>panel_sampled_anon.csv</code> (~928&nbsp;MB, one row per retiree-per-quarter).</li>
+          <li><b>One prereq input table</b> that the sample can't regenerate, staged for you under
+          <code>PATHS$prereq_root</code>: <code>F5_table_results.csv</code> only. (<code>G4</code> / <code>H2</code> are no
+          longer external prereqs — they're regenerated in-repo by the G4 / H2 stages this run.) The run <b>stops loudly</b>
+          if F5 is missing.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">What comes out</h3>
+        <ul class="tight" style="margin-bottom:0">
+          <li>Figures + tables for every stage, written <b>inside the repo</b> at <code>analysis/output/</code> (gitignored).</li>
+          <li>The headline welfare numbers from <b>I6</b>: WMVPF of the actual reform, plus the pure-Level (bL) and
+          pure-Slope (bS) decomposition.</li>
+          <li>A compiled <b>142-page LaTeX deck</b>, <code>_main.pdf</code>.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ JARGON ============ -->
+  <section id="jargon">
+    <h2><span class="n">1</span> Jargon in 60 seconds</h2>
+    <p>Six words do most of the work in this project. Skim these once; they're all you need to follow the diagram and the
+    worked examples.</p>
+    <div class="card">
+      <div class="gloss">
+        <div><b>points / points_norm</b> — Brazil's pension eligibility uses "points" = your age + years of contribution.
+        <code>points_norm</code> is your distance from the threshold (<b>85</b> for women, <b>95</b> for men). <code>0</code> =
+        exactly at the cutoff; below <code>0</code> = not yet there; above = past it.</div>
+        <div><b>counterfactual</b> — the "what if the reform never happened" world. We never observe it, so the code
+        <i>constructs</i> it. Everything downstream compares actual vs counterfactual.</div>
+        <div><b>hazard</b> — a conditional exit rate. The <i>claiming hazard</i> = among people who are eligible but haven't
+        claimed yet, the fraction that claims <i>this</i> quarter.</div>
+        <div><b>bunching</b> — people cluster ("bunch") their retirement <i>just past</i> the cutoff, because crossing the
+        threshold removes a benefit penalty. The spike of claims right above <code>points_norm = 0</code> is bunching.</div>
+        <div><b>DD (difference-in-differences)</b> — compares how an outcome moves for a group affected by the reform vs a
+        group that isn't, before vs after. It isolates the reform's effect from background trends.</div>
+        <div><b>PDV (present discounted value)</b> — a stream of future money expressed as one number today, discounting later
+        payments. Every "benefit" here is a <i>lifetime</i> PDV in reais, not a monthly amount.</div>
+        <div><b>MVPF / WMVPF</b> — (Weighted) Marginal Value of Public Funds = <i>welfare delivered to people</i> ÷ <i>net cost
+        to the government</i>. A value in (0,1) means each R$1 spent buys less than R$1 of welfare.</div>
+        <div><b>η (eta) &amp; γ (gamma)</b> — <code>γ=4</code> is society's risk aversion (CRRA); <code>η≈0.828</code> is the
+        welfare weight on a real given to a pension beneficiary vs the average citizen. η is <i>computed</i> from consumption
+        levels, never retyped.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ LEGEND ============ -->
+  <section id="legend">
+    <h2><span class="n">2</span> How to read the diagram</h2>
+    <p>The big picture below is color-coded by <b>layer</b>, and arrows carry the <b>actual file or quantity</b> that passes
+    between boxes.</p>
+    <div class="card">
+      <div class="legend">
+        <div><span class="sw" style="background:#f1f5f9;border-color:#94a3b8"></span><b>External inputs</b> — read-only, live
+        outside the repo (the two sample CSVs).</div>
+        <div><span class="sw" style="background:#fef3c7;border-color:#f59e0b"></span><b>Prereq tables</b> — pre-supplied inputs
+        under <code>prereq_root</code> (F5 only).</div>
+        <div><span class="sw" style="background:#f0fdf4;border-color:#86efac"></span><b>Analysis stages</b> — the 8 scripts that
+        run on the sample (green).</div>
+        <div><span class="sw" style="background:#ede9fe;border-color:#a78bfa"></span><b>Presentation</b> — figure collector +
+        the compiled deck (purple).</div>
+        <div><span class="sw" style="background:#f8fafc;border-color:#cbd5e1;border-style:dashed"></span><b>Dashed / grey box</b>
+        — build stages A–D, <b>not run</b> on the sample.</div>
+        <div><span class="sw" style="background:#0f172a"></span><b>Solid arrow</b> = a real artifact flows along it (labeled);
+        <b>dashed arrow</b> = "run order" or a conceptual link.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ BIG PICTURE ============ -->
+  <section id="bigpic">
+    <h2><span class="n">3</span> The whole pipeline, on one screen</h2>
+    <p>Two inputs feed one command (<code>analysis/analysis_all.R</code>), which runs eight stages in order and writes
+    everything into the repo; a second command (<code>presentation/build_deck.R</code>) turns those figures into the deck.</p>
+    <figure class="fig">
+      <svg viewBox="0 0 980 470" width="100%" style="height:auto" role="img" aria-label="End-to-end sample pipeline: inputs to eight analysis stages to in-repo output to the compiled deck">
+        <defs>
+          <marker id="ah" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#475569"/></marker>
+          <marker id="ahg" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#94a3b8"/></marker>
+        </defs>
+        <style>
+          .lbl{font:700 13px sans-serif} .mn{font:12px ui-monospace,Menlo,Consolas,monospace}
+          .sm{font:11px sans-serif;fill:#64748b} .role{font:10px sans-serif;fill:#166534}
+        </style>
+
+        <!-- ===== INPUTS ROW ===== -->
+        <!-- not-run build -->
+        <rect x="20" y="40" width="150" height="76" rx="10" fill="#f8fafc" stroke="#cbd5e1" stroke-dasharray="5 4"/>
+        <text x="95" y="64" text-anchor="middle" class="lbl" fill="#64748b">BUILD A·B·C·D</text>
+        <text x="95" y="82" text-anchor="middle" class="sm">server only</text>
+        <text x="95" y="103" text-anchor="middle" style="font:700 11px sans-serif" fill="#b91c1c">✗ NOT RUN here</text>
+        <!-- conceptual arrow: build output IS the sample -->
+        <path d="M170,78 H246" stroke="#94a3b8" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#ahg)"/>
+        <text x="208" y="70" text-anchor="middle" class="sm" fill="#7c3aed">frozen as</text>
+        <text x="208" y="103" text-anchor="middle" class="sm">5% of D-output</text>
+
+        <!-- sample data -->
+        <rect x="250" y="40" width="242" height="76" rx="10" fill="#f1f5f9" stroke="#94a3b8"/>
+        <text x="266" y="60" class="lbl" fill="#334155">SAMPLE DATA · external, read-only</text>
+        <text x="266" y="80" class="mn">dt_sampled_anon.csv</text>
+        <text x="266" y="100" class="mn">panel_sampled_anon.csv · 928 MB</text>
+
+        <!-- prereq tables -->
+        <rect x="524" y="40" width="256" height="76" rx="10" fill="#fef3c7" stroke="#f59e0b"/>
+        <text x="540" y="60" class="lbl" fill="#92400e">PREREQ TABLE · prereq_root</text>
+        <text x="540" y="80" class="mn" style="fill:#92400e">F5 (only external input)</text>
+        <text x="540" y="100" class="sm" style="fill:#92400e">G4/H2 regenerated in-repo this run</text>
+
+        <!-- arrows inputs -> engine -->
+        <path d="M371,116 V168" stroke="#475569" stroke-width="1.8" marker-end="url(#ah)"/>
+        <text x="379" y="138" class="mn" style="font-size:10.5px">panel_sampled_anon.csv</text>
+        <text x="379" y="152" class="mn" style="font-size:10.5px">+ dt_sampled_anon.csv</text>
+        <path d="M652,116 V168" stroke="#475569" stroke-width="1.8" marker-end="url(#ah)"/>
+        <text x="660" y="138" class="mn" style="font-size:10.5px">F5 table → gabriel/pure</text>
+        <text x="660" y="152" class="mn" style="font-size:10.5px">G4/H2: in-repo, not prereq</text>
+
+        <!-- ===== ENGINE ===== -->
+        <rect x="24" y="170" width="932" height="182" rx="14" fill="#f0fdf4" stroke="#86efac"/>
+        <path d="M24,184 h932" stroke="none"/>
+        <rect x="24" y="170" width="932" height="30" rx="14" fill="#16a34a"/>
+        <rect x="24" y="186" width="932" height="14" fill="#16a34a"/>
+        <text x="42" y="190" class="lbl" fill="#fff">Rscript analysis/analysis_all.R  —  8 stages in order · every output → in-repo analysis/output/</text>
+
+        <!-- 8 chips -->
+        <!-- x: 44,158,272,386,500,614,728,842  w=100 h=56 y=222 -->
+        <g>
+          <rect x="44"  y="222" width="100" height="56" rx="9" fill="#fff" stroke="#86efac"/>
+          <text x="94"  y="248" text-anchor="middle" class="mn" style="font-weight:700">E4</text>
+          <text x="94"  y="266" text-anchor="middle" class="role">figures</text>
+          <rect x="158" y="222" width="100" height="56" rx="9" fill="#fff" stroke="#86efac"/>
+          <text x="208" y="245" text-anchor="middle" class="mn" style="font-weight:700;font-size:11px">gabriel</text>
+          <text x="208" y="266" text-anchor="middle" class="role">Nᵃ, Nᶜ counts</text>
+          <rect x="272" y="222" width="100" height="56" rx="9" fill="#fff" stroke="#86efac"/>
+          <text x="322" y="245" text-anchor="middle" class="mn" style="font-weight:700;font-size:11px">pure</text>
+          <text x="322" y="266" text-anchor="middle" class="role">L / S schedules</text>
+          <rect x="386" y="222" width="100" height="56" rx="9" fill="#fff" stroke="#86efac"/>
+          <text x="436" y="248" text-anchor="middle" class="mn" style="font-weight:700">G4</text>
+          <text x="436" y="266" text-anchor="middle" class="role">avg benefits</text>
+          <rect x="500" y="222" width="100" height="56" rx="9" fill="#fff" stroke="#86efac"/>
+          <text x="550" y="248" text-anchor="middle" class="mn" style="font-weight:700">G5</text>
+          <text x="550" y="266" text-anchor="middle" class="role">bL / bS benefits</text>
+          <rect x="614" y="222" width="100" height="56" rx="9" fill="#fff" stroke="#86efac"/>
+          <text x="664" y="248" text-anchor="middle" class="mn" style="font-weight:700">H2</text>
+          <text x="664" y="266" text-anchor="middle" class="role">tax elasticity</text>
+          <rect x="728" y="222" width="100" height="56" rx="9" fill="#fff" stroke="#86efac"/>
+          <text x="778" y="248" text-anchor="middle" class="mn" style="font-weight:700">I4</text>
+          <text x="778" y="266" text-anchor="middle" class="role">WMVPF (actual)</text>
+          <rect x="842" y="222" width="100" height="56" rx="9" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
+          <text x="892" y="248" text-anchor="middle" class="mn" style="font-weight:700;fill:#15803d">★ I6</text>
+          <text x="892" y="266" text-anchor="middle" class="role" style="font-weight:700">WMVPF + L/S</text>
+        </g>
+        <!-- run-order arrows -->
+        <g stroke="#94a3b8" stroke-width="1.5">
+          <path d="M144,250 H156" marker-end="url(#ahg)"/>
+          <path d="M258,250 H270" marker-end="url(#ahg)"/>
+          <path d="M372,250 H384" marker-end="url(#ahg)"/>
+          <path d="M486,250 H498" marker-end="url(#ahg)"/>
+          <path d="M600,250 H612" marker-end="url(#ahg)"/>
+          <path d="M714,250 H726" marker-end="url(#ahg)"/>
+          <path d="M828,250 H840" marker-end="url(#ahg)"/>
+        </g>
+        <text x="44" y="252" class="sm" style="font-size:9.5px;fill:#86efac">▸ run order ▸</text>
+        <!-- handoff notes -->
+        <text x="42" y="304" style="font:11px sans-serif;fill:#166534">Real data handoffs: gabriel → pure <tspan class="mn" style="font-size:10px;fill:#166534">(claim counts)</tspan> · pure → G5/I6 <tspan class="mn" style="font-size:10px;fill:#166534">(L/S schedules)</tspan> · G4 · H2 · G5 → I6 <tspan class="mn" style="font-size:10px;fill:#166534">(_sample tables)</tspan></text>
+        <text x="42" y="326" class="sm">Not run on the sample: H3 (full-data only) · I7 / I7b (manual diagnostics)</text>
+
+        <!-- engine -> output -->
+        <path d="M300,352 V386" stroke="#475569" stroke-width="1.8" marker-end="url(#ah)"/>
+        <text x="308" y="373" class="mn" style="font-size:10.5px">WMVPF · figures · tables</text>
+
+        <!-- ===== OUTPUT ===== -->
+        <rect x="150" y="388" width="300" height="54" rx="10" fill="#f8fafc" stroke="#cbd5e1"/>
+        <text x="168" y="410" class="lbl" fill="#334155">analysis/output/ · in-repo, gitignored</text>
+        <text x="168" y="429" class="mn" style="font-size:11px">I6: WMVPF · bL · bS · figures · tables</text>
+
+        <!-- collector -->
+        <rect x="522" y="388" width="168" height="54" rx="10" fill="#faf5ff" stroke="#d8b4fe"/>
+        <text x="537" y="410" class="lbl" fill="#6b21a8">build_deck.R</text>
+        <text x="537" y="429" class="sm" style="fill:#6b21a8">collector.py · manifest.csv</text>
+        <!-- deck -->
+        <rect x="762" y="384" width="196" height="60" rx="10" fill="#ede9fe" stroke="#a78bfa"/>
+        <text x="860" y="410" text-anchor="middle" class="lbl" fill="#5b21b6">_main.pdf</text>
+        <text x="860" y="428" text-anchor="middle" class="sm" style="fill:#6b21a8">142-page deck</text>
+
+        <path d="M450,415 H520" stroke="#475569" stroke-width="1.8" marker-end="url(#ah)"/>
+        <text x="485" y="408" text-anchor="middle" class="mn" style="font-size:10.5px">figures</text>
+        <path d="M690,415 H760" stroke="#475569" stroke-width="1.8" marker-end="url(#ah)"/>
+        <text x="725" y="408" text-anchor="middle" class="mn" style="font-size:10.5px">deck</text>
+      </svg>
+      <figcaption>Left-to-right, top-to-bottom: two external inputs → one command runs 8 green stages → everything lands
+      in-repo → a second command routes the figures (<code>collector.py</code>) and compiles the deck. The grey dashed box
+      (A–D) never runs here — the sample already <i>is</i> its output.</figcaption>
+    </figure>
+    <div class="callout"><b>Why the split matters.</b> The line between "inputs live outside the repo, outputs live inside the
+    repo" is the whole mental model. You never edit or rebuild the inputs; you only ever regenerate the in-repo outputs. That's
+    why <code>analysis_all.R</code> wipes only its temp folder and <b>never</b> the output folder or the prereq folder — deleting
+    either would destroy files a later stage needs.</div>
+  </section>
+
+  <!-- ============ RUN ============ -->
+  <section id="run">
+    <h2><span class="n">4</span> The two commands</h2>
+    <p>From a terminal at the repo root. No <code>setwd</code>, no path editing — <code>config/paths.R</code> finds the project
+    root via a <code>.here</code> sentinel and auto-detects <code>DATA_MODE=sample</code> because the sample root exists.</p>
+    <pre><span class="cm"># 1 · run the analysis: panel + prereq tables → figures, tables, WMVPF</span>
+Rscript analysis/analysis_all.R
+
+<span class="cm"># 2 · collect the figures and compile the English deck (_main.pdf)</span>
+Rscript presentation/build_deck.R</pre>
+    <p>Prefer R / RStudio? Open R at the repo root and <code>source("RUN.R")</code> — it's a signpost that prints the three
+    masters — then <code>source(here::here("analysis","analysis_all.R"))</code> and the deck master.</p>
+    <div class="grid2">
+      <div class="card">
+        <h3 style="margin-top:0">What command 1 does, in order</h3>
+        <p class="muted" style="margin-top:0">It first checks the one prereq input (F5) exists (and <b>stops loudly</b> if not),
+        then runs the eight stages:</p>
+        <div class="pillrow">
+          <span class="tag t-analysis">E4</span><span class="tag t-analysis">gabriel</span><span class="tag t-analysis">pure</span>
+          <span class="tag t-analysis">G4</span><span class="tag t-analysis">G5</span><span class="tag t-analysis">H2</span>
+          <span class="tag t-analysis">I4</span><span class="tag t-analysis">I6</span>
+        </div>
+        <p class="muted" style="margin-bottom:0">The headline numbers come out of the last one, <b>I6</b>.</p>
+      </div>
+      <div class="card notrun">
+        <h3 style="margin-top:0;color:#64748b">What is <i>not</i> run</h3>
+        <p class="muted" style="margin-top:0"><code>build/build_all.R</code> deliberately <code>stop()</code>s in sample mode —
+        the panel is an <b>input you already have</b>, not something to rebuild. So <b>A4 → B4 → C6 → D4</b> and their whole
+        lineage never execute here. Also skipped: <b>H3</b> (full-data only, no sample branch) and <b>I7 / I7b</b> (manual
+        diagnostics, not on the master).</p>
+      </div>
+    </div>
+    <div class="callout warn"><b>The <code>i4-g4h2</code> quirk — now FIXED.</b> Previously <b>I4</b> read the <b>full-data</b>
+    (no-suffix) <code>G4_table_results.csv</code> / <code>H2_table_results.csv</code> as prereq inputs, while <b>I6</b> read the
+    <code>_sample</code>-suffixed versions produced this run. In sample mode that mixed sample claim-counts with full-data
+    benefits/taxes. <b>I4 now reads the suffix-aware <code>_sample</code> G4/H2 from the in-repo output — exactly like I6</b>
+    (<code>file.path(PATHS$output_G, paste0('G4_table_results', SUFFIX, '.csv'))</code>), so only <b>F5</b> stays external. This
+    shifted I4's sample <code>WMVPF_actual</code> from <b>0.2126 → 0.2106</b> (still in (0,1)); <b>I6 is unchanged</b> (0.2126).
+    It's an econometric change <b>pending professor review</b>.</div>
+  </section>
+
+  <!-- ============ STAGES ============ -->
+  <section id="stages">
+    <h2><span class="n">5</span> Stage by stage</h2>
+    <p>One card per stage: the script, what flows in, what it does in plain words, what flows out, and — where relevant — an
+    <b>OBSCURE PART</b> box explaining the one line a newcomer will stare at.</p>
+
+    <!-- A-D not run -->
+    <div class="card notrun">
+      <div class="stagehdr"><span class="stbadge" style="background:#94a3b8">A–D</span>
+        <span class="mono">build/code/ · A4 B4 C6 D4 (+ lineage)</span>
+        <span class="tag t-false">NOT RUN on the sample</span></div>
+      <p style="margin:.4em 0 0">On the server these link SUIBE (the pension-claim registry) to RAIS (the employment census),
+      restrict to eligible workers, impute exact contribution time, and build the quarterly panel. On the sample there is
+      nothing to do: the two CSVs you feed in <b>are</b> the frozen 5% slice of those outputs, with every derived column
+      (points, distances to the cutoff, benefits, taxes, hazards) already baked in. If you're curious how A–D work, that's the
+      <a href="WORKFLOW_GUIDE_SERVER.html">server guide</a>.</p>
+    </div>
+
+    <!-- E4 -->
+    <div class="card stagecard">
+      <div class="stagehdr"><span class="stbadge">E4</span>
+        <span class="mono">E4_plots_claiming_distributions.R</span></div>
+      <div class="io">
+        <div class="k in">Inputs →</div><div><code>dt_sampled_anon.csv</code>, <code>panel_sampled_anon.csv</code> (read directly from the sample <code>data/</code> folder).</div>
+        <div class="k">Does</div><div>Draws diagnostic pictures of <b>when</b> and at <b>what point-distance</b> people claim their pensions — the raw claiming distributions that motivate everything after it. No estimation, just plots.</div>
+        <div class="k out">Outputs →</div><div>Claiming-distribution figures → <code>analysis/output/E/</code>. A few feed the deck.</div>
+      </div>
+    </div>
+
+    <!-- gabriel -->
+    <div class="card stagecard">
+      <div class="stagehdr"><span class="stbadge">F · gabriel</span>
+        <span class="mono">new_counterfactual_claiming3_gabriel.R</span></div>
+      <div class="io">
+        <div class="k in">Inputs →</div><div><code>F5_table_results.csv</code> (prereq — holds the empirical claiming hazard <code>ch</code> and the DD-estimated reform effect on it per cell), plus the sample panel &amp; cross-section.</div>
+        <div class="k">Does</div><div>Builds the <b>no-reform world</b> quarter by quarter. It counts actual claims per cell <code>(p,t)</code> = (points-from-cutoff, quarters-since-reform), strips the reform's boost out of the hazard (<code>ch_c = ch·(1−effect)</code>), and walks each cohort forward to get counterfactual claims <b>Nᶜ</b> alongside actual claims <b>Nᵃ</b>.</div>
+        <div class="k out">Outputs →</div><div><code>new_counterfactual_claim_counts_sample.csv</code> (→ G5, I4, I6) and the handoff file <code>claims_actual_counterfactual_t_p_sample.csv</code> (→ pure), plus PDFs. All under <code>analysis/output/F/</code> and <code>analysis/temp/</code>.</div>
+      </div>
+      <div class="callout warn" style="margin-bottom:0"><b>OBSCURE PART — the "elig_c" recursion.</b> The counterfactual isn't just
+      "apply the counterfactual hazard to the observed pool." Because the reform made people claim <i>early</i>, in the no-reform
+      world <b>more people are still waiting</b> in later quarters. The recursion carries that surplus forward — the extra
+      counterfactual pool each quarter equals the running sum of (actual − counterfactual claims) so far. Cohorts march along
+      diagonals (<code>cohort = p − t/2</code>) because points accrue <b>0.5 per quarter</b>.</div>
+    </div>
+
+    <!-- pure -->
+    <div class="card stagecard">
+      <div class="stagehdr"><span class="stbadge star">F · pure</span>
+        <span class="mono">new_counterfactual_claiming3_pure.R</span> <span class="tag t-analysis">canonical F</span></div>
+      <div class="io">
+        <div class="k in">Inputs →</div><div><code>claims_actual_counterfactual_t_p_sample.csv</code> (gabriel's handoff — the <code>(p, t, Nᵃ, Nᶜ)</code> table).</div>
+        <div class="k">Does</div><div>Splits the reform's footprint into two <b>one-lever-at-a-time</b> hypothetical reforms: pure <b>LEVEL</b> (bL) and pure <b>SLOPE</b> (bS). It finds the "postponers" (cells where Nᶜ&gt;Nᵃ below the cutoff), routes their mass to where they'll re-emerge just above the cutoff (bunching), and builds two mirror-image claim schedules <code>claims_L</code> and <code>claims_S</code>.</div>
+        <div class="k out">Outputs →</div><div><code>new_counterfactual_claim_counts_with_pure_schedules_3_sample.csv</code> (→ G5, I6) + per-quarter PDFs → <code>analysis/output/F/</code> and <code>analysis/output/new_counter_claiming/</code>.</div>
+      </div>
+      <div class="callout warn" style="margin-bottom:0"><b>OBSCURE PART — "proportional mixing."</b> The postponers who bunch are
+      spread across the window <code>p ∈ [0,4)</code> in the <b>same proportions</b> as observed actual claimers (a share profile
+      <code>g</code> that sums to 1). Because <code>g</code> sums to 1, the bunching mass exactly equals the arriving mass — the
+      decomposition <b>conserves people</b>: in every cell <code>Nᴸ + Nˢ = Nᵃ + Nᶜ</code>. Worked out step-by-step in
+      <a href="#toyF">§6</a>.</div>
+    </div>
+
+    <!-- G4 -->
+    <div class="card stagecard">
+      <div class="stagehdr"><span class="stbadge">G4</span>
+        <span class="mono">G4_effect_average_benefit_freq.R</span></div>
+      <div class="io">
+        <div class="k in">Inputs →</div><div><code>dt_sampled_anon.csv</code> (life-expectancy column already baked in).</div>
+        <div class="k">Does</div><div>Computes the <b>average lifetime benefit</b> (as a PDV) per cell and runs an event-study DD to separate the real formula change from a <i>composition</i> shift (different people choosing to claim after the reform). It emits both the raw cell mean and the DD estimate side by side.</div>
+        <div class="k out">Outputs →</div><div><code>G4_table_results_sample.csv</code> (→ <b>I6</b>) + event-study PDFs → <code>analysis/output/G/</code>.</div>
+      </div>
+      <div class="callout" style="margin-bottom:0"><b>OBSCURE PART — the "selection correction."</b> Downstream stages compute
+      <code>delta_ben = avg_benefits_pv − point_estimate</code>: subtract the DD estimate of the composition shift to leave the
+      benefit a <i>comparable</i> claimer would draw. The <code>×3</code> in the PDV is "monthly → quarterly"; the annuity factor
+      discounts the benefit over the retiree's remaining quarters of life. The far-below group <code>[−15,−7]</code> is the
+      control (too far from the cutoff to re-time).</div>
+    </div>
+
+    <!-- G5 -->
+    <div class="card stagecard">
+      <div class="stagehdr"><span class="stbadge">G5</span>
+        <span class="mono">G5_effect_average_benefit_freq_bL_and_bS.R</span></div>
+      <div class="io">
+        <div class="k in">Inputs →</div><div><code>dt_sampled_anon.csv</code> + pure's <code>...with_pure_schedules_3_sample.csv</code> + economic constants.</div>
+        <div class="k">Does</div><div>A superset of G4: repeats its DD, then builds benefit schedules for the two <b>pure reforms</b> (bL raises the replacement-rate level; bS flattens its slope), runs a second-round DD on each, and splits the effect into postponement vs anticipation pieces.</div>
+        <div class="k out">Outputs →</div><div><code>G5_table_results_selection_sample.csv</code> and <code>G5_table_results_contrafactual_reforms_and_benefits_freq_sample.csv</code> (→ <b>I6</b>) → <code>analysis/output/G/</code>.</div>
+      </div>
+      <div class="callout warn" style="margin-bottom:0"><b>OBSCURE PART — a flagged assumption.</b> The bL/bS benefit formulas divide
+      by the pre-reform replacement rate, which the code's own comment calls a <i>"potentially problematic assumption — verify
+      against the canonical deck appendix."</i> Treat it as an approximation, not an identity. (In the reverted strategy, I6 uses
+      G5's <i>benefit</i> columns and the claim counts; the old frequency-space <code>Beta</code>/<code>claims_L/S</code> columns
+      are dead.)</div>
+    </div>
+
+    <!-- H2 -->
+    <div class="card stagecard">
+      <div class="stagehdr"><span class="stbadge">H2</span>
+        <span class="mono">H2_policy_elasticity_MW.R</span></div>
+      <div class="io">
+        <div class="k in">Inputs →</div><div><code>dt_sampled_anon.csv</code> + <code>panel_sampled_anon.csv</code>.</div>
+        <div class="k">Does</div><div>The <b>fiscal side</b>: when the reform changes retirement timing, how much does government contribution (tax) revenue move? It compares workers more vs less exposed to the <i>fator previdenciário</i> penalty, reweights them to be comparable (IPW), and runs a DD on the <i>year-over-year change</i> in taxes.</div>
+        <div class="k out">Outputs →</div><div><code>H2_table_results_sample.csv</code> (→ <b>I6</b>) + figures → <code>analysis/output/H/</code>.</div>
+      </div>
+      <div class="callout" style="margin-bottom:0"><b>OBSCURE PART — treatment is about the <i>fator</i>, not income.</b> The
+      <code>&lt;1.25MW</code> group isn't "low earners" in a welfare sense — it's the group whose benefit was <i>least</i> reduced
+      by the fator, so <i>least</i> incentivized to re-time. Getting that backwards flips the sign. IPW (inverse-probability
+      weighting) is doing real identification work, not decoration: it forces the two groups to overlap on observables. Note the
+      DD reference period here is <code>−1</code>, vs <code>−2</code> in G4/G5.</div>
+    </div>
+
+    <!-- I4 -->
+    <div class="card stagecard">
+      <div class="stagehdr"><span class="stbadge">I4</span>
+        <span class="mono">I4_wmvpf_no_pure_reforms_freq.R</span></div>
+      <div class="io">
+        <div class="k in">Inputs →</div><div>Sample panel + cross-section; F counts <code>new_counterfactual_claim_counts_sample.csv</code> (with suffix); the <code>_sample</code> <code>G4_table_results_sample.csv</code> and <code>H2_table_results_sample.csv</code> produced this run in-repo (suffix-aware, exactly like I6).</div>
+        <div class="k">Does</div><div>Builds three "worlds" of cumulative lifetime benefits — <b>counterfactual</b> <code>b(x)</code>, <b>mechanical</b> <code>b'(x)</code>, <b>actual</b> <code>b'(x')</code> — then divides welfare by net cost to get the WMVPF of the <i>actual</i> 2015 reform.</div>
+        <div class="k out">Outputs →</div><div><code>I4_table_wmvpf_sample.csv</code> + <code>I4_plot_results_sample.pdf</code> → <code>analysis/output/I/</code>.</div>
+      </div>
+      <div class="callout" style="margin-bottom:0"><b>OBSCURE PART — two data routes for the same kind of number.</b> <code>b'(x')</code>
+      is summed over <i>real individuals</i> in the panel; <code>b(x)</code>/<code>b'(x)</code> can't be (those people/timings don't
+      exist), so they're rebuilt from <i>cell averages × counterfactual head-counts</i>. Also: the H2 tax term is computed but
+      <b>commented out</b> of the cost line, so the current WMVPF is benefit-side only. The full mechanics are in <a href="#toyI">§7</a>.</div>
+    </div>
+
+    <!-- I6 -->
+    <div class="card stagecard" style="border-left-color:#15803d;border-left-width:5px">
+      <div class="stagehdr"><span class="stbadge star">★ I6</span>
+        <span class="mono">I6_wmvpf_with_pure_reforms_freq.R</span> <span class="tag t-analysis">headline</span></div>
+      <div class="io">
+        <div class="k in">Inputs →</div><div>Everything I4 uses — including the same <b>suffix-aware</b> <code>_sample</code> G4/H2 produced this run (now shared with I4) — <b>plus</b> <code>G5_table_results_contrafactual_reforms_and_benefits_freq_sample.csv</code>.</div>
+        <div class="k">Does</div><div><b>Part 1</b> reproduces I4's actual-reform WMVPF with one remaining fix (extends the horizon to t=13); the suffix-aware table reading is now shared with I4, so it's no longer an I6-only fix. <b>Part 2</b> answers the policy question: of the reform's two levers, which delivers more welfare per real? It simulates the pure-<b>Level</b> and pure-<b>Slope</b> reforms in expenditure space and computes a WMVPF for each.</div>
+        <div class="k out">Outputs →</div><div><code>I6_wmvpf_actual_sample.csv</code>, <code>I6_wmvpf_pure_L_sample.csv</code>, <code>I6_wmvpf_pure_S_sample.csv</code>, <code>I6_summary_sample.csv</code> + plots → <code>analysis/output/I/</code>.</div>
+      </div>
+      <div class="callout warn"><b>OBSCURE PART — the bL vs bS sign seam.</b> Both pure reforms share one reallocation box that
+      moves postponers' expenditure from origin cells to bunching cells (scaled by the claiming probability <code>g_pta</code>,
+      with the "2 quarters buys 1 point" geometry). The <i>only</i> difference is assembly: pure-Level adds it onto the
+      counterfactual (<code>Eᴸ = Eᶜ + Eᴾ</code>); pure-Slope subtracts it from the actual (<code>Eˢ = Eᵃ − Eᴾ</code>). The code
+      itself says "verify carefully" here.</div>
+      <div class="callout good" style="margin-bottom:0"><b>The headline conclusions (full data).</b> All three WMVPFs land in
+      (0,1); <b>WMVPF_bS &gt; WMVPF_bL</b> — the slope lever is more welfare-efficient than the level lever; so the
+      budget-neutral improving move is <b>raise bS, lower bL</b>. The actual 2015 reform went the <i>opposite</i> way (raised
+      level, cut slope). I6 prints this conclusion explicitly.</div>
+    </div>
+
+    <div class="callout bad"><b>Don't panic at the sample's pure numbers.</b> On the 5% sample, I6's <i>actual</i> WMVPF is a
+    healthy ≈ <code>0.21</code> (in (0,1) ✓), but the <i>pure</i> decompositions come out <b>outside</b> (0,1) and even
+    <b>reversed</b> (bL ≈ 1.56, bS ≈ −2.43). That is expected <b>sampling noise</b> on the small pure-decomposition cells — the
+    full-data canonical values are ≈ 0.68 / 0.71 and satisfy bS &gt; bL. The 5% sample is a <b>pipeline-validation harness, not a
+    replication</b>; it also runs a provisional <code>_multby20</code> ×20 blow-up just to eyeball the sample at population scale.
+    None of this is a bug.</div>
+  </section>
+
+  <!-- ============ TOY F ============ -->
+  <section id="toyF">
+    <h2><span class="n">6</span> Toy example — the F-stage bunching counterfactual, with real arithmetic</h2>
+    <p>This is the single hardest idea in the F stage. Made-up round numbers make it concrete. We follow one <b>arrival cohort</b>:
+    everyone whose points cross the cutoff (<code>p = 0</code>) in quarter <code>t = 4</code>. Since points accrue 0.5 per quarter,
+    moving <code>p</code> points to the cutoff takes <code>2p</code> quarters, so this cohort's cells satisfy <code>t = 4 + 2p</code>.</p>
+
+    <div class="step">
+      <h4>Step 1 · Find the postponers (below the cutoff, <code>p &lt; 0</code>)</h4>
+      <p style="margin:.3em 0">Where the counterfactual exceeds the actual (<code>Nᶜ &gt; Nᵃ</code>), the gap is people the reform
+      induced to <b>wait</b>. Meet two of them: <b>id_0000001</b> sits at <code>p = −2</code> in quarter <code>t = 0</code>;
+      <b>id_0000002</b> sits at <code>p = −1</code> in quarter <code>t = 2</code>. Their cells:</p>
+      <table class="toy">
+        <thead><tr><th>cell (p, t)</th><th>who</th><th class="num">Nᵃ actual</th><th class="num">Nᶜ counterfactual</th><th class="num">postponers = max(Nᶜ−Nᵃ, 0)</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">(−2, 0)</td><td>id_0000001's cell</td><td class="num">100</td><td class="num">130</td><td class="num">30</td></tr>
+          <tr><td class="mono">(−1, 2)</td><td>id_0000002's cell</td><td class="num">120</td><td class="num">140</td><td class="num">20</td></tr>
+        </tbody>
+      </table>
+      <p style="margin:.3em 0"><b>Postponement Arrivals</b> for this cohort: <code>PA = 30 + 20 = 50</code> people who will reach the
+      cutoff in <code>t = 4</code> and bunch just past it.</p>
+    </div>
+
+    <div class="step">
+      <h4>Step 2 · The bunching band above the cutoff (<code>0 ≤ p &lt; 4</code>), same cohort</h4>
+      <p style="margin:.3em 0">These are the cells where the postponers re-emerge. We read the <b>actual</b> claimers there to learn
+      the shape of the spike:</p>
+      <table class="toy">
+        <thead><tr><th>cell (p, t)</th><th class="num">Nᵃ actual</th><th class="num">Nᶜ counterfactual</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">(0, 4)</td><td class="num">200</td><td class="num">180</td></tr>
+          <tr><td class="mono">(1, 6)</td><td class="num">100</td><td class="num">90</td></tr>
+          <tr><td class="mono">(2, 8)</td><td class="num">100</td><td class="num">95</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="step">
+      <h4>Step 3 · The share profile <code>g</code> (proportional mixing)</h4>
+      <p style="margin:.3em 0">Assume postponers bunch across <code>p</code> in the <b>same proportions</b> as the actual claimers.
+      Denominator = <code>200 + 100 + 100 = 400</code>:</p>
+      <div class="eq"><span class="cm"># g must sum to 1 across the window</span>
+g₀ = 200/400 = <span class="g2">0.50</span>   g₁ = 100/400 = <span class="g2">0.25</span>   g₂ = 100/400 = <span class="g2">0.25</span>   → <span class="y">Σ g = 1.00 ✓</span></div>
+    </div>
+
+    <div class="step">
+      <h4>Step 4 · Spread the postponers into bunching mass <code>PB = g · PA</code></h4>
+      <div class="eq">PB₀ = 0.50 × 50 = <span class="g2">25</span>    PB₁ = 0.25 × 50 = <span class="g2">12.5</span>    PB₂ = 0.25 × 50 = <span class="g2">12.5</span>    → <span class="y">Σ PB = 50 = PA ✓ (mass conserved)</span></div>
+    </div>
+
+    <div class="step">
+      <h4>Step 5 · The two pure-reform schedules</h4>
+      <p style="margin:.3em 0">Rule: below the cutoff, LEVEL keeps <b>actual</b> and SLOPE keeps <b>counterfactual</b>; inside the
+      band, LEVEL lays the bunchers <i>onto</i> the counterfactual (<code>Nᶜ + PB</code>) while SLOPE strips them <i>out</i> of the
+      actual (<code>Nᵃ − PB</code>). The two are mirror images and always sum to <code>Nᵃ + Nᶜ</code>.</p>
+      <table class="toy">
+        <thead><tr><th>cell</th><th>branch</th><th class="num">claims_L (Nᴸ, level/bL)</th><th class="num">claims_S (Nˢ, slope/bS)</th><th class="num">Nᴸ + Nˢ</th><th class="num">= Nᵃ + Nᶜ</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">(−2, 0)</td><td><code>p&lt;0</code></td><td class="num">100</td><td class="num">130</td><td class="num">230</td><td class="num ok">230 ✓</td></tr>
+          <tr><td class="mono">(−1, 2)</td><td><code>p&lt;0</code></td><td class="num">120</td><td class="num">140</td><td class="num">260</td><td class="num ok">260 ✓</td></tr>
+          <tr><td class="mono">(0, 4)</td><td><code>0≤p&lt;4</code></td><td class="num">180 + 25 = 205</td><td class="num">200 − 25 = 175</td><td class="num">380</td><td class="num ok">380 ✓</td></tr>
+          <tr><td class="mono">(1, 6)</td><td><code>0≤p&lt;4</code></td><td class="num">90 + 12.5 = 102.5</td><td class="num">100 − 12.5 = 87.5</td><td class="num">190</td><td class="num ok">190 ✓</td></tr>
+          <tr><td class="mono">(2, 8)</td><td><code>0≤p&lt;4</code></td><td class="num">95 + 12.5 = 107.5</td><td class="num">100 − 12.5 = 87.5</td><td class="num">195</td><td class="num ok">195 ✓</td></tr>
+        </tbody>
+      </table>
+      <p style="margin:.4em 0 0"><b>Reading it:</b> the 50 postponers (id_0000001's 30 + id_0000002's 20) re-appear as 50 units of
+      bunching, split 25 / 12.5 / 12.5. The <b>LEVEL</b> world adds that spike onto the counterfactual and keeps actual behavior
+      below the cutoff; the <b>SLOPE</b> world removes the same spike from the actual and reverts to the counterfactual below.
+      That mirror is exactly what lets I6 value the two levers separately.</p>
+    </div>
+  </section>
+
+  <!-- ============ TOY I ============ -->
+  <section id="toyI">
+    <h2><span class="n">7</span> Toy example — the I-stage WMVPF, with real arithmetic</h2>
+    <p>Now the headline number. First the concept, then the exact arithmetic. Everything is a <b>cumulative</b> lifetime PDV in
+    R$ (here, millions), summed quarter by quarter after the reform.</p>
+
+    <div class="card">
+      <h3 style="margin-top:0">The three worlds (why there are three)</h3>
+      <table class="toy">
+        <thead><tr><th>symbol</th><th>name</th><th>benefit formula</th><th>claiming choices</th><th>plain words</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">b(x)</td><td>counterfactual</td><td>old</td><td>old</td><td>what would have been paid with no reform</td></tr>
+          <tr><td class="mono">b'(x)</td><td>mechanical</td><td><b>new</b></td><td>old</td><td>new formula, same people claiming at the same times (behavior frozen)</td></tr>
+          <tr><td class="mono">b'(x')</td><td>actual</td><td><b>new</b></td><td><b>new</b></td><td>what was actually paid — new formula AND people re-timing</td></tr>
+        </tbody>
+      </table>
+      <p style="margin:.5em 0 0"><b>Two differences carry all the economics:</b> <code>b'(x) − b(x)</code> = <b>Mechanical Effect</b>
+      (pure formula change, the part beneficiaries value); <code>b'(x') − b'(x)</code> = <b>Fiscal Externality</b> (extra cost from
+      behavior change alone). Their sum is the <b>Total (net) Cost</b>.</p>
+      <p style="margin:.5em 0 0 0"><span class="muted">Grounding <code>b'(x')</code> in individuals:</span> at <code>t=0</code> it is
+      literally the sum of every post-reform claimant's PDV in the panel — e.g. <b>id_0000001</b> contributes 60 and
+      <b>id_0000002</b> contributes 40 → they add 100 to <code>b'(x')(t=0)</code>. The other two worlds can't be summed from real
+      people (those choices/timings never happened), so they're rebuilt from cell-averages × counterfactual counts. That's the
+      "two data routes" from I4's card.</p>
+    </div>
+
+    <p>Constants used, exactly as in the code: welfare weight <b>ETA = 0.828</b> (γ=4); cost interest <code>1.005³ = 1.015075</code>;
+    welfare discount <code>0.995³ = 0.985075</code>. The made-up cumulative inputs:</p>
+    <table class="toy" style="max-width:520px">
+      <thead><tr><th>t</th><th class="num">b(x)</th><th class="num">b'(x)</th><th class="num">b'(x')</th></tr></thead>
+      <tbody>
+        <tr><td>0</td><td class="num">90</td><td class="num">96</td><td class="num">100</td></tr>
+        <tr><td>1</td><td class="num">200</td><td class="num">212</td><td class="num">220</td></tr>
+      </tbody>
+    </table>
+
+    <div class="step">
+      <h4>Step 1 · net_cost = (b'(x') − b(x)) / 1.015075<sup>t</sup></h4>
+      <div class="eq">t=0:  (100 − 90) / 1        = <span class="g2">10.00</span>
+t=1:  (220 − 200) / 1.015075 = 20 / 1.015075 = <span class="g2">19.70</span>
+                              <span class="y">Σ net_cost = 29.70</span></div>
+    </div>
+
+    <div class="step">
+      <h4>Step 2 · mechanical gain = b'(x) − b(x)  (what beneficiaries value)</h4>
+      <div class="eq">t=0:  96 − 90  = <span class="b2">6</span>       t=1:  212 − 200 = <span class="b2">12</span></div>
+    </div>
+
+    <div class="step">
+      <h4>Step 3 · welfare = 0.985075<sup>t</sup> · ETA · (b'(x) − b(x))</h4>
+      <div class="eq">t=0:  1        × 0.828 × 6  = <span class="g2">4.968</span>
+t=1:  0.985075 × 0.828 × 12 = <span class="g2">9.788</span>
+                            <span class="y">Σ welfare = 14.756</span></div>
+    </div>
+
+    <div class="step">
+      <h4>Step 4 · WMVPF = Σ welfare / Σ net_cost</h4>
+      <div class="eq"><span class="y">WMVPF = 14.756 / 29.70 = 0.497</span>   →   <span class="g2">0.497 ∈ (0,1) ✓</span></div>
+      <p style="margin:.4em 0 0"><b>Reading it:</b> this reform delivers about <b>50 cents of welfare per real</b> of net fiscal
+      cost. It's below 1 for two reasons: <b>ETA &lt; 1</b> (a real to beneficiaries is worth 0.828 of a real to the average
+      citizen), and the <b>fiscal externality</b> — the gap between <code>b'(x')</code> (100 / 220) and <code>b'(x)</code>
+      (96 / 212) — adds cost without adding beneficiary welfare. Remove the externality (set <code>b'(x') = b'(x)</code>) and the
+      ratio would climb toward ≈ 0.82. That's the whole story of why a redistribution-heavy reform scores below 1.</p>
+    </div>
+
+    <div class="callout"><b>One expected oddity.</b> Total Cost can be <b>negative at t=0</b> and that's fine, not a bug:
+    postponement front-loads apparent savings because <code>b'(x')</code> is tiny at t=0 (few claim under the new schedule) while
+    <code>b(x)</code> already carries a full old-schedule cohort.</div>
+  </section>
+
+  <!-- ============ SAMPLE VS SERVER ============ -->
+  <section id="vs">
+    <h2><span class="n">8</span> Sample vs Server — the one-line difference</h2>
+    <p>You just ran the <b>sample</b> path: two frozen CSVs in, two commands, outputs in-repo, numbers that <i>validate the
+    pipeline</i> rather than replicate the paper. The <b>server</b> path is the same analysis stages preceded by the full A–D
+    build on the confidential SUIBE/RAIS data, producing the real paper numbers.</p>
+    <table>
+      <thead><tr><th>Aspect</th><th>SAMPLE (this guide — your laptop)</th><th>SERVER / FULL</th></tr></thead>
+      <tbody>
+        <tr><td>Build A→D</td><td><b>Skipped</b> — the panel is a pre-supplied input</td><td><b>Run first</b> — rebuilds the panel from raw data</td></tr>
+        <tr><td>Data root</td><td>OneDrive <code>transfer_may_retirement</code> (sample)</td><td><code>F:/</code> analysis · <code>U:/</code> build</td></tr>
+        <tr><td>Analysis stages</td><td>E4 → gabriel → pure → G4 → G5 → H2 → I4 → I6</td><td>Same list, plus H3 becomes runnable</td></tr>
+        <tr><td>File suffix</td><td><code>_sample</code> on figures/tables (collector warns "do not ship")</td><td>No suffix — final figures</td></tr>
+        <tr><td>The numbers</td><td>Validation only — sampling noise vs the paper is <b>expected</b></td><td>The replication numbers</td></tr>
+      </tbody>
+    </table>
+    <div class="callout"><b>Read next:</b> for how the confidential build actually links SUIBE to RAIS, imputes contribution
+    time, and constructs the panel — the A–D stages skipped here — see the sibling guide
+    <a href="WORKFLOW_GUIDE_SERVER.html"><b>WORKFLOW_GUIDE_SERVER.html</b></a>. For the engineering story of how the repo got its
+    <code>build / analysis / presentation</code> shape and the config layer, see
+    <a href="RESTRUCTURE_EXPLAINER.html">RESTRUCTURE_EXPLAINER.html</a>.</div>
+  </section>
+
+  <div class="sep"></div>
+  <p class="muted" style="font-size:12.5px">Field guide for a new RA · <i>optimal-pension-reforms</i> · the 5% sample workflow
+  (<code>Rscript analysis/analysis_all.R</code> → <code>Rscript presentation/build_deck.R</code>). Sample = validation harness,
+  not replication; A–D build is server-only. Toy numbers are illustrative.</p>
+  </main>
+</div>
+</body>
+</html>

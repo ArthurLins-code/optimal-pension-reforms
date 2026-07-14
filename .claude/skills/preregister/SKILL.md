@@ -62,7 +62,7 @@ User can override with `--style osf|aspredicted|aea-rct`.
 
 ### PHASE 3 — Generate the document
 
-Read `templates/preregistration-template.md`. The template has three style sections; **only use the section matching the chosen style** (don't merge — registries differ).
+Read `_docs/pedro_hc_santanna_templates_for_projects/preregistration-template.md`. The template has three style sections; **only use the section matching the chosen style** (don't merge — registries differ).
 
 Common to all styles, the document MUST include:
 
@@ -82,7 +82,7 @@ Annotate each section with one of:
 - **SHOULD** — strongly recommended; reviewers expect it.
 - **MAY** — optional; include if relevant.
 
-Re-use the MUST/SHOULD/MAY framework from `templates/requirements-spec.md`. For each MUST that the input did not supply, write `[CLARIFY: <specific question>]` rather than fabricating content.
+Re-use the MUST/SHOULD/MAY framework from `_docs/pedro_hc_santanna_templates_for_projects/requirements-spec.md`. For each MUST that the input did not supply, write `[CLARIFY: <specific question>]` rather than fabricating content.
 
 ### PHASE 4 — Cross-checks (before writing to disk)
 
@@ -123,8 +123,8 @@ Include the registry URL: OSF → `osf.io/registries`, AsPredicted → `aspredic
 
 ## Cross-references
 
-- `templates/preregistration-template.md` — the three style templates this skill consumes.
-- `templates/requirements-spec.md` — MUST/SHOULD/MAY annotation language re-used here.
+- `_docs/pedro_hc_santanna_templates_for_projects/preregistration-template.md` — the three style templates this skill consumes.
+- `_docs/pedro_hc_santanna_templates_for_projects/requirements-spec.md` — MUST/SHOULD/MAY annotation language re-used here.
 - `.claude/skills/interview-me/SKILL.md` — produces the spec this skill consumes via `--input`.
 - `.claude/skills/verify-claims/SKILL.md` — Phase 5 invokes this for citation post-flight.
 - `.claude/references/discipline-cards.md` — field defaults that drive `--style` selection.

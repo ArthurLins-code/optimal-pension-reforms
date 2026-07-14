@@ -1,0 +1,57 @@
+file,line,literal
+A4_balance_check.R,10,F:/docs/R-library
+A4_balance_check.R,15,U:/Documents/Paper/directory_2025
+A4_balance_check.R,16,setwd(paste(dir))
+A4_balance_check.R,24,working/A1_suibe_semi.csv.gz
+A4_balance_check.R,26,working/A2_suibe_unid.csv.gz
+A4_balance_check.R,28,working/A3_merged_suibe.csv.gz
+A4_balance_check.R,278,output/A/A4_balance_check.csv
+A4_balance_check.R,280,output/A/A4_balance_check.tex
+B4_create_clean_candidates_cross.R,12,F:/docs/R-library
+B4_create_clean_candidates_cross.R,17,U:/Documents/Paper/directory_2025
+B4_create_clean_candidates_cross.R,18,setwd(paste(dir))
+B4_create_clean_candidates_cross.R,26,working/A3_merged_suibe.csv.gz
+B4_create_clean_candidates_cross.R,28,working/B2_full_candidates_cross.dta
+B4_create_clean_candidates_cross.R,36,extra/inpc/tabela_inpc.csv
+B4_create_clean_candidates_cross.R,41,extra/conversao_cnae_cbo/conversao_cnae.csv
+B4_create_clean_candidates_cross.R,44,extra/conversao_cnae_cbo/conversao_cbo.csv
+B4_create_clean_candidates_cross.R,47,extra/microrregioes.dta
+B4_create_clean_candidates_cross.R,87,"working/B3_full_candidates_panel/B3_<y>.csv (paste0, y=1995:2001)"
+B4_create_clean_candidates_cross.R,121,"working/B3_full_candidates_panel/B3_<y>.csv (paste0, y=2002)"
+B4_create_clean_candidates_cross.R,159,"working/B3_full_candidates_panel/B3_<y>.csv (paste0, y=2003:09,2011:20)"
+B4_create_clean_candidates_cross.R,198,"working/B3_full_candidates_panel/B3_<y>.csv (paste0, y=2010)"
+B4_create_clean_candidates_cross.R,641,"working/B4_clean_candidates_cross/B4_<y>.csv.gz (paste0, y=2010:2019)"
+C6_estimate_continuous_contrib.R,12,F:/docs/R-library
+C6_estimate_continuous_contrib.R,17,U:/Documents/Paper/directory_2025
+C6_estimate_continuous_contrib.R,18,setwd(paste(dir))
+C6_estimate_continuous_contrib.R,26,working/C5_restricted_sample.csv.gz
+C6_estimate_continuous_contrib.R,29,extra/Expectativa_Vida_IBGE.xlsx
+C6_estimate_continuous_contrib.R,433,working/C6_estimated_contrib_time.csv.gz
+D4_create_panel.R,11,F:/docs/R-library
+D4_create_panel.R,16,U:/Documents/Paper/directory_2025
+D4_create_panel.R,17,setwd(paste(dir))
+D4_create_panel.R,34,working/D3_cross_section.csv.gz
+D4_create_panel.R,41,extra/inpc/tabela_inpc.csv
+D4_create_panel.R,46,extra/conversao_cnae_cbo/conversao_cnae.csv
+D4_create_panel.R,49,extra/conversao_cnae_cbo/conversao_cbo.csv
+D4_create_panel.R,52,extra/microrregioes.dta
+D4_create_panel.R,87,"working/C3_filtered_rais/C3_<y>.csv (paste0, y=2002:2020)"
+D4_create_panel.R,411,working/D4_panel_reform.csv.gz
+D4_create_panel.R,413,working/D4_panel_claim.csv.gz
+D1_create_cross_section.R,11,F:/docs/R-library
+D1_create_cross_section.R,16,U:/Documents/Paper/directory_2025
+D1_create_cross_section.R,17,setwd(paste(dir))
+D1_create_cross_section.R,25,working/C5_restricted_sample.csv.gz
+D1_create_cross_section.R,27,working/C6_estimated_contrib_time.csv.gz
+D1_create_cross_section.R,29,extra/Expectativa_Vida_IBGE.xlsx
+D1_create_cross_section.R,177,working/D1_cross_section.csv.gz
+D3_create_cross_section.R,11,F:/docs/R-library
+D3_create_cross_section.R,16,U:/Documents/Paper/directory_2025
+D3_create_cross_section.R,17,setwd(paste(dir))
+D3_create_cross_section.R,34,working/C5_restricted_sample.csv.gz
+D3_create_cross_section.R,36,working/C6_estimated_contrib_time.csv.gz
+D3_create_cross_section.R,38,extra/Expectativa_Vida_IBGE.xlsx
+D3_create_cross_section.R,191,working/D3_cross_section.csv.gz
+aux_codes_RAIS/Sample_RAIS_arthur.do,12,U:\Desktop\Dissertação\ID_worker
+aux_codes_RAIS/join_rais_few_vars.R,1,F:/docs/R-library
+aux_codes_RAIS/join_rais_few_vars.R,9,F:/RAIS/admin/id_data/contract_level/

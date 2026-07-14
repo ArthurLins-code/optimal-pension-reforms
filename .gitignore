@@ -14,8 +14,28 @@ videos/
 # (podem ser regenerados rodando o código no PC remoto)
 trans_retirement/output/
 
+# --- Functional-layout I/O (restructure; regeneratable / confidential — keep only .gitkeep) ---
+build/output/*
+!build/output/.gitkeep
+build/temp/*
+!build/temp/.gitkeep
+build/input/*
+!build/input/.gitkeep
+analysis/output/*
+!analysis/output/.gitkeep
+analysis/temp/*
+!analysis/temp/.gitkeep
+analysis/input/*
+!analysis/input/.gitkeep
+
+# --- Golden-baseline heavy artifacts (keep the .md/.csv provenance, ignore the bulk) ---
+quality_reports/baseline/figures_before/
+quality_reports/baseline/figures_asis/
+quality_reports/baseline/logs/
+quality_reports/baseline/logs_stage3/
+
 # --- Versões do paper e apresentações (PDFs binários) ---
-versões do artigo/
+paper/
 
 # --- PDF de cálculos manuscritos ---
 Cálculos Juan*.pdf
@@ -149,9 +169,15 @@ quality_reports/preregistrations/*
 !quality_reports/checkpoints/.gitkeep
 !quality_reports/preregistrations/.gitkeep
 
+# Relocation before/after decks — heavy regenerable binaries; track the README, ignore the PDFs
+quality_reports/relocation_check/*.pdf
+
 # R analysis outputs (generated artifacts; keep scripts, ignore outputs)
 scripts/R/_outputs/
 
 # Output artifacts — uncomment lines below based on your preference
 # *.rds
 # output/**/*.rds
+
+# Stray R default plot device output
+Rplots.pdf
