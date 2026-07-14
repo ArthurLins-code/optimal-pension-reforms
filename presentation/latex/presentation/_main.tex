@@ -1,6 +1,6 @@
 \input{_preamble.tex}
 \usepackage[dvipsnames]{xcolor}
-\graphicspath{{../../figures_central_folder/from_code/}{../../figures_central_folder/static/}}
+\graphicspath{{../../figures_central_folder/from_code/}{../../figures_central_folder/static/}{../figures/}}
 \begin{document}
 \title[Optimal Pension Reforms]{\large{Optimal Pension Reforms:} \\ An Application to the Brazilian Administrative Data}
 \author{Gustavo Gonzaga (PUC-Rio) \\ Gabriel Lemos (MIT Sloan) \\ Juan Rios (PUC-Rio)}
@@ -277,7 +277,7 @@
         \end{align*}
         % b_a'=b^a(x_{it}|a(x_{it})=a)
         % b_a=b(x_{it}|a(x_{it})=a)
-        \item Implicit assumption: utilitarian planner
+        \item We consider a utilitarian planner and normalize $u_c=1$ at the avg consumption in the economy at $t=0$.
         \item $C(b^c,b^a)$ is the cost of the reform, including fiscal externalities:
     \end{itemize}
     \small
@@ -504,38 +504,103 @@
 
 \begin{frame}[label=wmvpfMvpf]{WMVPF and MVPF of the Reform}
     \begin{itemize}
-        \item Under envelope conditions, the welfare effect per dollar spent is:
+        \item Under envelope conditions or for a local reform:
         % It is an approximation because we are considering a non-infinitesimal reform
         \begin{align*}
-            WMVPF(b^c,b^a)&\approx \frac{\sum_i \sum_t E\left(\beta^t \frac{\partial u(x_{it})}{\partial c_{it}}*[b^a(x_{it}^c)-b^c(x_{it}^c)]\right)}{C(b^c,b^a)} \\
-            & = \eta \frac{\sum_i \sum_t  E[b^a(x_{it}^c)-b^c(x_{it}^c)]}{C(b^c,b^a)} =\eta * MVPF(b^c,b^a)
+            WMVPF(b^c,b^a)&\approx \frac{\sum_i \sum_t E\left(\beta^t \frac{\partial u(x_{it})}{\partial c_{it}}*[b^a(x_{it}^c)-b^c(x_{it}^c)]\right)}{C(b^c,b^a)}
         \end{align*}
         % technically, we are also holding constant the state of the world in b^a(x,pi). I believe we want the same distribution as in the absence of the reform.
         % For example, if someone gets fired with a higher probability under the reformed schedule, we want to compute their benefits with the lower probability before the reform was enacted
-        \item Where $\eta$ is the incidence-weighted average welfare weight
-        \item Normalize mgU to the avg. in the economy + constant CRRA $\gamma=4$:
+        \item For a large reform, the next slide gives bounds that do not require the envelope theorem.
+        \item Normalize mgU to the avg. in the economy + constant CRRA $\gamma$ and assume that \(\operatorname{Cov}\left(
+c_{it}-c,
+\beta^t\left[b^a(x^c_{it})-b^c(x^c_{it})\right]
+\right)=0\) then:
         %\equiv \frac{\sum_i \sum_t E\left(\beta^t \frac{\partial u(x_{it})}{\partial c_{it}}*[b^a(x_{it}^c)-b^c(x_{it}^c)]\right)}{\sum_i \sum_t E\left[b^a(x_{it}^c)-b^c(x_{it}^c)\right]}
         % CRRA constant across individuals, allow us to write gamma without i
         % CRRA constant across consumption levels allow us to use equal instead of approx
         \begin{align*}
-            \eta = \beta^{t}\left(1-\gamma\frac{c_{p}-c}{c}\right)
+            WMVPF(b^c,b^a) = \left(1-\gamma\frac{c_{p}-c}{c}\right)\frac{\sum_i \sum_t  \beta^{t}E[b^a(x_{it}^c)-b^c(x_{it}^c)]}{C(b^c,b^a)}
         \end{align*}
         \begin{itemize}
-            \item $c_p$ is the avg. cons. among beneficiaries, and $c$ is avg consumption in Brazil $\Rightarrow \frac{c_{p}-c}{c}=4.2\%$ from surveys
+            \item $c_p$ is the avg. cons. among reform-beneficiaries, and $c$ is avg consumption in Brazil $\Rightarrow \frac{c_{p}-c}{c}=4.2\%$ from surveys
         \end{itemize}
     \end{itemize}
-\bfootnote{\hyperlink{survey}{\beamerbutton{Survey Evidence}}}
 \end{frame}
 
-\begin{frame}[label=pofResults]{POF Results}
-    \centering
-    \includegraphics[width=\textwidth]{plot_expenditures_groups.pdf}
-    % Pension beneficiaries consumed 8.2% more
-    % Their marginal utility is therefore lower.
-    % Welfare effect < Mechanical effect
-    \bfootnote{\hyperlink{survey}{\beamerbutton{ELSI}}}
+\begin{frame}[label=boundsSummary]{Large-Reform WMVPF Bounds}
+    \begin{itemize}
+        \item Let $c^{a|c}_{it}\equiv c^c_{it}+b^a(x^c_{it})-b^c(x^c_{it})$, $c^{c|a}_{it}\equiv c^a_{it}-[b^a(x^a_{it})-b^c(x^a_{it})]$, and:
+        \begin{align*}
+            WMVPF^E(b^c,b^a)
+            &\equiv
+            \frac{\sum_i\sum_t E\left[\beta^t\{u(x^a_{it})-u(x^c_{it})\}\right]}
+            {\lambda C(b^c,b^a)}.
+        \end{align*}
+        \item Let the corresponding average consumption levels be:
+        \begin{align*}
+            \bar c^{a|c}\equiv
+        \frac{\sum_i\sum_t E[c^{a|c}_{it}]}{\sum_i\sum_t E[1]} \quad \text{and} \quad \bar c^{c|a} \equiv
+        \frac{\sum_i\sum_t E[c^{c|a}_{it}]}{\sum_i\sum_t E[1]} 
+        \end{align*}
+        \item If $C(b^c,b^a)>0$, $b^a(x)>b^c(x)$ for  $x=x^a_{it},x^c_{it}$, $\gamma$ is the CRRA and consumption and benefit changes are uncorrelated, then $WMVPF^E \in$:
+    \end{itemize}
+    \footnotesize
+        \begin{align*}
+            \left[\left(1-\gamma\frac{\bar c^{a|c}-c}{c}\right)
+            \frac{\sum\limits_{i,t} \beta^tE\left[b^a(x^c_{it})-b^c(x^c_{it})\right]}
+            {C(b^c,b^a)}
+            ,
+            \left(1-\gamma\frac{\bar c^{c|a}-c}{c}\right)
+            \frac{\sum\limits_{i,t} \beta^tE\left[b^a(x^a_{it})-b^c(x^a_{it})\right]}
+            {C(b^c,b^a)}\right]
+        \end{align*}
+    \bfootnote{\hyperlink{lbProofSetup}{\beamerbutton{LB Proof}} \hyperlink{ubProofSetup}{\beamerbutton{UB Proof}}}
 \end{frame}
 
+\begin{frame}[label=boundsEndpoints]{The Bounds Need Two Consumption Endpoints}
+    \scriptsize
+    \begin{itemize}
+        \item Estimate the average consumption levels $\bar c^{a|c}$ and $\bar c^{c|a}$ from ELSI and POF; the appendix gives claimant-group definitions and implementation details.
+        \item Let $\widehat n^g_p$ be average household size among ELSI claimers in group $g$ at point $p$; define per-capita benefit changes:
+        \begin{align*}
+            \Delta b^{c,pc}_{p,t}
+            &\equiv
+            \frac{b^a(x^c_{p,t})-b^c(x^c_{p,t})}{\widehat n^c_p},
+            &
+            \Delta b^{a,pc}_{p,t}
+            &\equiv
+            \frac{b^a(x^a_{p,t})-b^c(x^a_{p,t})}{\widehat n^a_p}.
+        \end{align*}
+        \vspace{-1em}
+        \item The household per-capita endpoint cells are:
+        \begin{align*}
+            \widehat c^{a|c}_{p,t}
+            &\equiv
+            \widehat c^c_p+\rho\Delta b^{c,pc}_{p,t},
+            &
+            \widehat c^{c|a}_{p,t}
+            &\equiv
+            \widehat c^a_p-\rho\Delta b^{a,pc}_{p,t}.
+        \end{align*}
+        \vspace{-1em}
+        \item Aggregate using the same cell support as the benefit calculations:
+        \begin{align*}
+            \bar c^{a|c}
+            &=
+            \frac{\sum_{p,t}N^c_{p,t}\widehat c^{a|c}_{p,t}}
+            {\sum_{p,t}N^c_{p,t}},
+            &
+            \bar c^{c|a}
+            &=
+            \frac{\sum_{p,t}N^a_{p,t}\widehat c^{c|a}_{p,t}}
+            {\sum_{p,t}N^a_{p,t}}.
+        \end{align*}
+        \vspace{-1em}
+        \item Baseline: $\rho\equiv\partial c/\partial b=0.33$, following Gerard and Gonzaga.
+    \end{itemize}
+    \bfootnote{\hyperlink{elsiGroups}{\beamerbutton{Estimating $\hat c^c_p$ and $\hat c^a_p$}}}
+\end{frame}
 
 \begin{frame}[label=welfareGraph]{Welfare Weighted MVPF}
     \begin{figure}
@@ -1018,12 +1083,363 @@
     % The estimate for the average benefit that would have been paid in the absence of the reform at point p and quarter t is estimated as bar b^o_{p,t}-\beta_{t,p}
 \end{frame}
 
+\begin{frame}[label=lbProofSetup]{LB Proof (1/4): Setup}
+    \small
+    \begin{itemize}
+        \item For the lower bound, evaluate the actual schedule at no-reform choices.
+        \item Let \(x^c_{it}=(c^c_{it},x^c_{it,-c})\). Applying the actual schedule to the same choices gives:
+        \begin{align*}
+            c^{a|c}_{it}
+            &\equiv c^c_{it}+b^a(x^c_{it})-b^c(x^c_{it}).
+        \end{align*}
+        \item The no-response welfare gain, in consumption-equivalent units, is:
+        \begin{align*}
+            \underline W^{NR}
+            \equiv
+            \frac{1}{\lambda}\sum_i\sum_t E\left[
+            \beta^t
+            \left\{
+            u(c^{a|c}_{it},x^c_{it,-c})
+            -
+            u(x^c_{it})
+            \right\}
+            \right].
+        \end{align*}
+    \end{itemize}
+    \bfootnote{\hyperlink{boundsSummary}{\beamerbutton{Back}}}
+\end{frame}
+
+\begin{frame}[label=lbProofRP]{LB Proof (2/4): Revealed Preference}
+    \small
+    \begin{itemize}
+        \item Assume behavioral responses under the actual schedule do not reduce welfare on average:
+        \begin{align*}
+            \frac{1}{\lambda}\sum_i\sum_t E\left[
+            \beta^t
+            \left\{
+            u(x^a_{it})-u(c^{a|c}_{it},x^c_{it,-c})
+            \right\}
+            \right]
+            \ge 0.
+        \end{align*}
+        \item This allows for misoptimization as long as responses to the reform improve welfare on average.
+        \item Adding the no-response gain gives:
+        \begin{align*}
+            \frac{1}{\lambda}\sum_i\sum_t E\left[
+            \beta^t
+            \left\{
+            u(x^a_{it})-u(x^c_{it})
+            \right\}
+            \right]
+            \ge
+            \underline W^{NR}.
+        \end{align*}
+        \item The lower bound uses \(x^c_{it}\), because it holds no-reform behavior fixed.
+    \end{itemize}
+    \bfootnote{\hyperlink{boundsSummary}{\beamerbutton{Back}}}
+\end{frame}
+
+\begin{frame}[label=lbProofWMVPF]{LB Proof (3/4): WMVPF}
+    \small
+    \begin{itemize}
+        \item Define the exact welfare measure per dollar of fiscal cost as:
+        \begin{align*}
+            WMVPF^E(b^c,b^a)
+            \equiv
+            \frac{\sum_i\sum_t E\left[
+            \beta^t
+            \left\{
+            u(x^a_{it})-u(x^c_{it})
+            \right\}
+            \right]}{\lambda C(b^c,b^a)}.
+        \end{align*}
+        \item If the reform increases cost, \(C(b^c,b^a)>0\), then:
+        \begin{align*}
+            WMVPF^E(b^c,b^a)
+            \ge
+            \frac{\underline W^{NR}}{C(b^c,b^a)}.
+        \end{align*}
+        \item This is the exact large-reform lower bound before the marginal approximation.
+    \end{itemize}
+    \bfootnote{\hyperlink{boundsSummary}{\beamerbutton{Back}}}
+\end{frame}
+
+\begin{frame}[label=lbProofMU]{LB Proof (4/4): Marginal Approximation}
+    \footnotesize
+    \begin{itemize}
+        \item If \(b^a(x^c_{it})\geq b^c(x^c_{it})\), concavity implies:
+        \begin{align*}
+            u(c^{a|c}_{it},x^c_{it,-c})-u(x^c_{it})
+            &\ge
+            \frac{\partial u(c^{a|c}_{it},x^c_{it,-c})}{\partial c_{it}}
+            \left[b^a(x^c_{it})-b^c(x^c_{it})\right].
+        \end{align*}
+        \item Therefore:
+        \begin{align*}
+            WMVPF^E(b^c,b^a)
+            &\ge
+            \frac{\sum_i\sum_t E\left[
+            \beta^t
+            \frac{\partial u(c^{a|c}_{it},x^c_{it,-c})/\partial c_{it}}{\lambda}
+            \left[b^a(x^c_{it})-b^c(x^c_{it})\right]
+            \right]}{C(b^c,b^a)}.
+        \end{align*}
+        \item With constant CRRA \(\gamma\) and zero covariance between the consumption gap and the discounted benefit gain:
+        \begin{align*}
+            WMVPF^E(b^c,b^a)
+            &\ge
+            \left(1-\gamma\frac{\bar c^{a|c}-c}{c}\right)
+            \frac{\sum_i\sum_t E\left[\beta^t\left(b^a(x^c_{it})-b^c(x^c_{it})\right)\right]}
+            {C(b^c,b^a)}.
+        \end{align*}
+    \end{itemize}
+    \bfootnote{\hyperlink{boundsSummary}{\beamerbutton{Back}}}
+\end{frame}
+
+\begin{frame}[label=ubProofSetup]{UB Proof (1/4): Setup}
+    \small
+    \begin{itemize}
+        \item For the upper bound, evaluate the no-reform schedule at actual choices.
+        \item Let \(x^a_{it}=(c^a_{it},x^a_{it,-c})\). Applying the no-reform schedule to the same choices gives:
+        \begin{align*}
+            c^{c|a}_{it}
+            &\equiv c^a_{it}-\left[b^a(x^a_{it})-b^c(x^a_{it})\right].
+        \end{align*}
+        \item The actual-response welfare gain, in consumption-equivalent units, is:
+        \begin{align*}
+            \overline W^{AR}
+            \equiv
+            \frac{1}{\lambda}\sum_i\sum_t E\left[
+            \beta^t
+            \left\{
+            u(x^a_{it})
+            -
+            u(c^{c|a}_{it},x^a_{it,-c})
+            \right\}
+            \right].
+        \end{align*}
+    \end{itemize}
+    \bfootnote{\hyperlink{boundsSummary}{\beamerbutton{Back}}}
+\end{frame}
+
+\begin{frame}[label=ubProofRP]{UB Proof (2/4): Revealed Preference}
+    \small
+    \begin{itemize}
+        \item Assume behavioral responses under the no-reform schedule do not reduce welfare on average:
+        \begin{align*}
+            \frac{1}{\lambda}\sum_i\sum_t E\left[
+            \beta^t
+            \left\{
+            u(x^c_{it})-u(c^{c|a}_{it},x^a_{it,-c})
+            \right\}
+            \right]
+            \ge 0.
+        \end{align*}
+        \item This allows for misoptimization as long as responses to the counterfactual reversal improve welfare on average.
+        \item Rearranging gives:
+        \begin{align*}
+            \frac{1}{\lambda}\sum_i\sum_t E\left[
+            \beta^t
+            \left\{
+            u(x^a_{it})-u(x^c_{it})
+            \right\}
+            \right]
+            \le
+            \overline W^{AR}.
+        \end{align*}
+        \item The upper bound uses \(x^a_{it}\), because it holds actual behavior fixed.
+    \end{itemize}
+    \bfootnote{\hyperlink{boundsSummary}{\beamerbutton{Back}}}
+\end{frame}
+
+\begin{frame}[label=ubProofWMVPF]{UB Proof (3/4): WMVPF}
+    \small
+    \begin{itemize}
+        \item Using the same exact welfare measure per dollar of fiscal cost:
+        \begin{align*}
+            WMVPF^E(b^c,b^a)
+            \equiv
+            \frac{\sum_i\sum_t E\left[
+            \beta^t
+            \left\{
+            u(x^a_{it})-u(x^c_{it})
+            \right\}
+            \right]}{\lambda C(b^c,b^a)}.
+        \end{align*}
+        \item If \(C(b^c,b^a)>0\), then:
+        \begin{align*}
+            WMVPF^E(b^c,b^a)
+            \le
+            \frac{\overline W^{AR}}{C(b^c,b^a)}.
+        \end{align*}
+        \item This is the exact large-reform upper bound before the marginal approximation.
+    \end{itemize}
+    \bfootnote{\hyperlink{boundsSummary}{\beamerbutton{Back}}}
+\end{frame}
+
+\begin{frame}[label=ubProofMU]{UB Proof (4/4): Marginal Approximation}
+    \footnotesize
+    \begin{itemize}
+        \item If \(b^a(x^a_{it})\geq b^c(x^a_{it})\), concavity implies:
+        \begin{align*}
+            u(x^a_{it})-u(c^{c|a}_{it},x^a_{it,-c})
+            &\le
+            \frac{\partial u(c^{c|a}_{it},x^a_{it,-c})}{\partial c_{it}}
+            \left[b^a(x^a_{it})-b^c(x^a_{it})\right].
+        \end{align*}
+        \item Therefore:
+        \begin{align*}
+            WMVPF^E(b^c,b^a)
+            &\le
+            \frac{\sum_i\sum_t E\left[
+            \beta^t
+            \frac{\partial u(c^{c|a}_{it},x^a_{it,-c})/\partial c_{it}}{\lambda}
+            \left[b^a(x^a_{it})-b^c(x^a_{it})\right]
+            \right]}{C(b^c,b^a)}.
+        \end{align*}
+        \item With constant CRRA \(\gamma\) and zero covariance between the consumption gap and the discounted benefit gain:
+        \begin{align*}
+            WMVPF^E(b^c,b^a)
+            &\le
+            \left(1-\gamma\frac{\bar c^{c|a}-c}{c}\right)
+            \frac{\sum_i\sum_t E\left[\beta^t\left(b^a(x^a_{it})-b^c(x^a_{it})\right)\right]}
+            {C(b^c,b^a)}.
+        \end{align*}
+    \end{itemize}
+    \bfootnote{\hyperlink{boundsSummary}{\beamerbutton{Back}}}
+\end{frame}
+
+\begin{frame}[label=elsiGroups]{ELSI Defines Claiming Groups and Endpoint Means}
+    \scriptsize
+    \begin{itemize}
+        \item Let $g\in\{c,a\}$ index the choice distribution: $g=c$ denotes no-reform choices, proxied by pre-reform claimers; $g=a$ denotes actual choices, proxied by post-reform claimers.
+        \item Use ELSI-Brasil wave 1 (2015--16) and wave 2 (2019--21).
+        \item Keep own-retirement recipients:
+        \begin{itemize}
+            \item Wave 1: $i16=1$ and $i17\_1=1$ for INSS retirement.
+            \item Wave 2: $i0\_32=1$ and $i17\_1=1$ for INSS retirement.
+            \item Drop death-pension-only cases: $i17\_7=1$ with no own retirement.
+        \end{itemize}
+        \item Assign the claimant group using retirement age:
+        \begin{align*}
+            \widehat y_i^{claim}
+            =
+            y_i^{interview}
+            -
+            \left(age_i^{interview}-i18_i\right).
+        \end{align*}
+        \item Set $g_i=c$ if $\widehat y_i^{claim}<2015$ and $g_i=a$ if $\widehat y_i^{claim}\geq 2015$.
+        \item For $p_i>0$, estimate endpoint consumption as $\widehat c^{a|c}=\widehat E_{ELSI}\!\left[c_i\mid g_i=c,\;p_i>0\right]$ and $\widehat c^{c|a}=\widehat E_{ELSI}\!\left[c_i\mid g_i=a,\;p_i>0\right]$: before- and after-reform claimers, respectively.
+        \item Compute normalized points at claiming as $p_i=i18_i+contrib_i-\bar p_i$, with $\bar p_i=85$ for women and $95$ for men.
+        \item For $contrib_i$, use wave-1 $i8$ years paying INSS; for wave-2 panel observations, carry forward wave-1 $i8$ when no wave-2 contribution-history variable is available.
+    \end{itemize}
+    \bfootnote{\hyperlink{boundsEndpoints}{\beamerbutton{Back}}}
+\end{frame}
+
+\begin{frame}[label=elsiConsumption]{ELSI Gives Per-Capita Consumption Within Each Group}
+    \footnotesize
+    \begin{itemize}
+        \item Build household spending from ELSI household expenses. Let
+        \[
+            \mathcal M=\{c2,c4,c5,c6,c7,c8,c9,c10,c11,c17\}.
+        \]
+        Then
+        \begin{align*}
+            C_h^{ELSI}
+            =
+            \sum_{q\in\mathcal M}m(q_h)
+            +
+            \frac{m(c15_h)+m(c18_h)}{12}.
+        \end{align*}
+        \item $m(\cdot)$ maps each bracket to its midpoint; top-coded cells use the mean from POF in the same bracket.
+        \item Coding rules: set $c4_h=0$ if $c3_h=0$; set $c17_h=0$ if $c16_h=0$; drop $99$ and treat $88$ as not applicable.
+        \item Exclude taxes and asset purchases from consumption: $c12$ (IPTU/ITR), $c13$ (IPVA), and $c14$ (vehicle purchases).
+        \item Divide by household size:
+        \begin{align*}
+            c_i^{ELSI}=\frac{C_{h(i)}^{ELSI}}{n_{h(i)}^{ELSI}}.
+        \end{align*}
+        \item Household size: wave 1 uses $ar6$; wave 2 uses the released household resident count if present, otherwise count the roster from $ar10$ plus nonmissing $idade2$--$idade12$.
+    \end{itemize}
+    \bfootnote{\hyperlink{boundsEndpoints}{\beamerbutton{Back}}}
+\end{frame}
+
+\begin{frame}[label=elsiProfile]{Estimate \texorpdfstring{$\widehat c^{g,ELSI}_{p}$}{c-hat by group and points}}
+    \small
+    \begin{itemize}
+        \item For each $g\in\{c,a\}$ and normalized-point cell $p$, estimate:
+        \begin{align*}
+            \widehat c^{g,ELSI}_{p}
+            =
+            \frac{
+            \sum_i peso\_calibrado_i
+            1\{g_i=g,\;p_i=p\}c_i^{ELSI}
+            }{
+            \sum_i peso\_calibrado_i
+            1\{g_i=g,\;p_i=p\}
+            }.
+        \end{align*}
+        \item Use the ELSI survey design: $peso\_calibrado$, $upa$, and $estrato$.
+        \item Convert all ELSI monetary values to the POF 2017--18 price year before averaging.
+        \item Use the same point bins as the administrative analysis. If a $(g,p)$ cell has fewer than 30 observations, pool adjacent point cells before estimating the mean.
+        \item Output one table with columns: $g$, $p$, $\widehat c^{g,ELSI}_{p}$, standard error, cell count, and effective cell count.
+    \end{itemize}
+    \bfootnote{\hyperlink{boundsEndpoints}{\beamerbutton{Back}}}
+\end{frame}
+
+\begin{frame}[label=pofLevel]{POF Anchors the Consumption Level}
+    \footnotesize
+    \begin{itemize}
+        \item Use POF 2017--18 because it is the closest detailed expenditure survey after the reform.
+        \item Unit identifiers: $UF$, $COD\_UPA$, $NUM\_DOM$, and $NUM\_UC$.
+        \item Household size is not the right denominator. Build $n_u^{POF}$ by counting records in \textit{Morador} within the consumption unit, excluding $V0306\in\{18,19\}$.
+        \item Expenditure tabs: \textit{Aluguel Estimado}, \textit{Despesa Coletiva}, \textit{Caderneta Coletiva}, \textit{Despesa Individual}, and non-monetary POF 2/4 services.
+        \item Spending variables: $V8000\_DEFLA$, $FATOR\_ANUALIZACAO$, $V9011$, $QUADRO$, and $V9001$.
+        \item Keep consumption items using $Tradutor\_Despesa\_Geral.xls$ with $Nivel\_2=11$.
+        \item Identify own-INSS-retirement units in \textit{Outros Rendimentos}: $V9001=5400401$; robustness includes $5400501$ for INSS pensions.
+    \end{itemize}
+    \bfootnote{\hyperlink{boundsEndpoints}{\beamerbutton{Back}}}
+\end{frame}
+
+\begin{frame}[label=scaledConsumption]{Scale ELSI Profiles to the POF Level}
+    \small
+    \begin{itemize}
+        \item Construct POF per-capita consumption for retired consumption units:
+        \begin{align*}
+            \widehat c^{POF}_{ret}
+            =
+            \frac{
+            \sum_u PESO\_FINAL_u
+            1\{u\in ret\}
+            c_u^{POF}
+            }{
+            \sum_u PESO\_FINAL_u
+            1\{u\in ret\}
+            },
+            \qquad
+            c_u^{POF}
+            =
+            \frac{\sum_{r\in u}E_{ur}}{n_u^{POF}}.
+        \end{align*}
+        \item Let $\widehat c^{ELSI}_{ret}$ be the pooled ELSI retired mean using the same consumption proxy.
+        \item Scale each ELSI group-point mean to the POF level:
+        \begin{align*}
+            \widehat c^g_p
+            =
+            \widehat c^{POF}_{ret}
+            \times
+            \frac{\widehat c^{g,ELSI}_{p}}{\widehat c^{ELSI}_{ret}}.
+        \end{align*}
+        \item This preserves ELSI variation across $p$ and across claimant groups, while using POF for the consumption level.
+    \end{itemize}
+    \bfootnote{\hyperlink{boundsEndpoints}{\beamerbutton{Back}}}
+\end{frame}
+
 \begin{frame}[label=survey]{ELSI: Consumption by Normalized Points}
     \centering
     \includegraphics[height=0.72\textheight,keepaspectratio]{ELSI.jpg}
     % Roughly constant,
     % It doesnt seem like redistribution within beneficiaries was that important
-    \bfootnote{\hyperlink{pofResults}{\beamerbutton{Back}}}
+    \bfootnote{\hyperlink{boundsSummary}{\beamerbutton{Back}}}
 \end{frame}
 
 \begin{frame}[label=pureSlopeFrequencies]{Frequencies under Pure \textbf{Slope} Reform:
