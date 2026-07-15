@@ -26,7 +26,7 @@ latex/               # DECK SOURCES
   presentation/      #   English live build
   apresentacao/      #   Portuguese deck
   figures/           #   shared legacy figures + from_code/ + static/
-presentation/        # RESULTS -> DECK tooling
+deck_tools/          # RESULTS -> DECK tooling
   figures_central_folder/  # collector/update/verify/deck_compare + manifest.csv
   build_deck.R             # master:  collect figures -> compile latex/presentation/_main.tex -> PDF
 legacy/              # quarantined: F1-F7, G6, I5, old/B1-B2 — each guarded by stop()
@@ -41,7 +41,7 @@ and `PENSION_SAMPLE_ROOT` / `PENSION_FULL_ROOT`). From the repo root:
 
 ```bash
 Rscript analysis/analysis_all.R       # 5% sample: panel -> figures, tables, WMVPF
-Rscript presentation/build_deck.R     # figures -> compiled English deck (latex/presentation/_main.pdf)
+Rscript deck_tools/build_deck.R       # figures -> compiled English deck (latex/presentation/_main.pdf)
 Rscript build/build_all.R             # full-data build (server only; DATA_MODE=full)
 ```
 
@@ -60,7 +60,7 @@ latexmk latex/presentation/_main.tex
 
 The English deck resolves figures only through `latex/figures/from_code/` and
 `latex/figures/static/`. The `from_code/` directory is tracked so collaborators can compile
-the deck without first running the sample pipeline. Regenerate it with `Rscript presentation/build_deck.R` after
+the deck without first running the sample pipeline. Regenerate it with `Rscript deck_tools/build_deck.R` after
 changing figure-producing code; keep manual or external figures in `static/`.
 
 ## Data

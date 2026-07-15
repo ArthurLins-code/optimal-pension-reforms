@@ -94,7 +94,7 @@
 <div class="tldr">
   <h2>✅ Short answer: yes, it is automatic</h2>
   <p>If you change a script that makes a figure, you update that figure in the slides with <b>one command</b>:</p>
-  <pre><span class="c">python figures_central_folder/update_deck.py G5</span>
+  <pre><span class="c">python deck_tools/figures_central_folder/update_deck.py G5</span>
 <span class="m"># reruns the G5 script → collects its figures → rebuilds the slides PDF</span></pre>
   <p class="small">Replace <code>G5</code> with the stage you changed (<code>E4</code>, <code>G5</code>, <code>H2</code>, <code>F</code>, <code>Fg</code>, <code>I6</code>).
   The rest of this page explains <i>what that command does</i> and how the pieces connect — so you can trust it and fix it if something looks off.</p>
@@ -193,7 +193,7 @@
 <!-- ============================================================ -->
 <h2><span class="num">4</span> Update a figure — the one-command way</h2>
 <p>You edited <code>G5</code> and want the slides to reflect it. Run:</p>
-<pre><span class="c">python figures_central_folder/update_deck.py G5</span></pre>
+<pre><span class="c">python deck_tools/figures_central_folder/update_deck.py G5</span></pre>
 <p>That command does the three steps of §2 for you:</p>
 <table>
   <tr><th>step</th><th>what it runs</th><th>result</th></tr>
@@ -207,7 +207,7 @@
 
 <div class="callout tip"><span class="i">💡</span><div>
   Just changed the slides or a manifest row, but didn't touch any R code? Skip the slow R step:
-  <pre><span class="c">python figures_central_folder/update_deck.py --collect-only</span></pre>
+  <pre><span class="c">python deck_tools/figures_central_folder/update_deck.py --collect-only</span></pre>
 </div></div>
 
 <!-- ============================================================ -->
@@ -217,12 +217,12 @@
 <span class="c">Rscript trans_retirement/code/G5_effect_average_benefit_freq_bL_and_bS.R</span>
 
 <span class="m"># 2 · pull the fresh figures into the central folder</span>
-<span class="c">python figures_central_folder/collector.py \
+<span class="c">python deck_tools/figures_central_folder/collector.py \
        --sample-root "C:/Users/&lt;you&gt;/OneDrive/Documentos/Pesquisa/transfer_may_retirement"</span>
 
 <span class="m"># 3 · rebuild the slides</span>
 <span class="c">cd latex/presentation &amp;&amp; latexmk -pdf -interaction=nonstopmode _main.tex</span></pre>
-<p class="small">Check the figure landed: <code>python figures_central_folder/verify_deck.py</code> should say
+<p class="small">Check the figure landed: <code>python deck_tools/figures_central_folder/verify_deck.py</code> should say
   <span class="g">unresolved: 0</span>.</p>
 
 <!-- ============================================================ -->
@@ -274,10 +274,10 @@ reform_sketch.pdf,<span class="g">(manual/external)</span>,latex/figures/static,
 
 <h3>④ Run the workflow</h3>
 <pre><span class="m"># A · a script makes it — rerun that stage so the file exists, then collect + compile:</span>
-<span class="c">python figures_central_folder/update_deck.py G5</span>
+<span class="c">python deck_tools/figures_central_folder/update_deck.py G5</span>
 
 <span class="m"># B · hand-made (already in static/), or the file already exists — just collect + compile:</span>
-<span class="c">python figures_central_folder/update_deck.py --collect-only</span></pre>
+<span class="c">python deck_tools/figures_central_folder/update_deck.py --collect-only</span></pre>
 <p class="small">Using a script that isn't one of the shortcuts? Pass its path:
   <code>update_deck.py trans_retirement/code/MyScript.R</code>. Then confirm it landed:
   <code>verify_deck.py</code> → <span class="g">unresolved: 0</span>.</p>
@@ -328,16 +328,16 @@ reform_sketch.pdf,<span class="g">(manual/external)</span>,latex/figures/static,
 <!-- ============================================================ -->
 <h2><span class="num">9</span> Cheat sheet</h2>
 <pre><span class="m"># one-command update after editing a stage</span>
-<span class="c">python figures_central_folder/update_deck.py G5</span>
+<span class="c">python deck_tools/figures_central_folder/update_deck.py G5</span>
 
 <span class="m"># just re-route + recompile (no R)</span>
-<span class="c">python figures_central_folder/update_deck.py --collect-only</span>
+<span class="c">python deck_tools/figures_central_folder/update_deck.py --collect-only</span>
 
 <span class="m"># check every slide figure resolves</span>
-<span class="c">python figures_central_folder/verify_deck.py</span>
+<span class="c">python deck_tools/figures_central_folder/verify_deck.py</span>
 
 <span class="m"># see what changed between the old and new slides (page-by-page)</span>
-<span class="c">python figures_central_folder/deck_compare.py OLD.pdf NEW.pdf figures_central_folder/_diffs</span>
+<span class="c">python deck_tools/figures_central_folder/deck_compare.py OLD.pdf NEW.pdf figures_central_folder/_diffs</span>
 
 <span class="m"># find where a slide's picture comes from</span>
 <span class="m">→ open figures_central_folder/manifest.csv and search the figure name</span></pre>

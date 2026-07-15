@@ -7,7 +7,7 @@ changed), then writes a single side-by-side PDF of just the changed pages so you
 can eyeball exactly what moved. Text/TikZ pages render identically and are skipped.
 
 Usage:
-  python figures_central_folder/deck_compare.py OLD.pdf NEW.pdf OUTDIR
+  python deck_tools/figures_central_folder/deck_compare.py OLD.pdf NEW.pdf OUTDIR
 
 Output:
   OUTDIR/deck_changes_OLD_vs_NEW.pdf   (one side-by-side per changed page)

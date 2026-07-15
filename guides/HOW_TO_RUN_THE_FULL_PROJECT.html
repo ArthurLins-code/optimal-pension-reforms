@@ -98,7 +98,7 @@
         <h3 style="margin-top:0;color:var(--sample)">🟢 5% sample (your laptop)</h3>
         <pre><span class="cm"># terminal, at repo root</span>
 Rscript analysis/analysis_all.R
-Rscript presentation/build_deck.R</pre>
+Rscript deck_tools/build_deck.R</pre>
         <p class="muted" style="margin-bottom:0">Build is skipped — the panel is pre-supplied. ~3–4 min total.</p>
       </div>
       <div class="card" style="border-left:4px solid var(--server)">
@@ -107,7 +107,7 @@ Rscript presentation/build_deck.R</pre>
 export PENSION_DATA_MODE=full
 Rscript build/build_all.R
 Rscript analysis/analysis_all.R
-Rscript presentation/build_deck.R</pre>
+Rscript deck_tools/build_deck.R</pre>
         <p class="muted" style="margin-bottom:0">Rebuilds the panel from raw SUIBE/RAIS first.</p>
       </div>
     </div>
@@ -135,7 +135,7 @@ Rscript presentation/build_deck.R</pre>
         <text x="310" y="100" text-anchor="middle" class="bm">analysis_all.R</text>
         <text x="310" y="114" text-anchor="middle" class="bs" style="fill:#15803d">runs on the sample</text>
         <rect x="456" y="44" width="170" height="74" class="bx" fill="#faf5ff" stroke="#d8b4fe"/>
-        <text x="541" y="66" text-anchor="middle" class="bt" style="fill:#6b21a8">presentation/</text>
+        <text x="541" y="66" text-anchor="middle" class="bt" style="fill:#6b21a8">deck_tools/</text>
         <text x="541" y="84" text-anchor="middle" class="bs">collect → compile deck</text>
         <text x="541" y="100" text-anchor="middle" class="bm">build_deck.R</text>
         <text x="541" y="114" text-anchor="middle" class="bs">_main.pdf</text>
@@ -227,7 +227,7 @@ source(here::here("analysis","analysis_all.R"))
 Rscript analysis/analysis_all.R</pre>
         It runs <code>E4 → gabriel → pure → G5 → I4 → I6</code> in order (≈2–3 min of compute on the 928 MB panel),
         writing figures + tables to the repo-internal <code>analysis/output/</code> (gitignored, regenerable).</li>
-      <li><b>Build the deck</b> (§6): <code>Rscript presentation/build_deck.R</code>.</li>
+      <li><b>Build the deck</b> (§6): <code>Rscript deck_tools/build_deck.R</code>.</li>
     </ol>
     <div class="callout"><b>Prerequisite tables (external inputs).</b> The analysis master runs a check and <code>stop()</code>s if the
     input tables it consumes are missing. These are read from the <b>external root</b>, not regenerated on the sample:
@@ -246,13 +246,13 @@ Rscript analysis/analysis_all.R</pre>
 Sys.setenv(PENSION_DATA_MODE = "full")
 source(here::here("build","build_all.R"))         <span class="cm"># raw SUIBE/RAIS → analysis-ready panel</span>
 source(here::here("analysis","analysis_all.R"))   <span class="cm"># panel → estimates, figures, WMVPF</span>
-source(here::here("presentation","build_deck.R")) <span class="cm"># figures → deck</span>
+source(here::here("deck_tools","build_deck.R")) <span class="cm"># figures → deck</span>
 
 <span class="cm"># …or as a shell / batch job:</span>
 export PENSION_DATA_MODE=full
 Rscript build/build_all.R
 Rscript analysis/analysis_all.R
-Rscript presentation/build_deck.R</pre>
+Rscript deck_tools/build_deck.R</pre>
     <div class="callout warn"><b>From-scratch rebuild.</b> <code>build_all.R</code> runs the canonical heads
     <code>A4 · B4 · C6 · D4</code>. A true raw rebuild also needs the upstream lineage that fills <code>working/</code> —
     <code>A1–A3</code>, the Stata <code>B1–B3</code>, <code>C1–C5</code>, <code>D1–D3</code> — run first. The Stata steps go via
@@ -265,18 +265,18 @@ Rscript presentation/build_deck.R</pre>
   <!-- DECK -->
   <section id="deck">
     <h2><span class="n">6</span> Build the slide deck</h2>
-    <p><code>presentation/build_deck.R</code> wraps three steps; run it after the analysis master:</p>
+    <p><code>deck_tools/build_deck.R</code> wraps three steps; run it after the analysis master:</p>
     <ol class="steps">
       <li><code>collector.py</code> gathers each stage's figures from the repo-internal <code>analysis/output/</code> into
-      <code>presentation/figures_central_folder/from_code/</code>.</li>
-      <li><code>latexmk -cd -g -pdf</code> compiles <code>presentation/latex/presentation/_main.tex</code> →
+      <code>latex/figures/from_code/</code>.</li>
+      <li><code>latexmk -cd -g -pdf</code> compiles <code>latex/presentation/_main.tex</code> →
       <code>_main.pdf</code> (≈142 pages on the sample).</li>
       <li><code>verify_deck.py</code> confirms every <code>\includegraphics</code> resolves.</li>
     </ol>
-    <pre>Rscript presentation/build_deck.R        <span class="cm"># collect → compile → verify</span>
+    <pre>Rscript deck_tools/build_deck.R        <span class="cm"># collect → compile → verify</span>
 <span class="cm"># open the result:</span>
-<span class="cm"># presentation/latex/presentation/_main.pdf</span></pre>
-    <p class="muted">The English deck is the live build (<code>presentation/latex/presentation/</code>); the Portuguese
+<span class="cm"># latex/presentation/_main.pdf</span></pre>
+    <p class="muted">The English deck is the live build (<code>latex/presentation/</code>); the Portuguese
     <code>apresentacao/</code> deck is separate and off the collector pipeline.</p>
   </section>
 
@@ -286,10 +286,10 @@ Rscript presentation/build_deck.R</pre>
     <table>
       <thead><tr><th>Output</th><th>Where</th></tr></thead>
       <tbody>
-        <tr><td>Figures (claiming, event-study, frequencies, WMVPF plots)</td><td><code>analysis/output/{E,F,G,H,I,new_counter_claiming}/</code> (repo-internal, gitignored) → collected into <code>presentation/figures_central_folder/from_code/</code></td></tr>
+        <tr><td>Figures (claiming, event-study, frequencies, WMVPF plots)</td><td><code>analysis/output/{E,F,G,H,I,new_counter_claiming}/</code> (repo-internal, gitignored) → collected into <code>latex/figures/from_code/</code></td></tr>
         <tr><td>Estimate tables (G5, I4, I6 …)</td><td><code>analysis/output/{G,I}/…csv</code> (repo-internal, gitignored)</td></tr>
         <tr><td><b>Headline numbers</b> — WMVPF (actual), WMVPF_bL/bS, η</td><td><code>analysis/output/I/I6_summary&lt;SUFFIX&gt;.csv</code> (sample: <code>WMVPF_actual = 0.2126</code>, <code>η = 0.8281</code>)</td></tr>
-        <tr><td>Compiled deck</td><td><code>presentation/latex/presentation/_main.pdf</code></td></tr>
+        <tr><td>Compiled deck</td><td><code>latex/presentation/_main.pdf</code></td></tr>
       </tbody>
     </table>
   </section>
@@ -319,10 +319,10 @@ Rscript presentation/build_deck.R</pre>
         <h3 style="margin-top:0;color:var(--sample)">🟢 Sample (laptop) — no env var needed</h3>
         <p style="margin:.5em 0 .2em"><b>R / RStudio</b> — source the script:</p>
         <pre>source(here::here("analysis","analysis_all.R"))
-source(here::here("presentation","build_deck.R"))</pre>
+source(here::here("deck_tools","build_deck.R"))</pre>
         <p style="margin:.5em 0 .2em"><b>Command line / PowerShell</b> — Rscript:</p>
         <pre>Rscript analysis/analysis_all.R
-Rscript presentation/build_deck.R</pre>
+Rscript deck_tools/build_deck.R</pre>
         <p class="muted" style="margin-bottom:0">Mode auto-detects as <code>sample</code>; build is skipped.</p>
       </div>
       <div class="card" style="border-left:4px solid var(--server)">
@@ -331,13 +331,13 @@ Rscript presentation/build_deck.R</pre>
         <pre>Sys.setenv(PENSION_DATA_MODE = "full")
 source(here::here("build","build_all.R"))
 source(here::here("analysis","analysis_all.R"))
-source(here::here("presentation","build_deck.R"))</pre>
+source(here::here("deck_tools","build_deck.R"))</pre>
         <p style="margin:.5em 0 .2em"><b>Command line / PowerShell</b> — Rscript:</p>
         <pre><span class="cm"># bash:</span>        export PENSION_DATA_MODE=full
 <span class="cm"># PowerShell:</span>  $env:PENSION_DATA_MODE="full"
 Rscript build/build_all.R
 Rscript analysis/analysis_all.R
-Rscript presentation/build_deck.R</pre>
+Rscript deck_tools/build_deck.R</pre>
         <p class="muted" style="margin-bottom:0">A raw rebuild needs the A1–D3 lineage first (see <code>build/code/README.md</code>).</p>
       </div>
     </div>

@@ -11,7 +11,7 @@ The two PDFs in this folder are **gitignored** (heavy, regenerable binaries — 
 - `deck_AFTER.pdf`  — deck built from the **post-change** pipeline (outputs written in-repo to `analysis/output`).
 
 ## Result — 2026-07-09, 5% sample
-`presentation/figures_central_folder/deck_compare.py deck_BEFORE.pdf deck_AFTER.pdf` →
+`deck_tools/figures_central_folder/deck_compare.py deck_BEFORE.pdf deck_AFTER.pdf` →
 
 ```
 Pages compared : 142
@@ -30,10 +30,10 @@ Corroborating byte-level checks:
 ## How to regenerate
 ```bash
 # BEFORE: git stash / checkout the pre-change commit, then:
-Rscript analysis/analysis_all.R && Rscript presentation/build_deck.R
-cp presentation/latex/presentation/_main.pdf quality_reports/relocation_check/deck_BEFORE.pdf
+Rscript analysis/analysis_all.R && Rscript deck_tools/build_deck.R
+cp latex/presentation/_main.pdf quality_reports/relocation_check/deck_BEFORE.pdf
 # AFTER: restore the change, rerun the two commands, copy _main.pdf -> deck_AFTER.pdf
-python presentation/figures_central_folder/deck_compare.py \
+python deck_tools/figures_central_folder/deck_compare.py \
   quality_reports/relocation_check/deck_BEFORE.pdf \
   quality_reports/relocation_check/deck_AFTER.pdf \
   quality_reports/relocation_check/_diff

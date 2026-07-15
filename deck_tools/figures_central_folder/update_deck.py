@@ -12,10 +12,10 @@ Sample runs write their figures into the sample working dir (the OneDrive
 vs repo wins). So the whole loop is: edit a generating script -> run this -> deck updates.
 
 Examples:
-  python figures_central_folder/update_deck.py G5            # rerun G5, then collect + compile
-  python figures_central_folder/update_deck.py G5 H2         # several stages
-  python figures_central_folder/update_deck.py --collect-only
-  python figures_central_folder/update_deck.py G5 --no-compile
+  python deck_tools/figures_central_folder/update_deck.py G5            # rerun G5, then collect + compile
+  python deck_tools/figures_central_folder/update_deck.py G5 H2         # several stages
+  python deck_tools/figures_central_folder/update_deck.py --collect-only
+  python deck_tools/figures_central_folder/update_deck.py G5 --no-compile
 """
 from __future__ import annotations
 
@@ -26,8 +26,8 @@ import sys
 import time
 from pathlib import Path
 
-PRESENTATION = Path(__file__).resolve().parent.parent  # presentation/ (this tool's home)
-REPO_ROOT = PRESENTATION.parent                        # repo root
+DECK_TOOLS = Path(__file__).resolve().parent.parent    # deck_tools/ (this tool's home)
+REPO_ROOT = DECK_TOOLS.parent                          # repo root
 ROOT = REPO_ROOT                                       # repo root (used for collector cwd)
 CODE = REPO_ROOT / "analysis" / "code"                 # restructure: stage scripts moved here
 DECK_DIR = REPO_ROOT / "latex" / "presentation"
@@ -93,7 +93,7 @@ def main() -> int:
 
     # 2. COLLECT --------------------------------------------------------------
     banner("COLLECT  ->  latex/figures/from_code/")
-    collect_cmd = [sys.executable, str(PRESENTATION / "figures_central_folder" / "collector.py")]
+    collect_cmd = [sys.executable, str(DECK_TOOLS / "figures_central_folder" / "collector.py")]
     if sample_root:
         collect_cmd += ["--sample-root", sample_root]
     rc, dt = run(collect_cmd, cwd=ROOT)

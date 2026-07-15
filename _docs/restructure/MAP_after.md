@@ -34,10 +34,14 @@ optimal-pension-reforms/
 │   ├── temp/                       #   intermediates incl. former /tmp hand-off — .gitkept, gitignored
 │   └── analysis_all.R              #   master: E4 → gabriel → pure → G5 → I4 → I6 (sample-runnable)
 │
-├── presentation/                   # ── RESULTS → DECK ──
+├── latex/                          # ── DECK SOURCES ──
+│   ├── presentation/               #   English deck source (live build)
+│   ├── apresentacao/               #   Portuguese deck source
+│   └── figures/                    #   shared figures: from_code/ (tracked generated), static/ (tracked manual)
+│
+├── deck_tools/                     # ── RESULTS → DECK TOOLING ──
 │   ├── figures_central_folder/     #   collector.py, update_deck.py, verify_deck.py, deck_compare.py,
-│   │                               #     manifest.csv, from_code/ (gitignored), static/ (tracked), _diffs/
-│   ├── latex/                      #   presentation/ (EN, live build), apresentacao/ (PT), figures/ (legacy)
+│   │                               #     manifest.csv, _diffs/ (gitignored)
 │   └── build_deck.R                #   master: collector.py → latexmk EN deck → verify_deck.py
 │
 ├── legacy/                         # ── QUARANTINE (each file guarded by loud stop()) ──
@@ -48,7 +52,7 @@ optimal-pension-reforms/
 ├── RUN.R                           # root front door — signpost; dispatches to the three masters
 ├── .here                           # rprojroot sentinel (existence only; no code reads contents)
 ├── .gitattributes                  # `* text=auto` + binary rules (kills CRLF/LF phantom diff)
-├── config/ build/ analysis/ presentation/ legacy/   (above)
+├── config/ build/ analysis/ latex/ deck_tools/ legacy/   (above)
 ├── _docs/                          # knowledge base, plans, logs, memory, restructure/, doc templates, references/
 │     ├── pedro_hc_santanna_templates_for_projects/   # doc templates used by the .claude skills/rules
 │     └── references/               # CodeAndData.pdf, transition instructions, meeting-notes PDF
@@ -131,7 +135,7 @@ G4, H2 ──► {G4,H2}_table_results_sample.csv ──► (prereqs consumed by
   then `run_stage(E4, gabriel, pure, G5, G4, H2, I4, I6)` — **G4/H2 added** so their `_sample` tables
   regenerate in-repo before I4/I6. Outputs land in the in-repo `analysis/output` (gitignored, both
   modes). H3 explicitly excluded; I7/I7b manual.
-- **`presentation/build_deck.R`** — `source` config; (1) `collector.py` (**no `--sample-root`** — with
+- **`deck_tools/build_deck.R`** — `source` config; (1) `collector.py` (**no `--sample-root`** — with
   outputs in-repo the collector reads `analysis/output` directly), (2) `latexmk -cd -g -pdf` on
   `deck_dir/_main.tex` (the `-cd` chdir replaces any `setwd`), (3) `verify_deck.py`. Emits `_main.pdf`.
 - **`RUN.R`** — non-destructive signpost; documents the three `source(here::here(...))` lines and
@@ -151,17 +155,17 @@ G4, H2 ──► {G4,H2}_table_results_sample.csv ──► (prereqs consumed by
 analysis stages (E4, pure, G5, G4, H2, I6, …) ──ggsave/write──► in-repo analysis/output/ (PATHS$output_*, gitignored, both modes)
         │
         ▼
-presentation/figures_central_folder/collector.py       (no --sample-root)
+deck_tools/figures_central_folder/collector.py       (no --sample-root)
         │   reads manifest.csv; for each row resolves the output under the in-repo analysis/output/
         ▼
-presentation/figures_central_folder/from_code/      (gitignored — regeneratable, 5%-sample-derived)
-        │   + static/ (tracked: irreproducible manual assets, e.g. ELSI.jpg, frequenciesLQ*.pdf)
+latex/figures/from_code/      (tracked generated deck assets)
+        │   + latex/figures/static/ (tracked: irreproducible manual assets, e.g. ELSI.jpg)
         ▼
-presentation/latex/presentation/_main.tex
-        \graphicspath{{../../figures_central_folder/from_code/}{../../figures_central_folder/static/}}
+latex/presentation/_main.tex
+        \graphicspath{{../figures/from_code/}{../figures/static/}}
         │   latexmk -cd -g -pdf
         ▼
-presentation/latex/presentation/_main.pdf
+latex/presentation/_main.pdf
         │   verify_deck.py confirms every \includegraphics resolves under from_code/ + static/
 ```
 
@@ -180,7 +184,7 @@ presentation/latex/presentation/_main.pdf
 Rscript analysis/analysis_all.R
 
 # 2) Collect figures and compile the English deck
-Rscript presentation/build_deck.R
+Rscript deck_tools/build_deck.R
 
 # 3) Full-data build (restricted server only)
 PENSION_DATA_MODE=full Rscript build/build_all.R
@@ -211,7 +215,7 @@ resolver; `constants.R` holds gamma/ETA/RR/thresholds once.
 **Files moved by functional area (root-elevated):**
 - `trans_retirement/code/{A,B,C,D}*` → **`build/code/`** (+ `aux_codes_RAIS/`).
 - `trans_retirement/code/{E,G,H,I}*` + `new_counterfactual_claiming*` → **`analysis/code/`**.
-- `figures_central_folder/` + `latex/` → **`presentation/`**; added `presentation/build_deck.R`.
+- `figures_central_folder/` → **`deck_tools/figures_central_folder/`**; `latex/` remains the deck-source root; added `deck_tools/build_deck.R`.
 - `trans_retirement/code/legacy/` + `old/` → **`legacy/`** (F1-F7, G6, I5, old/B1-B2).
 - Added role dirs `input/ output/ temp/` under build/ and analysis/, each `.gitkept` and gitignored.
 
@@ -233,14 +237,14 @@ phantom diff that previously showed 181 files as modified).
 
 **Realized layout matches §4 (the root-level option).** The §4 "one open structural choice" (line 120)
 offered nesting `build/`/`analysis/` under `trans_retirement/` vs elevating to root; the restructure took
-the **root-level** path — `build/`, `analysis/`, `presentation/`, `config/`, `legacy/` all sit at the repo
+the **root-level** path — `build/`, `analysis/`, `latex/`, `deck_tools/`, `config/`, `legacy/` all sit at the repo
 root exactly as the §4 diagram (lines 81-116) draws them.
 
 Per-element conformance:
 - `config/{paths.R, constants.R}` — present, wired into canonical stages. ✔ (§4, §5)
 - `build/{input,code,output,temp,build_all.R}` — present; role dirs `.gitkept`+gitignored. ✔
 - `analysis/{input,code,output,temp,analysis_all.R}` — present. ✔
-- `presentation/{figures_central_folder, latex, build_deck.R}` — present. ✔
+- `latex/{presentation,apresentacao,figures}` and `deck_tools/{figures_central_folder,build_deck.R}` — present. ✔
 - `legacy/` with stop()-guarded F1-F7/G6/I5 + `old/` B1-B2. ✔ (§4, §8.2)
 - `.gitattributes` (`* text=auto`), `RUN.R` front door. ✔ (§4, §6)
 

@@ -230,7 +230,7 @@
   <section id="bigpic">
     <h2><span class="n">3</span> The whole pipeline, on one screen</h2>
     <p>Two inputs feed one command (<code>analysis/analysis_all.R</code>), which runs eight stages in order and writes
-    everything into the repo; a second command (<code>presentation/build_deck.R</code>) turns those figures into the deck.</p>
+    everything into the repo; a second command (<code>deck_tools/build_deck.R</code>) turns those figures into the deck.</p>
     <figure class="fig">
       <svg viewBox="0 0 980 470" width="100%" style="height:auto" role="img" aria-label="End-to-end sample pipeline: inputs to eight analysis stages to in-repo output to the compiled deck">
         <defs>
@@ -365,7 +365,7 @@
 Rscript analysis/analysis_all.R
 
 <span class="cm"># 2 · collect the figures and compile the English deck (_main.pdf)</span>
-Rscript presentation/build_deck.R</pre>
+Rscript deck_tools/build_deck.R</pre>
     <p>Prefer R / RStudio? Open R at the repo root and <code>source("RUN.R")</code> — it's a signpost that prints the three
     masters — then <code>source(here::here("analysis","analysis_all.R"))</code> and the deck master.</p>
     <div class="grid2">
@@ -716,7 +716,7 @@ t=1:  0.985075 × 0.828 × 12 = <span class="g2">9.788</span>
 
   <div class="sep"></div>
   <p class="muted" style="font-size:12.5px">Field guide for a new RA · <i>optimal-pension-reforms</i> · the 5% sample workflow
-  (<code>Rscript analysis/analysis_all.R</code> → <code>Rscript presentation/build_deck.R</code>). Sample = validation harness,
+  (<code>Rscript analysis/analysis_all.R</code> → <code>Rscript deck_tools/build_deck.R</code>). Sample = validation harness,
   not replication; A–D build is server-only. Toy numbers are illustrative.</p>
   </main>
 </div>

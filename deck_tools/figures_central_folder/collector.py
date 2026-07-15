@@ -17,8 +17,8 @@ Hard rule: this layer touches NO analysis script in analysis/code/. All routing 
 renaming logic lives here + in manifest.csv.
 
 Usage:
-    python figures_central_folder/collector.py            # route + diffs + verify
-    python figures_central_folder/collector.py --no-diff  # skip the PDF diffs
+    python deck_tools/figures_central_folder/collector.py            # route + diffs + verify
+    python deck_tools/figures_central_folder/collector.py --no-diff  # skip the PDF diffs
 """
 
 from __future__ import annotations
@@ -30,9 +30,9 @@ import sys
 from pathlib import Path
 
 # ----------------------------------------------------------------------------- paths
-HERE = Path(__file__).resolve().parent          # presentation/figures_central_folder/
-PRESENTATION = HERE.parent                       # presentation/
-ROOT = PRESENTATION.parent                       # repo root
+HERE = Path(__file__).resolve().parent           # deck_tools/figures_central_folder/
+DECK_TOOLS = HERE.parent                         # deck_tools/
+ROOT = DECK_TOOLS.parent                         # repo root
 LATEX = ROOT / "latex"
 FROM_CODE = LATEX / "figures" / "from_code"
 STATIC = LATEX / "figures" / "static"

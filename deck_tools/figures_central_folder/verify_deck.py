@@ -3,16 +3,16 @@
 verify_deck.py — confirm every live \\includegraphics in the presentation resolves
 under latex/figures/{from_code,static}. Read-only; no copying.
 
-Usage: python figures_central_folder/verify_deck.py
+Usage: python deck_tools/figures_central_folder/verify_deck.py
 Exit 0 if all active figure references resolve, else 1 (lists the unresolved ones).
 """
 import re
 import sys
 from pathlib import Path
 
-HERE = Path(__file__).resolve().parent          # presentation/figures_central_folder/
-PRESENTATION = HERE.parent                       # presentation/
-ROOT = PRESENTATION.parent                       # repo root
+HERE = Path(__file__).resolve().parent           # deck_tools/figures_central_folder/
+DECK_TOOLS = HERE.parent                         # deck_tools/
+ROOT = DECK_TOOLS.parent                         # repo root
 DECK = ROOT / "latex" / "presentation" / "_main.tex"
 FROM_CODE = ROOT / "latex" / "figures" / "from_code"
 STATIC = ROOT / "latex" / "figures" / "static"

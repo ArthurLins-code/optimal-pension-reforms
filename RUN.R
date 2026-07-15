@@ -11,7 +11,7 @@
 #       source(here::here("analysis", "analysis_all.R"))
 #
 #   Collect figures and compile the English deck:
-#       source(here::here("presentation", "build_deck.R"))
+#       source(here::here("deck_tools", "build_deck.R"))
 #
 message("RUN.R is a signpost — uncomment a source() line above, or run a master directly. ",
         "See README.md → 'How to run'.")

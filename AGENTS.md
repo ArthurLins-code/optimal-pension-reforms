@@ -10,8 +10,8 @@
 - `latex/` — Deck sources: `presentation/` (English), `apresentacao/` (Portuguese), and shared `figures/`
 - `latex/figures/from_code/` — Tracked generated figures used by the English deck
 - `latex/figures/static/` — Tracked manual or external figures used by the English deck
-- `presentation/figures_central_folder/` — Figure collector, verifier, comparer, manifest, and to-do register
-- `presentation/build_deck.R` — Collect figures and compile the English deck
+- `deck_tools/figures_central_folder/` — Figure collector, verifier, comparer, manifest, and to-do register
+- `deck_tools/build_deck.R` — Collect figures and compile the English deck
 - `data_local/` — 5% anonymized sample (NEVER committed)
 - `_docs/memory/` — Knowledge base (01-10)
 - `_docs/plans/` — Session plans
@@ -114,7 +114,7 @@ number differences unless they indicate substantive errors.
 
 ```bash
 Rscript analysis/analysis_all.R                   # Run sample analysis pipeline
-Rscript presentation/build_deck.R                 # Collect figures and compile English deck
+Rscript deck_tools/build_deck.R                   # Collect figures and compile English deck
 Rscript analysis/code/<script>.R                  # Run analysis script
 Rscript build/code/<script>.R                     # Run build script
 stata-mp -b do build/code/<script>.do             # Run Stata script

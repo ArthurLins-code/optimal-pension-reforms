@@ -343,7 +343,7 @@
         <rect x="30" y="968" width="1060" height="176" rx="12" fill="#faf5ff" stroke="#d8b4fe"/>
         <rect x="30" y="968" width="1060" height="28" rx="12" fill="#9333ea"/>
         <rect x="30" y="982" width="1060" height="14" fill="#9333ea"/>
-        <text x="46" y="987" class="ghd">⑥ PRESENTATION — Rscript presentation/build_deck.R</text>
+        <text x="46" y="987" class="ghd">⑥ PRESENTATION — Rscript deck_tools/build_deck.R</text>
         <rect x="64" y="1030" width="210" height="84" rx="9" fill="#fff" stroke="#d8b4fe"/>
         <text x="80" y="1052" class="gt" style="fill:#6b21a8">collector.py</text>
         <text x="80" y="1072" class="gs">reads manifest.csv</text>
@@ -586,7 +586,7 @@
   <!-- ===================== DECK ===================== -->
   <section id="deck">
     <h2><span class="n">8</span> Presentation — collecting figures and compiling the deck</h2>
-    <p>After analysis, <code>presentation/build_deck.R</code> runs three shell steps in sequence (any nonzero exit → <code>stop()</code>):</p>
+    <p>After analysis, <code>deck_tools/build_deck.R</code> runs three shell steps in sequence (any nonzero exit → <code>stop()</code>):</p>
     <div class="grid3">
       <div class="card"><h3 style="margin-top:0;font-size:15px">1 · collect</h3>
         <p class="muted" style="margin:0"><code>collector.py</code> reads <code>manifest.csv</code> (72 figures) and, for each, resolves the
@@ -746,7 +746,7 @@
         <pre>export PENSION_DATA_MODE=full
 Rscript build/build_all.R         <span class="cm"># raw SUIBE/RAIS → panel (U:/); stops unless full</span>
 Rscript analysis/analysis_all.R   <span class="cm"># panel → figures, tables, WMVPF (F:/)</span>
-Rscript presentation/build_deck.R <span class="cm"># figures → _main.pdf (142 pages)</span></pre>
+Rscript deck_tools/build_deck.R <span class="cm"># figures → _main.pdf (142 pages)</span></pre>
         <p class="muted" style="margin:.5em 0 0"><b>From scratch:</b> <code>build_all.R</code> runs the canonical heads A4/B4/C6/D4; run
         the upstream lineage (A1–A3, B1–B3, C1–C5, D1–D3) first. Stata steps: <code>stata-mp -b do build/code/&lt;file&gt;.do</code>.</p>
       </div>
@@ -755,7 +755,7 @@ Rscript presentation/build_deck.R <span class="cm"># figures → _main.pdf (142 
         <pre>Sys.setenv(PENSION_DATA_MODE = "full")
 source(here::here("build","build_all.R"))
 source(here::here("analysis","analysis_all.R"))
-source(here::here("presentation","build_deck.R"))</pre>
+source(here::here("deck_tools","build_deck.R"))</pre>
         <p class="muted" style="margin:.5em 0 0"><code>RUN.R</code> at the repo root is the front-door signpost listing the three masters.</p>
       </div>
     </div>

@@ -1,11 +1,11 @@
 # =============================================================================
-# presentation/build_deck.R — figures → compiled English deck (one command).
+# deck_tools/build_deck.R — figures → compiled English deck (one command).
 # Wraps the existing Python tools + latexmk. Run AFTER analysis/analysis_all.R.
 # (collector.py's internal source dirs are repathed to the new layout in Stage 2.)
 # =============================================================================
 source(here::here("config", "paths.R"))
 
-fig_dir  <- PATHS$figures_central        # presentation/figures_central_folder (tools + manifest)
+fig_dir  <- PATHS$figures_central        # deck_tools/figures_central_folder (tools + manifest)
 deck_tex <- file.path(PATHS$deck_dir, "_main.tex")
 py       <- Sys.getenv("PENSION_PYTHON", unset = "python")
 

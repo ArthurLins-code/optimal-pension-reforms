@@ -164,7 +164,7 @@
         <ul class="tight">
           <li><b>One path file</b> — <code>config/paths.R</code>: a single <code>PATHS</code> list; a folder move now edits one file, not forty.</li>
           <li><b>Zero <code>setwd()</code></b> in canonical stages; the project root is found via a <code>.here</code> sentinel.</li>
-          <li><b>Functional split</b> — <code>build/</code> (make the data) → <code>analysis/</code> (estimate) → <code>presentation/</code> (the deck).</li>
+          <li><b>Functional split</b> — <code>build/</code> (make the data) → <code>analysis/</code> (estimate) → <code>latex/</code> (deck source) + <code>deck_tools/</code> (build tooling).</li>
           <li><b>Three master scripts</b> + a root <code>RUN.R</code> front door — <code>source()</code> one file to run a phase.</li>
           <li><b>Persistent hand-off</b> — the <code>tmp/</code> seam routed to <code>PATHS$analysis_temp</code>.</li>
           <li><b>Legacy quarantined</b> in <code>legacy/</code>, each file guarded by a loud <code>stop()</code>.</li>
@@ -227,7 +227,7 @@
         <text x="592" y="187" class="lbl" style="fill:#166534">analysis/  code(E–I) · analysis_all.R</text>
         <text x="592" y="205" class="sub">estimation &amp; results — runs on 5% sample</text>
         <rect x="578" y="232" width="344" height="56" rx="9" fill="#faf5ff" stroke="#d8b4fe"/>
-        <text x="592" y="251" class="lbl" style="fill:#6b21a8">presentation/  figures + latex · build_deck.R</text>
+        <text x="592" y="251" class="lbl" style="fill:#6b21a8">latex/ + deck_tools/  figures · build_deck.R</text>
         <text x="592" y="269" class="sub">results → compiled deck</text>
         <rect x="578" y="296" width="344" height="38" rx="9" fill="#fef2f2" stroke="#fca5a5"/>
         <text x="592" y="319" class="lbl" style="fill:#991b1b">legacy/  F1–F7 · G6 · I5 · old/  → stop()</text>
@@ -397,14 +397,15 @@ clear_dirs(...)   <span class="cm"># wipe temp before a build (G–S "clear befo
         <tr><td><span class="tag t-config">config/</span></td><td><code>constants.R</code> (+ new <code>paths.R</code>)</td><td>2</td></tr>
         <tr><td><span class="tag t-build">build/code/</span></td><td>A1–A4, B1–B4, C1–C6, D1–D4, <code>aux_codes_RAIS/</code></td><td>31</td></tr>
         <tr><td><span class="tag t-analysis">analysis/code/</span></td><td>E1–E4, <code>…claiming3_{gabriel,pure}.R</code>, G1–G5, H1–H3, I1–I4, I6, I7, I7b</td><td>22</td></tr>
-        <tr><td><span class="tag t-present">presentation/</span></td><td><code>figures_central_folder/</code> + <code>latex/</code> (moved <i>together</i> — see note)</td><td>~248</td></tr>
+        <tr><td><span class="tag t-present">latex/</span></td><td><code>presentation/</code>, <code>apresentacao/</code>, and shared <code>figures/</code></td><td>deck source</td></tr>
+        <tr><td><span class="tag t-present">deck_tools/</span></td><td><code>figures_central_folder/</code> + <code>build_deck.R</code></td><td>tooling</td></tr>
         <tr><td><span class="tag t-legacy">legacy/</span></td><td>F1–F7, G6, I5, <code>old/</code> B1–B2 — each prefixed with a <code>stop()</code> guard</td><td>12</td></tr>
       </tbody>
     </table>
-    <div class="callout"><b>A neat trick that avoided edits.</b> The deck's
-    <code>\graphicspath{{../../figures_central_folder/from_code/}…}</code> is a <i>relative</i> path. By moving <code>latex/</code>
-    and <code>figures_central_folder/</code> <b>together</b> under <code>presentation/</code>, the <code>../../</code> offset still
-    resolves — so the deck needed <b>zero</b> graphicspath edits.</div>
+    <div class="callout"><b>The current split keeps source and tooling distinct.</b> The deck's
+    <code>\graphicspath{{../figures/from_code/}…}</code> resolves from <code>latex/presentation/</code> into
+    <code>latex/figures/</code>. The collector now lives under <code>deck_tools/</code> and writes generated
+    assets into that shared figure root.</div>
     <p>Also added: a <code>.here</code> root sentinel, <code>.gitattributes</code> (<code>* text=auto</code>), <code>.gitkeep</code>
     placeholders for the gitignored I/O dirs, an updated <code>.gitignore</code>, and the three masters
     (<code>build_all.R</code>, <code>analysis_all.R</code>, <code>build_deck.R</code>) + a root <code>RUN.R</code> signpost.</p>
@@ -639,10 +640,10 @@ clear_dirs(...)   <span class="cm"># wipe temp before a build (G–S "clear befo
         <pre><span class="cm"># open R at the repo root, then:</span>
 source("RUN.R")                                   <span class="cm"># signpost: prints the 3 entry points</span>
 source(here::here("analysis","analysis_all.R"))   <span class="cm"># panel → figures, tables, WMVPF</span>
-source(here::here("presentation","build_deck.R")) <span class="cm"># figures → English deck (_main.pdf)</span></pre>
+source(here::here("deck_tools","build_deck.R")) <span class="cm"># figures → English deck (_main.pdf)</span></pre>
         <p style="margin:.5em 0 .2em"><b>From the terminal:</b></p>
         <pre>Rscript analysis/analysis_all.R
-Rscript presentation/build_deck.R</pre>
+Rscript deck_tools/build_deck.R</pre>
         <p class="muted" style="margin-bottom:0">Auto-detected as <code>DATA_MODE=sample</code> when the sample root exists; point it
         elsewhere with <code>PENSION_SAMPLE_ROOT=…/transfer_may_retirement</code>. (<code>build/build_all.R</code> intentionally
         <code>stop()</code>s here — the panel is an input on the sample.)</p>
@@ -657,12 +658,12 @@ Rscript presentation/build_deck.R</pre>
 Sys.setenv(PENSION_DATA_MODE = "full")            <span class="cm"># force full-data mode</span>
 source(here::here("build","build_all.R"))         <span class="cm"># raw SUIBE/RAIS → analysis-ready panel</span>
 source(here::here("analysis","analysis_all.R"))   <span class="cm"># panel → estimates, figures, WMVPF</span>
-source(here::here("presentation","build_deck.R")) <span class="cm"># figures → deck</span></pre>
+source(here::here("deck_tools","build_deck.R")) <span class="cm"># figures → deck</span></pre>
         <p style="margin:.5em 0 .2em"><b>Or as a shell / batch job:</b></p>
         <pre>export PENSION_DATA_MODE=full
 Rscript build/build_all.R         <span class="cm"># full-data only (stops unless DATA_MODE=full)</span>
 Rscript analysis/analysis_all.R
-Rscript presentation/build_deck.R</pre>
+Rscript deck_tools/build_deck.R</pre>
         <p class="muted" style="margin-bottom:0"><b>From-scratch rebuild:</b> <code>build_all.R</code> runs the canonical heads
         A4/B4/C6/D4; the upstream lineage (A1–A3, B1–B3, C1–C5, D1–D3) that fills <code>working/</code> must run first — see
         <code>build/code/README.md</code>. Stata steps (B1–B3, C3) run with <code>stata-mp -b do build/code/&lt;file&gt;.do</code>.</p>
