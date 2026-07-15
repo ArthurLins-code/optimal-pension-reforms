@@ -45,6 +45,21 @@ Rscript build/build_all.R             # full-data build (server only; DATA_MODE=
 `RUN.R` is a signpost listing these. There is **no `setwd` and no hardcoded path in stage code** — every path resolves
 through `config/paths.R`; legacy files are guarded and never run.
 
+## Presentation builds
+
+The English deck lives in `presentation/latex/presentation/_main.tex`. The repository includes a root `.latexmkrc`
+that makes `latexmk` compile from the source file's own directory, so VS Code and terminal builds can be launched
+from the repo root without a manual `cd`:
+
+```bash
+latexmk presentation/latex/presentation/_main.tex
+```
+
+The English deck resolves figures only through `presentation/figures_central_folder/from_code/` and
+`presentation/figures_central_folder/static/`. The `from_code/` directory is tracked so collaborators can compile
+the deck without first running the sample pipeline. Regenerate it with `Rscript presentation/build_deck.R` after
+changing figure-producing code; keep manual or external figures in `static/`.
+
 ## Data
 
 The analysis uses Brazilian administrative records (SUIBE 2012–2019 and RAIS 1995–2020). These datasets are confidential and not included in this repository. Code runs on a restricted-access remote server.
