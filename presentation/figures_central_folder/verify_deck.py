@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 verify_deck.py — confirm every live \\includegraphics in the presentation resolves
-under figures_central_folder/{from_code,static}. Read-only; no copying.
+under latex/figures/{from_code,static}. Read-only; no copying.
 
 Usage: python figures_central_folder/verify_deck.py
 Exit 0 if all active figure references resolve, else 1 (lists the unresolved ones).
@@ -12,9 +12,10 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent          # presentation/figures_central_folder/
 PRESENTATION = HERE.parent                       # presentation/
-DECK = PRESENTATION / "latex" / "presentation" / "_main.tex"   # restructure: presentation/latex/presentation
-FROM_CODE = HERE / "from_code"
-STATIC = HERE / "static"
+ROOT = PRESENTATION.parent                       # repo root
+DECK = ROOT / "latex" / "presentation" / "_main.tex"
+FROM_CODE = ROOT / "latex" / "figures" / "from_code"
+STATIC = ROOT / "latex" / "figures" / "static"
 
 COMMENT = re.compile(r"(?<!\\)%.*")
 INCLUDE = re.compile(r"\\includegraphics(?:\[[^\]]*\])?\{([^}]+)\}")

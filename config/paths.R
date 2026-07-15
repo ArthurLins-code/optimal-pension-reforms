@@ -97,9 +97,9 @@ PATHS <- list(
 
   # repo-internal presentation dirs
   figures_central     = file.path(PROJECT_ROOT, "presentation", "figures_central_folder"),
-  figures_from_code   = file.path(PROJECT_ROOT, "presentation", "figures_central_folder", "from_code"),
-  figures_static      = file.path(PROJECT_ROOT, "presentation", "figures_central_folder", "static"),
-  deck_dir            = file.path(PROJECT_ROOT, "presentation", "latex", "presentation"),
+  figures_from_code   = file.path(PROJECT_ROOT, "latex", "figures", "from_code"),
+  figures_static      = file.path(PROJECT_ROOT, "latex", "figures", "static"),
+  deck_dir            = file.path(PROJECT_ROOT, "latex", "presentation"),
 
   # repo-internal code dirs (run_stage targets)
   build_code          = file.path(PROJECT_ROOT, "build", "code"),

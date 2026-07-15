@@ -154,7 +154,7 @@
 
   <div class="step hub">
     <div class="tag">③ the collector renames it for the slides</div>
-    <div class="path">figures_central_folder/from_code/<b>new0.pdf</b></div>
+    <div class="path">latex/figures/from_code/<b>new0.pdf</b></div>
     <div class="note">The collector looks up the rename in <code>manifest.csv</code> (see §3) and copies the
       newest version of the plot here under the exact name the slides use.</div>
   </div>
@@ -251,9 +251,9 @@
 my_new_plot.pdf,G5_effect_average_benefit_freq_bL_and_bS.R,trans_retirement/output/G,<span class="g">G5_my_panel.pdf</span>,OK-RENAME,any,My new benefit panel</pre>
 
 <p><b>B · the figure is hand-made / external</b> — a diagram or screenshot with no code behind it.
-  Drop the file into <code>figures_central_folder/static/</code>, then add:</p>
+  Drop the file into <code>latex/figures/static/</code>, then add:</p>
 <pre><span class="m"># deck_name, code_script, code_output_path, code_output_name, status, mode, notes</span>
-reform_sketch.pdf,<span class="g">(manual/external)</span>,figures_central_folder/static,reform_sketch.pdf,<span class="g">NONE</span>,n/a,Hand-made sketch</pre>
+reform_sketch.pdf,<span class="g">(manual/external)</span>,latex/figures/static,reform_sketch.pdf,<span class="g">NONE</span>,n/a,Hand-made sketch</pre>
 
 <table>
   <tr><th>status</th><th>use it when…</th></tr>
@@ -322,7 +322,7 @@ reform_sketch.pdf,<span class="g">(manual/external)</span>,figures_central_folde
   <tr><td>collector picked an old copy</td><td>Pass <code>--sample-root</code> so it sees your fresh sample run. It keeps the <i>newest</i> of sample-vs-repo.</td></tr>
   <tr><td>plot looks wrong / degenerate</td><td>That's the <i>code's</i> output, not a routing problem. Open the file named in <code>manifest.csv</code> and check the script. (A tiny PDF often means a near-empty sample cell.)</td></tr>
   <tr><td><span class="key">[LEGACY]</span> warning</td><td>That figure comes from an old script with no current generator — treat it as possibly outdated.</td></tr>
-  <tr><td>it's a hand-made picture</td><td><code>status = NONE</code> figures (diagrams, screenshots) live in <code>figures_central_folder/static/</code> and are not produced by code.</td></tr>
+  <tr><td>it's a hand-made picture</td><td><code>status = NONE</code> figures (diagrams, screenshots) live in <code>latex/figures/static/</code> and are not produced by code.</td></tr>
 </table>
 
 <!-- ============================================================ -->

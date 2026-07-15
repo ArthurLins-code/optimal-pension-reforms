@@ -13,13 +13,13 @@ This directory is self-contained, so you can move the whole `latex/` folder into
 From `latex/presentation/`:
 
 ```bash
-/Library/TeX/texbin/latexmk -f -pdf -interaction=nonstopmode _main.tex
+latexmk _main.tex
 ```
 
 From `latex/apresentacao/`:
 
 ```bash
-/Library/TeX/texbin/latexmk -f -pdf -interaction=nonstopmode _main.tex
+latexmk _main.tex
 ```
 
-`-f` is included because the exported source already contains a few TeX issues, but it still produces the PDF successfully.
+The repository root `.latexmkrc` makes `latexmk` compile from the source file's own directory and write SyncTeX files.

@@ -1,4 +1,4 @@
-# from_code/ is collector output (python figures_central_folder/collector.py)
+# latex/figures/from_code/ is collector output (python figures_central_folder/collector.py)
 # and IS tracked as of 2026-07-14 (team decision: collaborators who don't run
 # the pipeline need the figures on GitHub). Caveats: figures may be sample-
 # derived (noisy) until the next full-data server run, and can go stale if a

@@ -53,8 +53,8 @@ def side_by_side(page_out, pa, pb, label):
     H = margin * 2 + header + body
     pg = page_out.new_page(width=W, height=H)
     pg.insert_text((margin, margin + 9), label, fontsize=9, color=(0, 0, 0))
-    pg.insert_text((margin, margin + 21), "OLD (presentation/latex/figures)", fontsize=9, color=(0.7, 0, 0))
-    pg.insert_text((margin + colw + gap, margin + 21), "NEW (figures_central_folder)", fontsize=9, color=(0, 0.45, 0))
+    pg.insert_text((margin, margin + 21), "OLD (latex/figures)", fontsize=9, color=(0.7, 0, 0))
+    pg.insert_text((margin + colw + gap, margin + 21), "NEW (latex/figures/from_code)", fontsize=9, color=(0, 0.45, 0))
     y0 = margin + header
     pg.insert_image(fitz.Rect(margin, y0, margin + colw, y0 + ha),
                     stream=pa.tobytes("jpeg", jpg_quality=72))
