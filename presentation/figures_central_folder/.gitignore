@@ -1,7 +1,6 @@
-# Collector output — regenerated from pipeline outputs via:
-#   python figures_central_folder/collector.py
-# Do NOT commit these (they are copies of trans_retirement/output/** figures,
-# and locally they are 5% sample-derived). Tracked: manifest.csv, collector.py,
-# verify_deck.py, static/ (irreproducible manual assets).
-from_code/
+# latex/figures/from_code/ is collector output (python figures_central_folder/collector.py)
+# and IS tracked as of 2026-07-14 (team decision: collaborators who don't run
+# the pipeline need the figures on GitHub). Caveats: figures may be sample-
+# derived (noisy) until the next full-data server run, and can go stale if a
+# stage script changes without a rerun — regenerate before trusting them.
 _diffs/

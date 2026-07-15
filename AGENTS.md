@@ -5,14 +5,19 @@
 
 ## Repository Structure
 
-- `trans_retirement/code/` — Pipeline stages A-I (.R and .do)
-- `trans_retirement/output/` — Generated tables, figures, RData (gitignored)
+- `build/code/` — Data construction stages A-D (.R and .do; full-data/server only)
+- `analysis/code/` — Estimation and results stages E-I (.R)
+- `latex/` — Deck sources: `presentation/` (English), `apresentacao/` (Portuguese), and shared `figures/`
+- `latex/figures/from_code/` — Tracked generated figures used by the English deck
+- `latex/figures/static/` — Tracked manual or external figures used by the English deck
+- `presentation/figures_central_folder/` — Figure collector, verifier, comparer, manifest, and to-do register
+- `presentation/build_deck.R` — Collect figures and compile the English deck
 - `data_local/` — 5% anonymized sample (NEVER committed)
 - `_docs/memory/` — Knowledge base (01-10)
 - `_docs/plans/` — Session plans
 - `_docs/session_logs/` — Session logs
 - `_docs/quality_reports/` — Stage reports, reviews
-- `versoes do artigo/` — Paper drafts and presentations (gitignored)
+- `paper/` — Paper drafts and presentations (gitignored)
 
 ## Data
 
@@ -26,9 +31,9 @@
 REVERTED to AVERAGE BENEFITS for pure-reform computations.
 The "Expenditures path" is ABANDONED.
 - **I5 and G6 are LEGACY.** Never rerun. Never review as current.
-- Move to `trans_retirement/code/legacy/` in Phase 2.
+- Now quarantined in `legacy/` (each guarded with a `stop()`; never run).
 - **Canonical deck:** `Retirement_Presentations (old strat reverted).pdf`
-  in `versoes do artigo/Presentations/`. This is the ONLY source of truth.
+  in `paper/Presentations/`. This is the ONLY source of truth.
   Other decks in that folder are HISTORICAL — do not consult.
 
 ### 2. Stage Letter + Number Convention
@@ -80,17 +85,17 @@ User instructions: "Reason given by user: ..." verbatim.
 
 | Stage | Canonical File | Lang | Purpose |
 |-------|---------------|------|---------|
-| A | A4_balance_check.R | R | SUIBE balance |
-| B | B4_create_clean_candidates_cross.R | R | RAIS features cross-section |
-| C | C6_estimate_continuous_contrib.R | R | Impute contribution time |
-| D | D4_create_panel.R | R | Panel construction |
-| E | E4_plots_claiming_distributions.R | R | Diagnostic plots |
-| F | new_counterfactual_claiming3_pure.R | R | Counterfactual (NEW method) |
-| G | G5_effect_average_benefit_freq_bL_and_bS.R | R | DD on average benefits |
-| H | H3_policy_elasticity.R | R | IPW-DD elasticity |
-| I | I4_wmvpf_no_pure_reforms_freq.R | R | WMVPF estimation |
+| A | `build/code/A4_balance_check.R` | R | SUIBE balance |
+| B | `build/code/B4_create_clean_candidates_cross.R` | R | RAIS features cross-section |
+| C | `build/code/C6_estimate_continuous_contrib.R` | R | Impute contribution time |
+| D | `build/code/D4_create_panel.R` | R | Panel construction |
+| E | `analysis/code/E4_plots_claiming_distributions.R` | R | Diagnostic plots |
+| F | `analysis/code/new_counterfactual_claiming3_pure.R` | R | Counterfactual (NEW method) |
+| G | `analysis/code/G5_effect_average_benefit_freq_bL_and_bS.R` | R | DD on average benefits |
+| H | `analysis/code/H3_policy_elasticity.R` | R | IPW-DD elasticity |
+| I | `analysis/code/I4_wmvpf_no_pure_reforms_freq.R` | R | WMVPF estimation |
 
-B1-B3 and C3 are Stata `.do` files (upstream of their R canonical siblings).
+B1-B3 and C3 are Stata `.do` files in `build/code/` (upstream of their R canonical siblings).
 
 ## Key Relationships (exact numbers vary by data/specification)
 
@@ -108,8 +113,11 @@ number differences unless they indicate substantive errors.
 ## Commands
 
 ```bash
-Rscript trans_retirement/code/<script>.R          # Run R script
-stata-mp -b do trans_retirement/code/<script>.do  # Run Stata script
+Rscript analysis/analysis_all.R                   # Run sample analysis pipeline
+Rscript presentation/build_deck.R                 # Collect figures and compile English deck
+Rscript analysis/code/<script>.R                  # Run analysis script
+Rscript build/code/<script>.R                     # Run build script
+stata-mp -b do build/code/<script>.do             # Run Stata script
 python scripts/quality_score.py <file>            # Quality score
 ```
 

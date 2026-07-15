@@ -22,9 +22,12 @@ build/               # DATA CONSTRUCTION — full-data / server only
 analysis/            # ESTIMATION & RESULTS — runs on the 5% sample
   code/              #   E1-E4, new_counterfactual_claiming3_{gabriel,pure}.R, G1-G5, H1-H3, I1-I4, I6, I7
   analysis_all.R     #   master:  E4 -> gabriel -> pure -> G5 -> I4 -> I6
-presentation/        # RESULTS -> DECK
-  figures_central_folder/  # collector/update/verify/deck_compare + manifest.csv + from_code/ + static/
-  latex/                   # presentation/ (EN, live build) + apresentacao/ (PT)
+latex/               # DECK SOURCES
+  presentation/      #   English live build
+  apresentacao/      #   Portuguese deck
+  figures/           #   shared legacy figures + from_code/ + static/
+presentation/        # RESULTS -> DECK tooling
+  figures_central_folder/  # collector/update/verify/deck_compare + manifest.csv
   build_deck.R             # master:  collect figures -> compile latex/presentation/_main.tex -> PDF
 legacy/              # quarantined: F1-F7, G6, I5, old/B1-B2 — each guarded by stop()
 RUN.R                # root front door: dispatches to the three masters
@@ -38,12 +41,27 @@ and `PENSION_SAMPLE_ROOT` / `PENSION_FULL_ROOT`). From the repo root:
 
 ```bash
 Rscript analysis/analysis_all.R       # 5% sample: panel -> figures, tables, WMVPF
-Rscript presentation/build_deck.R     # figures -> compiled English deck (presentation/latex/presentation/_main.pdf)
+Rscript presentation/build_deck.R     # figures -> compiled English deck (latex/presentation/_main.pdf)
 Rscript build/build_all.R             # full-data build (server only; DATA_MODE=full)
 ```
 
 `RUN.R` is a signpost listing these. There is **no `setwd` and no hardcoded path in stage code** — every path resolves
 through `config/paths.R`; legacy files are guarded and never run.
+
+## Presentation builds
+
+The English deck lives in `latex/presentation/_main.tex`. The repository includes a root `.latexmkrc`
+that makes `latexmk` compile from the source file's own directory, so VS Code and terminal builds can be launched
+from the repo root without a manual `cd`:
+
+```bash
+latexmk latex/presentation/_main.tex
+```
+
+The English deck resolves figures only through `latex/figures/from_code/` and
+`latex/figures/static/`. The `from_code/` directory is tracked so collaborators can compile
+the deck without first running the sample pipeline. Regenerate it with `Rscript presentation/build_deck.R` after
+changing figure-producing code; keep manual or external figures in `static/`.
 
 ## Data
 

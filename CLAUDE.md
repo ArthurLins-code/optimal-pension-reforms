@@ -10,7 +10,8 @@ Restructured 2026-06-23 into a functional layout (Gentzkow–Shapiro). Full map:
 - `config/` — Portability layer: `paths.R` (one `PATHS` list + `DATA_MODE`; **no `setwd` anywhere**) and `constants.R` (economic primitives incl. `ETA`).
 - `build/code/` — Data construction, **full-data/server only**: A1-A4, B1-B4, C1-C6, D1-D4, `aux_codes_RAIS/`. Master: `build/build_all.R`.
 - `analysis/code/` — Estimation & results, **sample-runnable**: E1-E4, `new_counterfactual_claiming3_{gabriel,pure}.R`, G1-G5, H1-H3, I1-I4, I6, I7. Master: `analysis/analysis_all.R`.
-- `presentation/` — `figures_central_folder/` (collector/update/verify/deck_compare + `from_code/` + `static/`) and `latex/` (EN `presentation/`, PT `apresentacao/`). Master: `presentation/build_deck.R`.
+- `latex/` — Deck sources: EN `presentation/`, PT `apresentacao/`, shared `figures/` with `from_code/` + `static/`.
+- `presentation/` — Deck tooling: `figures_central_folder/` (collector/update/verify/deck_compare + manifest). Master: `presentation/build_deck.R`.
 - `legacy/` — Quarantined, each guarded by a `stop()`: F1-F7, G6, I5, `old/` B1-B2. Never run.
 - `RUN.R` — root front-door signpost dispatching to the three masters.
 - `build/{output,temp}`, `analysis/{output,temp}` — generated artifacts (gitignored). **OUTPUTS (figures/tables/temp) land in the repo's gitignored `analysis/output`|`temp` in BOTH sample and full mode.** INPUTS stay external: the 5% sample CSVs, the full-data build intermediates, and the `F5` + full-data (no-suffix) `G4`/`H2` prereq tables (read via `PATHS$prereq_root`).

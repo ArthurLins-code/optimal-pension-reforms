@@ -4,8 +4,8 @@ update_deck.py — one command to refresh the presentation's figures from the co
 
 It runs three steps in order:
   1. (optional) RUN one or more pipeline stages on the sample, so they regenerate figures
-  2. COLLECT  — route the current figures into figures_central_folder/from_code/
-  3. COMPILE  — rebuild presentation/latex/presentation/_main.pdf
+  2. COLLECT  — route the current figures into latex/figures/from_code/
+  3. COMPILE  — rebuild latex/presentation/_main.pdf
 
 Sample runs write their figures into the sample working dir (the OneDrive
 "transfer_may_retirement" folder); the collector reads from there (newest of sample-dir
@@ -30,7 +30,7 @@ PRESENTATION = Path(__file__).resolve().parent.parent  # presentation/ (this too
 REPO_ROOT = PRESENTATION.parent                        # repo root
 ROOT = REPO_ROOT                                       # repo root (used for collector cwd)
 CODE = REPO_ROOT / "analysis" / "code"                 # restructure: stage scripts moved here
-DECK_DIR = PRESENTATION / "latex" / "presentation"     # restructure: presentation/latex/presentation
+DECK_DIR = REPO_ROOT / "latex" / "presentation"
 
 # short name -> canonical script that PRODUCES deck figures
 STAGES = {
@@ -92,7 +92,7 @@ def main() -> int:
                 print(f"!! stage {s} failed (exit {rc}) -- stopping"); return rc
 
     # 2. COLLECT --------------------------------------------------------------
-    banner("COLLECT  ->  figures_central_folder/from_code/")
+    banner("COLLECT  ->  latex/figures/from_code/")
     collect_cmd = [sys.executable, str(PRESENTATION / "figures_central_folder" / "collector.py")]
     if sample_root:
         collect_cmd += ["--sample-root", sample_root]
@@ -103,7 +103,7 @@ def main() -> int:
 
     # 3. COMPILE --------------------------------------------------------------
     if not args.no_compile:
-        banner("COMPILE  ->  presentation/latex/presentation/_main.pdf")
+        banner("COMPILE  ->  latex/presentation/_main.pdf")
         # -g forces a rebuild so a removed/frozen figure is always reflected
         # (latexmk can otherwise consider _main.pdf up-to-date and keep a stale image).
         crc, dt = run(["latexmk", "-g", "-pdf", "-interaction=nonstopmode", "_main.tex"], cwd=DECK_DIR)

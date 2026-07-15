@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-collector.py — route pipeline figure outputs into figures_central_folder/from_code/
+collector.py — route pipeline figure outputs into latex/figures/from_code/
 
 Single-source-of-truth bridge between the analysis pipeline (analysis/output/**)
-and the presentation (presentation/latex/presentation/_main.tex). Reads manifest.csv and,
+and the presentation (latex/presentation/_main.tex). Reads manifest.csv and,
 for each live deck figure:
 
   * copies the code output -> from_code/<deck_name>, applying the rename the deck expects
@@ -33,11 +33,12 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent          # presentation/figures_central_folder/
 PRESENTATION = HERE.parent                       # presentation/
 ROOT = PRESENTATION.parent                       # repo root
-FROM_CODE = HERE / "from_code"
-STATIC = HERE / "static"
+LATEX = ROOT / "latex"
+FROM_CODE = LATEX / "figures" / "from_code"
+STATIC = LATEX / "figures" / "static"
 DIFFS = HERE / "_diffs"
 MANIFEST = HERE / "manifest.csv"
-LATEX_FIGURES = PRESENTATION / "latex" / "figures"   # source of the OLD (E3) copies for diffs
+LATEX_FIGURES = LATEX / "figures"                # source of the OLD (E3) copies for diffs
 
 ROUTABLE_STATUSES = {"OK", "OK-RENAME", "UPSTREAM-CANONICAL", "LEGACY"}
 
@@ -129,7 +130,7 @@ def make_side_by_side(old_pdf: Path, new_pdf: Path, out_pdf: Path,
 
 # ----------------------------------------------------------------------------- main
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Route pipeline figures into figures_central_folder/from_code/")
+    ap = argparse.ArgumentParser(description="Route pipeline figures into latex/figures/from_code/")
     ap.add_argument("--manifest", default=str(MANIFEST))
     ap.add_argument("--no-diff", action="store_true", help="skip rendering E3->E4 diffs")
     ap.add_argument("--sample-root", default=None,
@@ -239,7 +240,7 @@ def main() -> int:
     # ----------------------------------------------------------------- summary
     bar = "=" * 78
     print(bar)
-    print("figures_central_folder collector - summary")
+    print("latex/figures collector - summary")
     print(bar)
 
     by_status = {}

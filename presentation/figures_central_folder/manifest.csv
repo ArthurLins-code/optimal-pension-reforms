@@ -65,9 +65,9 @@ new4.pdf,G5_effect_average_benefit_freq_bL_and_bS.R,trans_retirement/output/G,G4
 new13.pdf,G5_effect_average_benefit_freq_bL_and_bS.R,trans_retirement/output/G,G4_eventstudy_benegits_new_5.pdf,OK-RENAME,any,Canonical G5 'benegits' panel 5->13. new=actual b^a.
 H2_dd_tax_collection_1.pdf,H2_policy_elasticity_MW.R,trans_retirement/output/H,H2_dd_tax_collection_1_sample.pdf,LEGACY,sample,Legacy H2 (canonical H=H3 emits no DD-tax fig). Sample-generated per Juan 2026-06-12 (dimension-fixed run). On the server flip code_output_name back to H2_dd_tax_collection_1.pdf and mode to full.
 I6_plot_cumsum_actual_reform_multby20_sample.pdf,I6_wmvpf_with_pure_reforms_freq.R,trans_retirement/output/I,I6_plot_cumsum_actual_reform_multby20_sample.pdf,OK,sample,Canonical/active I6 SAMPLE mode (5% sample x20-scaled NOT full-data). Source absent in local output/I (I6 not run on sample).
-image37.png,(manual/external),figures_central_folder/static,image37.png,NONE,n/a,Manual/external image (Brazilian gov expenditures). Pre-placed in static/. Building it=later prompt.
-schedule_women_new.pdf,(manual/external),figures_central_folder/static,schedule_women_new.pdf,NONE,n/a,Hand-made theoretical RR schedule (women). No pipeline code. Static. Building it=later prompt.
-schedule_men_new.pdf,(manual/external),figures_central_folder/static,schedule_men_new.pdf,NONE,n/a,Hand-made theoretical RR schedule (men). No pipeline code. Static. Building it=later prompt.
-plot_expenditures_groups.pdf,(manual/external),figures_central_folder/static,plot_expenditures_groups.pdf,NONE,n/a,POF consumption-by-group; no pipeline code. Static. Building it=later prompt.
-ELSI.jpg,(manual/external),figures_central_folder/static,ELSI.jpg,NONE,n/a,External ELSI survey image. Static.
-morRef2The.png,(manual/external),figures_central_folder/static,morRef2The.png,NONE,n/a,Hand-made conceptual diagram (constrained agents). Static.
+image37.png,(manual/external),latex/figures/static,image37.png,NONE,n/a,Manual/external image (Brazilian gov expenditures). Pre-placed in static/. Building it=later prompt.
+schedule_women_new.pdf,(manual/external),latex/figures/static,schedule_women_new.pdf,NONE,n/a,Hand-made theoretical RR schedule (women). No pipeline code. Static. Building it=later prompt.
+schedule_men_new.pdf,(manual/external),latex/figures/static,schedule_men_new.pdf,NONE,n/a,Hand-made theoretical RR schedule (men). No pipeline code. Static. Building it=later prompt.
+plot_expenditures_groups.pdf,(manual/external),latex/figures/static,plot_expenditures_groups.pdf,NONE,n/a,POF consumption-by-group; no pipeline code. Static. Building it=later prompt.
+ELSI.jpg,(manual/external),latex/figures/static,ELSI.jpg,NONE,n/a,External ELSI survey image. Static.
+morRef2The.png,(manual/external),latex/figures/static,morRef2The.png,NONE,n/a,Hand-made conceptual diagram (constrained agents). Static.

@@ -44,8 +44,8 @@ Stages to rerun: `new_counterfactual_claiming3_gabriel.R` → `new_counterfactua
 - **`frequenciesQ*` `prefer=` directive**: the manifest still prefers a (nonexistent) pure-script
   actual/cntf output and falls back to gabriel — extending pure.R remains a later prompt; the
   gabriel fallback is now dimension-fixed and saves outside `tmp/`, so it is a sound source.
-- **Static-by-nature figures (6)** — no generating code, in `static/`: `image37.png`,
+- **Static-by-nature figures (6)** — no generating code, in `latex/figures/static/`: `image37.png`,
   `schedule_{women,men}_new.pdf`, `plot_expenditures_groups.pdf`, `ELSI.jpg`, `morRef2The.png`.
   Scripting them is optional future work.
-- The 36 previously-frozen full-data images still sit in `static/` as references/rollback; they are
+- The 36 previously-frozen full-data images still sit in `latex/figures/static/` as references/rollback; they are
   shadowed by `from_code/` (graphicspath order). Optional cleanup after the team signs off.
