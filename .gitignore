@@ -36,6 +36,8 @@ quality_reports/baseline/logs_stage3/
 
 # --- Versões do paper e apresentações (PDFs binários) ---
 paper/
+!latex/paper/
+!latex/paper/overleaf.zip
 
 # --- PDF de cálculos manuscritos ---
 Cálculos Juan*.pdf
